@@ -229,7 +229,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v4.4';
+const VERSION = 'v4.5';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1830,7 +1830,7 @@ function respQ(clave,cat,v){ CHK[clave]=Object.assign({},CHK[clave],{v:v,cat:cat
    boton. Escribir "4" en un cuadro de texto era lento y luego no se podia
    comparar una semana con otra. El cuadro de texto se queda igual, para
    contar lo que quiera. */
-const esEscala = t => /\b1\s*(?:[-–—]|\s*al\s*)\s*5\b/i.test(String(t||''));
+const esEscala = t => /\b1\s*(?:[-–—]|\s*(?:al|to|a)\s*)\s*5\b/i.test(String(t||''));   /* v4.5: vale "1-5", "1 al 5" y "1 to 5": las hojas en ingles tambien */
 function notaQ(clave,cat,n){
   const a = CHK[clave] || {};
   CHK[clave] = Object.assign({}, a, {cat:cat, n: a.n===n ? 0 : n, v: a.v||''});
