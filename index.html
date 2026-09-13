@@ -1291,7 +1291,7 @@ function pintaCue(t){
     const ls = b.split('\n').filter(x=>x.trim());
     if(ls.length > 1 && ls[0].length <= 30)
       return `<p><b>${esc(ls[0])}</b><br>${esc(ls.slice(1).join(' '))}</p>`;
-    return `<p>${esc(ls.join(' '))}</p>`;
+    return `<p>${ls.map(esc).join('<br>')}</p>`;   // sin titulo, pero cada linea en la suya
   }).join('');
 }
 
