@@ -229,7 +229,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v4.3';
+const VERSION = 'v4.4';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -592,8 +592,12 @@ function pendientesSemana(b){
 /* Las que cuentan para la adherencia: ni descansos ni opcionales */
 const sesionesContables = b => diasDeBloque(b)
   .filter(d=>!esDescanso(d) && !esOpcional(d));
+/* v4.4: cada uno escribe el semaforo a su manera. Carmen pone AMARILLO
+   donde otros ponen AMBAR, y eso antes salia en gris, sin color. Se acepta
+   como lo escriba la hoja: la palabra del cliente no se toca. */
 const semColor = s => { const v = norm(s);
-  return (v==='rojo'||v==='red') ? 'rojo' : (v==='ambar'||v==='amber') ? 'ambar'
+  return (v==='rojo'||v==='red') ? 'rojo'
+       : (v==='ambar'||v==='amber'||v==='amarillo'||v==='yellow'||v==='naranja'||v==='orange') ? 'ambar'
        : (v==='verde'||v==='green') ? 'verde' : 'gris'; };
 const semForma = s => { const v=semColor(s); return v==='rojo'?'■':v==='ambar'?'▲':v==='verde'?'●':'–'; };
 
