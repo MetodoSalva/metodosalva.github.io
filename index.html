@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SALVA</title>
+<meta name="theme-color" content="#2F6B4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SALVA">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzJGNkI0QSIvPjx0ZXh0IHg9IjkwIiB5PSIxMTgiIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0NCIgZm9udC13ZWlnaHQ9IjYwMCIgbGV0dGVyLXNwYWNpbmc9IjQiIGZpbGw9IiNGNkYzRUUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlNBTFZBPC90ZXh0Pjwvc3ZnPg==">
+<script>
+/* Android: cada cliente instala su propio manifest, para que el icono abra
+   directamente su plan y no la pagina generica. */
+(function(){
+  var c = (new URLSearchParams(location.search).get('c') || '').toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  if(!c) return;
+  var l = document.createElement('link');
+  l.rel = 'manifest'; l.href = 'manifest-' + c + '.json';
+  document.head.appendChild(l);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --verde:#2F6B4A; --verde-c:#5E9A72; --verde-s:#C9D9CD; --verde-b:#EFF4F0;
+  --papel:#F1EDE6; --sup:#FFFDFA; --sup2:#EDE7DD; --linea:#E2DCD2; --linea2:#D8D1C6;
+  --txt:#4A463C; --txt2:#5E574C; --txt3:#8A8272;
+  --rojo:#B03A3A; --rojo-s:#F8E4E1; --ambar:#8A6A1E; --ambar-s:#F6EDD7;
+  --r:12px; --f:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --m:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--f);background:var(--papel);color:var(--txt);font-size:16px;line-height:1.5;
+  padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--verde-c);outline-offset:2px;border-radius:6px}
+
+/* cabecera */
+.top{background:var(--verde);color:#F6F3EE;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+  position:sticky;top:0;z-index:20}
+.top .wm{font-weight:700;letter-spacing:.22em;font-size:13px}
+.top .nm{font-size:13px;opacity:.82;margin-top:2px}
+.top .rowt{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pill{font-size:11px;font-weight:600;letter-spacing:.04em;background:rgba(246,243,238,.16);
+  border:1px solid rgba(246,243,238,.28);border-radius:99px;padding:3px 9px;white-space:nowrap}
+
+/* estructura */
+main{padding:16px 14px 96px;max-width:640px;margin:0 auto}
+.card{background:var(--sup);border:1px solid var(--linea);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card.flat{background:none;border:0;padding:0}
+h2{font-size:21px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+h3{font-size:16px;font-weight:600}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3)}
+.mut{color:var(--txt2);font-size:14.5px}
+.sm{font-size:13px;color:var(--txt3)}
+.mono{font-family:var(--m);font-size:13px}
+.row{display:flex;align-items:center;gap:8px}
+.wrap{flex-wrap:wrap}
+.sp{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
+
+/* semáforo */
+.sem{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
+  border-radius:99px;padding:3px 10px 3px 8px;border:1px solid;white-space:nowrap}
+.sem i{font-style:normal;font-size:9px;line-height:1}
+.sem.rojo{background:var(--rojo-s);border-color:#E2B0AA;color:var(--rojo)}
+.sem.ambar{background:var(--ambar-s);border-color:#E0C588;color:var(--ambar)}
+.sem.verde{background:var(--verde-b);border-color:var(--verde-s);color:var(--verde)}
+.sem.gris{background:var(--sup2);border-color:var(--linea2);color:var(--txt3)}
+
+/* botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:var(--sup);
+  border:1px solid var(--linea2);border-radius:10px;padding:10px 16px;font-size:15px;font-weight:600;
+  color:var(--txt);cursor:pointer;min-height:44px}
+.btn:active{transform:scale(.985)}
+.btn.pri{background:var(--verde);border-color:var(--verde);color:#F6F3EE}
+.btn.big{width:100%;padding:15px;font-size:16.5px;border-radius:12px}
+.btn.sm2{padding:6px 12px;font-size:13.5px;min-height:36px;border-radius:8px}
+.btn:disabled{opacity:.45}
+
+/* día */
+.dia{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--linea);
+  width:100%;text-align:left;background:none;border-left:0;border-right:0;border-top:0;cursor:pointer}
+.dia:last-child{border-bottom:0}
+.dia .d{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);
+  width:42px;flex:none;padding-top:3px}
+.dia .n{font-weight:600;font-size:15px;line-height:1.3}
+.dia.hoy .n{color:var(--verde)}
+
+/* ejercicio */
+.ej{border:1px solid var(--linea);border-radius:var(--r);background:var(--sup);margin-bottom:10px;overflow:hidden}
+.ej>.h{padding:13px 14px;display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.ej .nm{font-weight:600;font-size:15.5px;line-height:1.3}
+.ej .ds{font-family:var(--m);font-size:12.5px;color:var(--txt3);margin-top:3px}
+.ej .cue{font-size:13.5px;color:var(--txt2);padding:0 14px 12px;line-height:1.45}
+.ej .sets{padding:0 10px 10px;display:flex;flex-direction:column;gap:6px}
+.set{display:grid;grid-template-columns:22px 1fr 1fr 52px 78px;gap:6px;align-items:center}
+.set .i{font-family:var(--m);font-size:12px;color:var(--txt3);text-align:center}
+.set input{border:1px solid var(--linea2);border-radius:8px;padding:9px 8px;font-size:16px;width:100%;
+  background:var(--sup);text-align:center;min-height:42px}
+.set.ok{background:var(--verde-b);border-radius:8px;padding:3px 2px}
+.set.ok input{border-color:var(--verde-s);background:transparent}
+.set button{border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;border-radius:8px;
+  padding:9px 4px;font-size:13px;font-weight:600;min-height:42px;cursor:pointer}
+.set.ok button{background:transparent;color:var(--verde);border-color:var(--verde-s)}
+.calent{background:var(--sup2);border-radius:var(--r);padding:13px 14px;margin-bottom:12px;font-size:14px;color:var(--txt2)}
+.extra-sep{margin:22px 0 12px;padding:13px 14px;border:1px dashed var(--linea2);border-radius:var(--r);background:transparent}
+.extra-sep b{display:block;color:var(--txt);font-size:15px}
+.extra-sep p{margin-top:5px;font-size:13.5px;color:var(--txt3);line-height:1.45}
+.reg{padding:0 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reg .c{display:flex;flex-direction:column;gap:4px}
+.reg .c label{font-family:var(--m);font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px}
+.reg input{border:1px solid var(--linea2);border-radius:8px;padding:9px 8px;font-size:16px;width:100%;
+  background:var(--sup);color:var(--txt);font-family:var(--m)}
+.reg .ritmo{grid-column:1/-1;font-family:var(--m);font-size:12.5px;color:var(--verde);min-height:16px}
+.reg button{grid-column:1/-1;border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;
+  border-radius:8px;padding:11px;font-size:14px;font-weight:600}
+.reg.ok{background:var(--verde-b);margin:0 10px 12px;padding:12px;border-radius:10px}
+.reg.ok input{border-color:var(--verde-s);background:transparent}
+.valora{margin-top:16px;padding-top:14px;border-top:1px solid var(--linea)}
+.estrellas{display:flex;gap:6px;margin-top:9px}
+.estrellas button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;
+  padding:9px 0;font-size:20px;line-height:1;filter:grayscale(1);opacity:.45}
+.estrellas button.on{border-color:var(--verde);background:var(--verde-b);filter:none;opacity:1}
+.escala{display:flex;gap:6px;margin:4px 0 2px}
+.escala button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;
+  padding:10px 0;font-size:16px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px;font-family:var(--m)}
+.escala button.on{border-color:var(--verde);background:var(--verde);color:#F6F3EE}
+
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--sup);border-top:1px solid var(--linea);
+  display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:30}
+nav button{flex:1;background:none;border:0;padding:9px 2px 10px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--txt3);cursor:pointer;min-height:56px}
+nav button[aria-current]{color:var(--verde)}
+nav .g{font-size:17px;line-height:1}
+
+/* varios */
+.load{padding:60px 20px;text-align:center;color:var(--txt3)}
+.spin{width:26px;height:26px;border:2.5px solid var(--linea2);border-top-color:var(--verde);
+  border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+.toast{position:fixed;left:14px;right:14px;bottom:78px;background:var(--txt);color:var(--papel);
+  padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;z-index:40;text-align:center;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.4)}
+.err{background:var(--rojo-s);border:1px solid #E2B0AA;color:var(--rojo);border-radius:var(--r);padding:14px}
+.guia{border-left:3px solid var(--verde-s);padding-left:13px;margin-bottom:12px}
+.guia .p{font-weight:600;font-size:14px}
+.guia .c{font-size:14px;color:var(--txt2);line-height:1.45}
+.q{border-bottom:1px solid var(--linea);padding:13px 0}
+.q:last-child{border-bottom:0}
+.q .t{font-size:14.5px;font-weight:500;line-height:1.4;margin-bottom:8px}
+.q textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;font-size:16px;
+  min-height:70px;background:var(--sup);resize:vertical;line-height:1.4}
+.bar{height:7px;background:var(--sup2);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar>i{display:block;height:100%;background:var(--verde-c);border-radius:99px}
+.tag{display:inline-block;font-size:11px;font-weight:600;background:var(--sup2);color:var(--txt2);
+  border-radius:6px;padding:2px 7px;margin-right:5px}
+/* --- v3 --- */
+.aviso{background:var(--ambar-s);border:1px solid #E0C588;border-radius:var(--r);padding:14px;margin-bottom:12px}
+.aviso b{color:var(--ambar)}
+.vid{position:relative;width:100%;background:#000;border-radius:10px;overflow:hidden;margin:0 14px 12px;width:calc(100% - 28px)}
+.vid iframe{width:100%;aspect-ratio:9/16;max-height:60vh;display:block;border:0}
+.vid.h iframe{aspect-ratio:16/9}
+.verej{background:none;border:1px solid var(--linea2);border-radius:8px;padding:7px 12px;font-size:13px;
+  font-weight:600;color:var(--verde);cursor:pointer;margin:0 14px 12px;display:inline-flex;gap:6px;
+  align-items:center;text-decoration:none}
+.set{grid-template-columns:16px minmax(0,1fr) minmax(0,1fr) 40px 56px 26px;gap:4px}
+.set input{min-width:0;padding:9px 4px}
+.set button.x{background:none!important;border:0;color:var(--txt3);font-size:16px;padding:6px 0;
+  cursor:pointer;min-height:42px;font-weight:400}
+.set.ok button.x{color:var(--verde)}
+.set button:not(.x){padding:9px 2px;font-size:12.5px}
+.set.sent input{border-style:dashed}
+.sync{font-size:11px;font-weight:600;color:var(--verde);letter-spacing:.03em}
+/* Sesión ya registrada: se distingue de un vistazo y no invita a repetirse */
+.dia.hecha{opacity:.62}
+.dia.hecha .n{text-decoration:line-through;text-decoration-color:var(--linea2);text-decoration-thickness:1px}
+.dia.hecha .d{color:var(--verde)}
+.yahecha{background:var(--verde-b);border:1px solid var(--verde-s);border-radius:var(--r);padding:13px 14px;margin-bottom:12px}
+/* Nota del cliente sobre un ejercicio concreto */
+.notaej{margin:0 14px 12px}
+.notaej button.abrir{background:none;border:0;padding:6px 0;font-size:13px;font-weight:600;
+  color:var(--txt3);cursor:pointer;display:flex;align-items:center;gap:6px;text-align:left}
+.notaej button.abrir:hover{color:var(--verde)}
+.notaej button.abrir.con{color:var(--verde)}
+.notaej textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;
+  font-size:16px;min-height:64px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:4px}
+.notaej .pista{font-size:12px;color:var(--txt3);margin-top:5px}
+.yahecha b{color:var(--verde)}
+.corr{background:var(--ambar-s);border-radius:8px;padding:3px 2px}
+/* "este ejercicio no lo he hecho": discreto, pero a mano */
+.extra{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--linea)}
+.extra:last-of-type{border-bottom:0}
+.extra button{background:none;border:0;color:var(--txt3);font-size:16px;cursor:pointer;padding:2px 4px}
+.campo{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;font-size:16px;
+  background:var(--sup);margin-top:5px;color:var(--txt)}
+.tagb{background:var(--sup2);border:1px solid var(--linea2);border-radius:99px;padding:6px 12px;
+  font-size:13px;color:var(--txt2);cursor:pointer}
+.nohecho{padding:0 14px 12px;text-align:right}
+.nohecho button{background:none;border:0;padding:4px 0;font-size:12.5px;color:var(--txt3);
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.saltado{margin:0 14px 12px;background:var(--sup2);border-radius:8px;padding:8px 10px;
+  font-size:13px;color:var(--txt2);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.saltado button{background:none;border:0;font-size:13px;font-weight:600;color:var(--verde);
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* Lo que levanto la ultima vez: para no tener que acordarse ni buscarlo */
+.ultima{margin:0 14px 11px;font-size:12.5px;color:var(--verde);background:var(--verde-b);
+  border:1px solid var(--verde-s);border-radius:8px;padding:6px 10px}
+.ultima b{font-family:var(--m);font-size:12.5px}
+</style>
+</head>
+<body>
+<div id="app"><div class="load"><div class="spin"></div>Cargando tu plan…</div></div>
+<script>
+/* ==================================================================
+   SALVA · app de cliente — MAESTRO v4
+   Una sola app y un solo puente para todos. Quién es y su llave vienen
+   en su propio enlace:
+       .../?c=alexia&k=SU-CLAVE
+   Para dar de alta a alguien NO se toca este archivo: se añade una fila
+   en la hoja "SALVA - Clientes" y se le manda su enlace.
+   ================================================================== */
+
+const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
+
+const VERSION = 'v4.3';
+const ANIO = 2026;
+
+/* ---------- cliente activo ---------- */
+const qs = new URLSearchParams(location.search);
+const CID = (qs.get('c') || '').trim().toLowerCase();
+const KEY = (qs.get('k') || '').trim();
+
+/* ---------- estado ---------- */
+const S = { d:null, vista:'hoy', dia:null, semana:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null };
+const K = k => 'salva_' + CID + '_' + k;
+const LS = {
+  get(k,f){ try{ return JSON.parse(localStorage.getItem(K(k))) ?? f; }catch(e){ return f; } },
+  set(k,v){ try{ localStorage.setItem(K(k),JSON.stringify(v)); }catch(e){} }
+};
+let LOG = LS.get('log', {});          // { id: {r,c,rir,ok,sent,...} }
+let CHK = LS.get('checkin', {});
+let VID = LS.get('videos', {});
+let ENVIADO = LS.get('semanas_enviadas', []);   // semanas cuyo check-in ya mandó
+
+/* ---------- utilidades ---------- */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+/* v4.3: la hoja de un cliente en inglés trae los días y los meses en inglés.
+   La app entiende los dos idiomas; para los clientes en español no cambia
+   nada, porque los nombres españoles siguen valiendo igual. */
+const DIAS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const hoyNombres = () => { const i = new Date().getDay(); return [DIAS[i], DIAS_EN[i]].map(norm); };
+const MESES = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11,
+               jan:0,apr:3,aug:7,dec:11};
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+
+/* --- Limpieza de lo que viene de la hoja -------------------------
+   Las hojas traen números con decimales ("45.0") y textos que a veces
+   repiten la misma idea dos veces. Se arregla al mostrar, no tocando
+   los datos: la hoja sigue siendo la fuente.                      */
+const fmtMin = v => {
+  const t = String(v||'').trim();
+  if(!t) return '';
+  const n = parseFloat(t.replace(',','.'));
+  return isNaN(n) ? t : String(Math.round(n)) + ' min';
+};
+/* "Inicio parcial — INICIO PARCIAL" -> "Inicio parcial" */
+function sinRepetir(txt){
+  const t = String(txt||'').trim();
+  const p = t.split(/\s+[—–-]\s+/);
+  if(p.length<2) return t;
+  const vistos = [];
+  p.forEach(x=>{ if(x && !vistos.some(v=>norm(v)===norm(x))) vistos.push(x.trim()); });
+  return vistos.join(' · ');
+}
+/* Parte "Fuerza cuerpo completo — Fuerza de apoyo al HYROX" en
+   título ("Fuerza cuerpo completo") y aclaración, que va debajo en
+   pequeño. Se parte ANTES de deduplicar: si no, se pierde el guion. */
+function partir(txt){
+  const t = String(txt||'').trim();
+  const p = t.split(/\s+[—–]\s+/);
+  if(p.length<2) return {t:sinRepetir(t), sub:''};
+  const a = p[0].trim();
+  const b = p.slice(1).join(' · ').trim();
+  if(!b || norm(a)===norm(b) || norm(b).includes(norm(a))) return {t:a, sub:''};
+  return {t:a, sub:b};
+}
+
+function toast(msg){ S.toast=msg; pinta(); clearTimeout(toast.t); toast.t=setTimeout(()=>{S.toast=null;pinta();},3000); }
+
+function fechaIni(txt){
+  const s = String(txt||'');
+  const n = s.match(/(\d{1,2})/), m = s.match(/([a-záéíóúñ]{3,})/i);
+  if(!n||!m) return null;
+  const x = MESES[norm(m[1]).slice(0,3)];
+  return x===undefined ? null : new Date(ANIO, x, parseInt(n[1]));
+}
+function semanaActual(){
+  const ss = S.d.SEMANAS||[]; if(!ss.length) return null;
+  const h = new Date(); h.setHours(0,0,0,0);
+  let e = null; for(const w of ss){ const i=fechaIni(w.FECHAS); if(i && h>=i) e=w; }
+  return e || ss[0];
+}
+const campo = k => {
+  const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
+  if(!f || String(f.VISIBLE||'').toUpperCase()==='NO') return null;
+  return f.CONTENIDO || null;
+};
+const bloqueDe = s => s ? (s['BLOQUE (apunta a SESIONES)'] || s.BLOQUE || '') : '';
+
+/* Bloque extra: lo declara la hoja en la columna EXTRA, no se deduce.
+   Es trabajo que solo se hace si sobran minutos, y no cuenta para dar
+   la sesion por hecha: si no, un dia corto quedaria siempre a medias. */
+const esExtra = f => norm(f && f.EXTRA) === 'si';
+
+/* Ajustes de la ficha: se leen siempre, aunque VISIBLE sea NO.
+   No son contenido para el cliente, son configuración. */
+/* Idioma. La clave es el texto en espanol: si falta la traduccion,
+   se ve en espanol en vez de romperse o quedarse en blanco. */
+const EN = {
+  "Cargando tu plan…": "Loading your plan…",
+  "No se ha podido cargar tu plan.": "Your plan could not be loaded.",
+  "El plan está tardando más de lo normal.": "Your plan is taking longer than usual.",
+  "No encuentro a este cliente. Revisa la dirección.": "I can't find this client. Check the link.",
+  "Reintentar": "Try again",
+  "Mostrando tu plan guardado · actualizando…": "Showing your saved plan · updating…",
+  "Esta semana": "This week",
+  "Tu semana": "Your week",
+  "Completadas": "Completed",
+  "Foco de esta semana": "This week's focus",
+  "Foco de esa semana": "That week's focus",
+  "Te quedan": "Still to do",
+  "Semana": "Week",
+  "de": "of",
+  "Te falta el seguimiento de la semana": "Your check-in for week",
+  "Hoy": "Today",
+  "unos": "about",
+  "preguntas": "questions",
+  "Las": "The",
+  "semanas": "weeks",
+  "sin enviar": "not sent",
+  "serie": "set",
+  "series": "sets",
+  "Todo hecho": "All done",
+  "Ya hechas esta semana": "Already done this week",
+  "No hace falta repetirlas. Ábrelas solo si quieres revisar o corregir lo que anotaste.": "No need to repeat them. Open one only to review or correct what you logged.",
+  "Has registrado todas las sesiones de la semana. Descansa y nos vemos en la siguiente.": "You've logged every session this week. Rest, and I'll see you in the next one.",
+  "Hoy toca recuperar. Es parte del plan, no un día perdido.": "Today is recovery. That's part of the plan, not a wasted day.",
+  "Elige la sesión que vas a hacer hoy. Tú decides el día; yo anoto la fecha.": "Pick the session you're doing today. You choose the day; I record the date.",
+  "Elige un día": "Pick a day",
+  "Vuelve a Hoy y toca la sesión que quieras registrar.": "Go back to Today and tap the session you want to log.",
+  "Ir a Hoy": "Go to Today",
+  "Volver": "Back",
+  "Descanso": "Rest",
+  "Antes de empezar": "Before you start",
+  ", esto es tu plan.": ", this is your plan.",
+  "Aquí verás solo lo que te toca hoy. Toca Empezar sesión y ve anotando las series según las haces: repeticiones, kilos y RIR. Se guarda solo.": "Here you only see what you have to do today. Tap Start session and log your sets as you go: reps, kilos and RIR. It saves itself.",
+  "En Mi plan tienes el programa entero, por bloques, y qué busca cada uno.": "In My plan you have the whole programme, block by block, and what each one is for.",
+  "Una vez por semana te pido el seguimiento. Son unos minutos y es con lo que te ajusto el plan.": "Once a week I ask you for the check-in. It takes a few minutes and it is what I use to adjust your plan.",
+  "Si algo te molesta o no te cuadra, escríbemelo en la sesión. Lo leo.": "If something hurts or does not add up, write it to me in the session. I read it.",
+  "Entendido, vamos": "Got it, let's go",
+  "Enviando la foto…": "Sending the photo…",
+  "Hazle una foto a tu reloj al terminar y mándamela": "Take a photo of your watch when you finish and send it to me",
+  "Mandar otra foto": "Send another photo",
+  "Foto enviada": "Photo sent",
+  "Esa foto pesa demasiado.": "That photo is too heavy.",
+  "No se ha podido enviar la foto. Inténtalo otra vez con cobertura.": "The photo could not be sent. Try again when you have signal.",
+  "Se guarda solo mientras escribes. Toca": "It saves itself as you type. Tap",
+  "para confirmar la serie; si te equivocas, vuelve a tocarlo o usa la ✕.": "to confirm the set; if you get it wrong, tap it again or use the ✕.",
+  "Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.": "This session has no sets to log. When you finish, tell me how it went and rate it: that is enough for it to count as done.",
+  "Te falta parte del enlace. Abre entero el que te mandó Salva.": "Your link is incomplete. Open the full link Salva sent you.",
+  "Mi plan": "My plan",
+  "Registro": "Log",
+  "Progreso": "Progress",
+  "Hecha": "Done",
+  "Sin registrar": "Not logged",
+  "Parcial": "Partial",
+  "Registrada": "Logged",
+  "Omitida": "Skipped",
+  "km reales": "actual km",
+  "tiempo": "time",
+  "piernas 1-5": "legs 1-5",
+  "carga": "load",
+  "metros / reps": "metres / reps",
+  "m o reps": "m or reps",
+  "Ritmo": "Pace",
+  "Vaciar": "Clear",
+  "¿Algo que contarme de este ejercicio?": "Anything to tell me about this exercise?",
+  "Tu nota para Salva": "Your note for Salva",
+  "Esta sesión ya está registrada": "This session is already logged",
+  "No hace falta que la repitas. Si te equivocaste al anotar algo, corrígelo aquí y vuelve a enviar.": "No need to do it again. If you logged something wrong, fix it here and send it again.",
+  "Enviado.": "Sent.",
+  "dato corregido.": "value corrected.",
+  "datos corregidos.": "values corrected.",
+  "Enviado. Salvador ya lo tiene.": "Sent. Salva has it.",
+  "Estás respondiendo la": "You are answering",
+  "Es lo que me deja ajustar tu plan.": "This is what lets me adjust your plan.",
+  "Escribe con libertad.": "Write freely.",
+  "Son unos minutos y es lo que me deja ajustar tu plan. Puedes entrenar igual, pero no lo dejes pasar.": "It only takes a few minutes and it is what lets me adjust your plan. You can still train, but do not let it slide.",
+  "Suele arreglarse volviendo a intentarlo. Si acabas de registrar series, siguen guardadas en el móvil.": "Trying again usually fixes it. If you have just logged some sets, they are still saved on your phone.",
+  "Resume tu prioridad, experiencia, recuperación, carga reciente y disponibilidad. Es lo que uso para decidir desde dónde empezar y cómo ir ajustando.": "Your SALVA code summarizes your priority, experience, recovery, recent load and availability. I use it to decide where to start and how to keep adjusting your training.",
+  "Tu programa": "Your programme",
+  "Sesiones registradas frente a las previstas. Lo que no has anotado cuenta como sin registrar, no como fallada.": "Sessions logged against sessions planned. What you have not written down counts as not logged, not as failed.",
+  "Aquí vas a ver tu progreso": "This is where you will see your progress",
+  "Ahora está vacío, y es normal: esto se llena solo, con lo que vas anotando mientras entrenas.": "It is empty for now, and that is normal: it fills itself with what you write down while you train.",
+  "Anota las series según las haces, aunque sea rápido y a ojo. Con dos semanas ya veo por dónde vas y puedo ajustarte el plan.": "Log your sets as you go, even roughly. After two weeks I can already see where you are and adjust your plan.",
+  "No busques el número perfecto. Busca no fallar.": "Do not chase the perfect number. Just do not miss sessions.",
+  "Ir a lo de hoy": "Go to today",
+  "Lo que llevas": "What you have done so far",
+  "Sesiones anotadas": "Sessions logged",
+  "Series anotadas": "Sets logged",
+  "Vídeos enviados": "Videos sent",
+  "Tus cargas": "Your loads",
+  "De la primera vez que lo anotaste a tu mejor serie.": "From the first time you logged it to your best set.",
+  "series anotadas": "sets logged",
+  "serie anotada": "set logged",
+  "Otro entrenamiento": "Another session",
+  "¿Hiciste algo que no estaba en el plan? Apúntalo y me entero.": "Did you do something that was not in the plan? Write it here and I will know.",
+  "Añadir un entrenamiento": "Add a session",
+  "Qué hiciste": "What you did",
+  "Pilates, fútbol, clase de spinning…": "Pilates, football, a spinning class…",
+  "Cuánto duró": "How long it lasted",
+  "minutos": "minutes",
+  "Intensidad": "Intensity",
+  "intensidad": "intensity",
+  "1 = muy suave · 5 = a tope": "1 = very easy · 5 = all out",
+  "Algo que contarme": "Anything to tell me",
+  "Guardar": "Save",
+  "Cancelar": "Cancel",
+  "Quitar": "Remove",
+  "extra": "extra",
+  "Ponle un nombre: pilates, fútbol, lo que fuera.": "Give it a name: pilates, football, whatever it was.",
+  "Apuntado. Se manda con la sesión.": "Noted. It goes with the session.",
+  "No he hecho este ejercicio": "I did not do this one",
+  "No lo has hecho.": "You did not do this one.",
+  "Deshacer": "Undo",
+  "Anotado: este no lo has hecho.": "Noted: you did not do this one.",
+  "Ver cómo se hace": "See how it is done",
+  "Ver ejercicio": "Watch the exercise",
+  "técnica": "technique",
+  "La última vez": "Last time",
+  "estás aquí": "you are here",
+  "Y cuéntame lo que quieras, si te apetece.": "And tell me anything you want, if you feel like it.",
+  "Cada bloque tiene su objetivo. Dentro, las semanas van sumando.": "Each block has its own goal. Inside it, the weeks build on each other.",
+  "Los días rojos van siempre separados: al menos 48 horas entre uno y otro. Es lo que te deja rendir en los dos y recuperar bien.": "Hard (red) days are always kept apart: at least 48 hours between them. That is what lets you perform on both and recover well.",
+  "semana": "week",
+  "reps": "reps",
+  "¿No sabes si lo estás haciendo bien? Clica aquí y grábate": "Not sure you're doing it right? Tap here to film yourself",
+  "Grabar o elegir vídeo": "Record or choose a video",
+  "Ahora no": "Not now",
+  "Máximo 20 segundos: los vídeos largos no llegan a enviarse. Puedes grabarlo ahora o subir uno que ya tengas. No hace falta la serie entera, solo un par de repeticiones lo mejor que puedas. Si puedes, recorta el vídeo hasta justo antes de empezar: así entran más repeticiones y lo veo mejor.": "20 seconds maximum: longer videos fail to upload. You can film it now or upload one you already have. You don't need the whole set, just a couple of reps as well as you can. If you can, trim the clip to just before you start: more reps fit in and I see more.",
+  "En carrera, de lado o de frente se ve mucho mejor que de espaldas.": "For running, filming from the side or the front shows much more than from behind.",
+  "Enviando el vídeo…": "Sending your video…",
+  "Vídeo enviado": "Video sent",
+  "No se ha podido enviar el vídeo. Inténtalo otra vez con cobertura.": "The video could not be sent. Try again where you have signal.",
+  "Ese vídeo es muy largo. Recórtalo a 20 segundos o menos.": "That video is too long. Trim it to 20 seconds or less.",
+  "Ese vídeo pesa demasiado. Graba uno más corto.": "That video is too heavy. Record a shorter one.",
+  "Grabar otro": "Record another",
+  "Lo que te dice Salva": "What Salva says",
+  "No hay nada que registrar hoy.": "Nothing to log today.",
+  "Calentamiento.": "Warm-up.",
+  "Duración": "Duration",
+  "Qué vas a hacer": "What you're doing",
+  "Empezar sesión": "Start session",
+  "Continuar sesión": "Continue session",
+  "Abrir": "Open",
+  "Anotar": "Log",
+  "Estado": "Status",
+  "Observaciones": "Notes",
+  "Cómo te has sentido, molestias, lo que quieras contarme": "How you felt, any niggles, anything you want to tell me",
+  "Puedes contarme una molestia aunque no te haya impedido entrenar.": "Tell me about a niggle even if it didn't stop you training.",
+  "¿Qué tal ha ido la sesión?": "How did the session go?",
+  "Del 1 al 5. Me sirve para saber qué sesiones te funcionan.": "From 1 to 5. It tells me which sessions work for you.",
+  "Guardar y enviar": "Save and send",
+  "Marcar como omitida": "Mark as skipped",
+  "Marcaste esta sesión como omitida.": "You marked this session as skipped.",
+  "Marcada como omitida. Es distinto de no haberla anotado.": "Marked as skipped. That's different from not logging it.",
+  "Deshacer": "Undo",
+  "Enviar": "Send",
+  "Enviando…": "Sending…",
+  "Enviar a Salvador": "Send to Salvador",
+  "No hay nada nuevo que enviar.": "Nothing new to send.",
+  "No se ha podido enviar. Sigue guardado en tu móvil; inténtalo luego.": "Couldn't send. It's still saved on your phone; try again later.",
+  "Guardadas en tu móvil.": "Saved on your phone.",
+  "Se corregirá en la hoja al enviar.": "It will be corrected in the sheet when you send.",
+  "Escribe al menos las repeticiones que hiciste.": "Enter at least the reps you did.",
+  "Anota al menos un dato antes de confirmar.": "Log at least one value before confirming.",
+  "Se guarda mientras escribes. Si pierdes la conexión, no se borra.": "It saves as you type. If you lose signal, nothing is lost.",
+  "Si te sobran minutos": "If you have minutes to spare",
+  "Ocultar vídeo": "Hide video",
+  "Tu objetivo": "Your goal",
+  "Evento": "Event",
+  "Tu código SALVA": "Your SALVA code",
+  "Tus datos": "Your details",
+  "Lo que tenemos en cuenta": "What we're taking into account",
+  "Cómo leer el semáforo": "How to read the traffic light",
+  "Bloque actual": "Current block",
+  "Seguimiento semanal": "Weekly check-in",
+  "Responder": "Answer",
+  "Responder ahora": "Answer now",
+  "Tu respuesta": "Your answer",
+  "Guías y protocolos": "Guides and protocols",
+  "Los protocolos y las guías de tu plan.": "The protocols and guides for your plan.",
+  "Tests y checkpoints": "Tests and checkpoints",
+  "Resultado:": "Result:",
+  "Cargas que has anotado": "Loads you've logged",
+  "Todavía no hay cargas": "No loads yet",
+  "Cuando registres tus series aparecerán aquí.": "They'll appear here once you log your sets.",
+  "Sin comparaciones con otras personas y sin premios por entrenar más de lo prescrito.": "No comparisons with other people, and no rewards for training more than prescribed.",
+  "Ver todo": "See all",
+  "← Mi plan": "← My plan",
+  "opcional": "optional",
+  "Se envía junto con la sesión. Salva lo ve con el nombre del ejercicio.": "It's sent with the session. Salva sees it with the exercise name.",
+  "Dudas, sensaciones, si te ha gustado o no, molestias, la máquina estaba ocupada…": "Questions, how it felt, whether you liked it, niggles, the machine was taken…"
+};
+/* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
+   hay ficha, asi que se mira el enlace (&lang=en) y lo que se guardo la
+   ultima vez: asi la pantalla de "cargando" y la de error ya salen bien. */
+function enIngles(){
+  const f = ajuste('idioma');
+  if(f) return f.startsWith('en');
+  return String(qs.get('lang') || LS.get('idioma','')).toLowerCase().startsWith('en');
+}
+const tr = s => (enIngles() && EN[s]) ? EN[s] : s;
+
+const ajuste = k => {
+  const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
+  return f ? norm(f.CONTENIDO) : '';
+};
+const diasDeBloque = b => (S.d.SEMANA||[]).filter(r=>r.BLOQUE===b);
+const sesionDe = (b,d) => (S.d.SESIONES||[])
+  .filter(r=>r.BLOQUE===b && norm(r['DÍA'])===norm(d))
+  .sort((a,b2)=>(parseInt(a.ORDEN)||0)-(parseInt(b2.ORDEN)||0));
+function diaDeHoy(b){
+  const hs = hoyNombres();
+  return diasDeBloque(b).find(d=>hs.some(h=>norm(d['DÍA']).startsWith(h))) || null;
+}
+
+/* --- Días fijos o sesiones libres ---------------------------------
+   Alexia entrena lunes, martes, jueves y sábado: días fijos.
+   Sergio elige el día según sus viajes: sus sesiones se llaman
+   "Sesión 1..4". Si ninguna fila del bloque es un día de la semana,
+   la app cambia a modo libre y él elige qué toca hoy.            */
+const esDiaSemana = d => DIAS.concat(DIAS_EN).some(x=>norm(String(d)).startsWith(norm(x)));
+/* Un día de descanso se llama "Descanso" o "Rest" según el idioma de la hoja. */
+const esDescanso = d => { const t = norm(d && d['SESIÓN']); return t.includes('descanso') || /\b(rest|day off)\b/.test(t); };
+
+/* PERFIL · se declara en la ficha, no se adivina.
+     fijo     → entrena días concretos (lunes, martes...). Pantalla "Hoy toca X".
+     flexible → elige el día de cada sesión. Pantalla "Te quedan estas sesiones".
+   Si la ficha no lo dice, se deduce de los nombres de los días para no
+   romper las hojas antiguas. */
+function modoLibre(b){
+  const p = ajuste('perfil');
+  if(p==='flexible' || p==='libre') return true;
+  if(p==='fijo') return false;
+  const ds = diasDeBloque(b).filter(d=>!esDescanso(d));
+  return ds.length>0 && !ds.some(d=>esDiaSemana(d['DÍA']));
+}
+
+/* Sesiones marcadas como opcionales: no cuentan para la adherencia.
+   El "rodaje extra" de Sergio o un sábado suelto no deben salir como
+   sesión fallada si no se hacen. */
+const esOpcional = d => {
+  const v = norm(d && (d.OPCIONAL || d.Opcional || ''));
+  if(v==='si' || v==='sí' || v==='x' || v==='yes') return true;
+  const t = norm(d && d['SESIÓN']);
+  return t.includes('opcional') || t.includes('optional');
+};
+const idFecha = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~fecha`;
+function fechaDe(b,d){ const v=LOG[idFecha(b,d)]; return v?v.fecha:''; }
+function marcaFecha(b,d){
+  const id=idFecha(b,d);
+  if(LOG[id]) return;
+  LOG[id]={fecha:new Date().toISOString().slice(0,10), ok:true};
+  LS.set('log', LOG);
+}
+/* Sesiones de la semana que aún no se han registrado */
+function pendientesSemana(b){
+  return diasDeBloque(b)
+    .filter(d=>!esDescanso(d))
+    .filter(d=>['sin','parcial'].includes(estadoSesion(b,d['DÍA'])));
+}
+/* Las que cuentan para la adherencia: ni descansos ni opcionales */
+const sesionesContables = b => diasDeBloque(b)
+  .filter(d=>!esDescanso(d) && !esOpcional(d));
+const semColor = s => { const v = norm(s);
+  return (v==='rojo'||v==='red') ? 'rojo' : (v==='ambar'||v==='amber') ? 'ambar'
+       : (v==='verde'||v==='green') ? 'verde' : 'gris'; };
+const semForma = s => { const v=semColor(s); return v==='rojo'?'■':v==='ambar'?'▲':v==='verde'?'●':'–'; };
+
+/* Identificador estable de cada serie. Es lo que permite corregir
+   un dato ya enviado en vez de duplicarlo en la hoja.
+   v3.14: empieza por la semana. Un bloque dura varias semanas, asi que
+   sin este prefijo el lunes de la semana 3 era el mismo lunes que el de
+   la 2: se pisaban el registro y se perdia la progresion. */
+const SEM = () => 's' + slug(String((S.semana && S.semana.SEMANA) || '0'));
+const idSerie = (b,d,ej,i) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~s${i+1}`;
+const idOmit  = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~omitida`;
+const idObs   = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~obs`;
+/* Nota del cliente sobre un ejercicio concreto: "no sé si lo hago bien",
+   "me molesta el hombro"... Llega a la hoja con el nombre del ejercicio,
+   así se sabe exactamente de cuál habla. */
+const idNota  = (b,d,ej) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~nota`;
+const idReg   = (b,d,ej) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~reg`;
+const idVal   = (b,d)    => `${SEM()}~${slug(b)}~${slug(d)}~valoracion`;
+
+/* v3.14: "la ultima vez". Busca el mismo ejercicio en cualquier semana
+   anterior, o en otro dia de esta, y devuelve la serie mas pesada de la
+   ultima sesion en la que se anoto. Si nunca se ha hecho, no devuelve nada
+   y debajo del ejercicio no aparece ninguna linea. */
+function ultimaVez(bl, dia, nombre){
+  const ej = slug(nombre), hoy = SEM()+'~'+slug(bl)+'~'+slug(dia), cand = [];
+  Object.keys(LOG).forEach(k=>{
+    const p = k.split('~');
+    if(p.length !== 5 || p[3] !== ej || !/^s\d+$/.test(p[4])) return;
+    const v = LOG[k];
+    if(!v || !v.ok || v.borrada || (!v.r && !v.c)) return;
+    if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;          // la sesion de hoy no es "la ultima vez"
+    cand.push({ses:p[0]+'~'+p[1]+'~'+p[2], sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'',
+               c:parseFloat(String(v.c||'').replace(',','.'))||0, carga:v.c||'', reps:v.r||'', rir:v.rir||''});
+  });
+  if(!cand.length) return null;
+  cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
+  const ses = cand[0].ses;
+  const mismas = cand.filter(x=>x.ses===ses)
+    .sort((a,b)=> b.c-a.c || (parseFloat(b.reps)||0)-(parseFloat(a.reps)||0));
+  return {sem:mismas[0].sem, carga:mismas[0].carga, reps:mismas[0].reps, rir:mismas[0].rir};
+}
+/* Lo mismo para lo que no son series: carrera, remo, trineo... */
+function ultimaVezReg(bl, dia, nombre){
+  const ej = slug(nombre), hoy = SEM()+'~'+slug(bl)+'~'+slug(dia), cand = [];
+  Object.keys(LOG).forEach(k=>{
+    const p = k.split('~');
+    if(p.length !== 5 || p[3] !== ej || p[4] !== 'reg') return;
+    const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.d) return;
+    if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;
+    cand.push({sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'', d:v.d});
+  });
+  if(!cand.length) return null;
+  cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
+  const d = cand[0].d;
+  const partes = [d.km?d.km+' km':'', d.tiempo||'', d.metros||'', d.carga?d.carga+' kg':'',
+                  d.rpe?'RPE '+d.rpe:''].filter(Boolean);
+  return partes.length ? {sem:cand[0].sem, txt:partes.join(' · ')} : null;
+}
+function lineaUltima(u){
+  if(!u) return '';
+  const txt = u.txt ? u.txt
+    : (u.carga ? u.carga+' kg × '+u.reps : u.reps+' '+tr('reps')) + (u.rir?' · RIR '+u.rir:'');
+  return `<div class="ultima">${tr("La última vez")}${u.sem?' · '+tr('semana')+' '+u.sem:''}: <b>${esc(txt)}</b></div>`;
+}
+
+/* Que se pide en cada fila lo declara la hoja en la columna REGISTRO.
+   Antes solo habia casillas donde habia SERIES, asi que una carrera o una
+   ronda de HYROX no tenian donde anotarse. */
+const CAMPOS = {
+  km:      {et:'km reales',   ph:'km',      modo:'decimal'},
+  tiempo:  {et:'tiempo',      ph:'mm:ss',   modo:'text'},
+  rpe:     {et:'RPE',         ph:'1-10',    modo:'numeric'},
+  piernas: {et:'piernas 1-5', ph:'1-5',     modo:'numeric'},
+  carga:   {et:'carga',       ph:'kg',      modo:'decimal'},
+  metros:  {et:'metros / reps',ph:'m o reps',modo:'text'}
+};
+const camposDe = f => String((f&&f.REGISTRO)||'').split(',')
+                        .map(x=>norm(x)).filter(k=>CAMPOS[k]);
+
+function aSegundos(t){
+  const p = String(t||'').trim().split(':').map(x=>parseInt(x,10));
+  if(!p.length || p.some(isNaN)) return 0;
+  if(p.length===3) return p[0]*3600 + p[1]*60 + p[2];
+  if(p.length===2) return p[0]*60 + p[1];
+  return p[0]*60;                        // "45" se entiende como 45 minutos
+}
+function ritmoDe(d){
+  const km = parseFloat(String((d&&d.km)||'').replace(',','.'));
+  const sg = aSegundos(d&&d.tiempo);
+  if(!km || !sg) return '';
+  const s = Math.round(sg/km);
+  return 'Ritmo ' + Math.floor(s/60) + ':' + String(s%60).padStart(2,'0') + ' min/km';
+}
+const textoNota = id => { const v=LOG[id]; return v && v.nota ? v.nota : ''; };
+/* El identificador lleva el nombre en minúsculas y con guiones, pero a la
+   hoja debe llegar tal y como tú lo escribiste. Se recuerda al pintar. */
+const NOMBRES = {};
+const recordarNombre = (id, nombre) => { if(nombre) NOMBRES[id]=nombre; };
+const nombreDe = id => NOMBRES[id] || '';
+const idChk   = (sem,n) => `chk~s${slug(sem)}~p${slug(n)}`;
+const idVideo = (b,d,n) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(n)}~vid`;
+const idFoto  = (b,d,n) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(n)}~foto`;
+/* v3.19: "este ejercicio no lo he hecho". Sin esto, una sesion en la que
+   se salta un ejercicio se quedaba en "Parcial" para siempre. */
+const idSalto = (b,d,n) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(n)}~salto`;
+/* v3.21: entrenamientos que ha hecho por su cuenta y no estaban en el plan
+   (una clase de pilates, un HYROX en grupo, un partido). Se apuntan en el
+   dia que toque y quedan en la hoja, para saber que hace de verdad. */
+const idExtra = (b,d,n) => `${SEM()}~${slug(b)}~${slug(d)}~extra-${n}~extra`;
+function extrasDe(b,d){
+  const pre = `${SEM()}~${slug(b)}~${slug(d)}~extra-`;
+  return Object.keys(LOG).filter(k=>k.indexOf(pre)===0 && k.endsWith('~extra') && LOG[k] && !LOG[k].borrada)
+    .sort().map(k=>({id:k, v:LOG[k].extra || {}}));
+}
+const saltado = (b,d,n) => { const v = LOG[idSalto(b,d,n)]; return !!(v && v.ok); };
+const hoyISO  = () => new Date().toISOString().slice(0,10);
+
+/* ---------- biblioteca de ejercicios ---------- */
+const fichaEj = nombre => (S.d.EJERCICIOS||[]).find(e=>norm(e.EJERCICIO)===norm(nombre)) || null;
+function idYoutube(url){
+  const m = String(url||'').match(/(?:shorts\/|watch\?v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+/* ---------- estado de sesión ---------- */
+function estadoSesion(b,d){
+  if(LOG[idOmit(b,d)]) return 'omitida';
+  const todas = sesionDe(b,d).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
+                                        && !saltado(b,d,f['EJERCICIO / ELEMENTO']));
+  const conSeries = todas.filter(f=>f.SERIES);
+  const conReg    = todas.filter(f=>!f.SERIES && camposDe(f).length);
+  if(!conSeries.length && !conReg.length){
+    // Una carrera larga puede no tener nada que anotar. Antes se quedaba
+    // "sin registrar" para siempre y nunca contaba como hecha: ahora basta
+    // con valorarla al terminar.
+    const val = LOG[idVal(b,d)];
+    return (val && val.val) ? 'hecha' : 'sin';
+  }
+  /* v3.19: la sesion esta HECHA cuando todos los ejercicios tienen algo
+     anotado, aunque falte alguna serie suelta. Antes hacia falta que
+     cuadraran todas las series: bastaba con hacer 3 de 4 para que la
+     sesion se quedara en "Parcial" toda la vida. PARCIAL ahora significa
+     lo que de verdad importa: hay ejercicios sin tocar. El detalle serie
+     a serie sigue entero en la hoja. */
+  let ejercicios=0, conAlgo=0, anotadas=0;
+  conSeries.forEach(f=>{
+    const n = parseInt(f.SERIES)||1; ejercicios++;
+    let m = 0;
+    for(let i=0;i<n;i++){ const v=LOG[idSerie(b,d,f['EJERCICIO / ELEMENTO'],i)]; if(v && v.ok) m++; }
+    anotadas += m; if(m) conAlgo++;
+  });
+  conReg.forEach(f=>{
+    ejercicios++;
+    const v = LOG[idReg(b,d,f['EJERCICIO / ELEMENTO'])];
+    if(v && v.ok){ anotadas++; conAlgo++; }
+  });
+  if(!anotadas) return 'sin';
+  return conAlgo >= ejercicios ? 'hecha' : 'parcial';
+}
+const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida']};
+const chipEstado = e => { const [c,t]=ETQ[e]||ETQ.sin; return `<span class="sem ${c}"><i>${semForma(c)}</i>${tr(t)}</span>`; };
+const pendientes = () => Object.keys(LOG).filter(k=>LOG[k] && LOG[k].ok && !LOG[k].sent).length;
+
+/* ---------- aviso de seguimiento ---------- */
+function faltaCheckin(){
+  const ss = S.d.SEMANAS||[]; if(!S.semana || !ss.length) return null;
+  const i = ss.findIndex(w=>w.SEMANA===S.semana.SEMANA);
+  if(i<=0) return null;                                  // en la semana 1 no hay anterior
+  const ant = ss[i-1];
+  if(ENVIADO.includes(String(ant.SEMANA))) return null;
+  // Si ya está respondida en la hoja, tampoco avisamos: así el aviso no
+  // reaparece por cambiar de móvil o vaciar el navegador.
+  const enHoja = (S.d.MIS_SEMANAS_CHECKIN||[]).map(String);
+  if(enHoja.includes(String(ant.SEMANA))){
+    if(!ENVIADO.includes(String(ant.SEMANA))){ ENVIADO.push(String(ant.SEMANA)); LS.set('semanas_enviadas', ENVIADO); }
+    return null;
+  }
+  return ant;
+}
+
+/* ---------- carga ---------- */
+async function cargar(){
+  if(!CID || !KEY){ S.err=tr('Te falta parte del enlace. Abre entero el que te mandó Salva.'); pinta(); return; }
+  if(!S.d){
+    const c = LS.get('plan', null);
+    if(c && c.d){ S.d=c.d; S.semana=semanaActual(); migrarSemana(); S.cache=c.ts; pinta(); }
+  }
+  // Sin límite de espera, una petición que no responde deja la pantalla
+  // en "Cargando..." para siempre. 25 s y se avisa con un botón.
+  const ctrl = new AbortController();
+  const reloj = setTimeout(()=>ctrl.abort(), 25000);
+  try{
+    // El parametro NO puede llamarse "c": Google devuelve error 400 en
+    // cualquier direccion de Apps Script que lleve ?c=. En el enlace de la
+    // app si vale, porque ese no pasa por Google.
+    const r = await fetch(API + '?cliente=' + encodeURIComponent(CID) + '&k=' + encodeURIComponent(KEY),
+                          {redirect:'follow', signal:ctrl.signal});
+    clearTimeout(reloj);
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    S.d=d; S.semana=semanaActual(); migrarSemana(); S.err=null; S.cache=null;
+    LS.set('idioma', ajuste('idioma') || 'es');   // para la pantalla de carga de la proxima vez
+    LS.set('plan', {d:d, ts:Date.now()});
+    fusionarRegistros(d.MIS_REGISTROS||[]);
+  }catch(e){
+    clearTimeout(reloj);
+    const tardo = e && e.name==='AbortError';
+    if(!S.d) S.err = tardo ? tr('El plan está tardando más de lo normal.')
+                           : (e.message || 'No se ha podido cargar el plan');
+  }
+  pinta();
+}
+
+/* v3.14: lo anotado antes de esta version no llevaba la semana delante.
+   Se le pone la semana en la que esta hoy: es de donde viene, porque
+   hasta ahora cada bloque solo podia guardar una tanda. Asi no pierde
+   las sesiones que ya tenia marcadas. */
+function migrarSemana(){
+  if(LS.get('migrado_semana', false)) return;
+  /* Un identificador nuevo empieza por la semana; los viejos empezaban por
+     el bloque. No vale mirar si empieza por "s" y un numero, porque hay
+     clientes cuyo bloque se llama S01: hay que contar las partes.
+     Las marcas de dia (omitida, obs, valoracion, fecha) tienen 4 partes
+     nuevas y 3 viejas; todo lo demas, 5 nuevas y 4 viejas. */
+  const MARCAS = ['omitida','obs','valoracion','fecha'];
+  const semDe = b => {
+    // Si ese bloque es de una sola semana, es esa. Si dura varias (no se
+    // puede saber cual), la semana en la que esta hoy.
+    const ss = (S.d.SEMANAS||[]).filter(w=>slug(w['BLOQUE (apunta a SESIONES)'] || w.BLOQUE || '') === b);
+    return ss.length === 1 ? 's' + slug(String(ss[0].SEMANA)) : SEM();
+  };
+  const pasa = o => {
+    const n = {};
+    Object.keys(o).forEach(k=>{
+      const p = k.split('~');
+      const esperadas = MARCAS.indexOf(p[p.length-1]) > -1 ? 4 : 5;
+      n[p.length < esperadas ? semDe(p[0]) + '~' + k : k] = o[k];
+    });
+    return n;
+  };
+  LOG = pasa(LOG); LS.set('log', LOG);
+  VID = pasa(VID); LS.set('videos', VID);
+  LS.set('migrado_semana', true);
+}
+
+/* Trae de la hoja lo ya enviado, para que se pueda repasar y corregir
+   aunque la clienta haya cambiado de móvil o vaciado el navegador. */
+function fusionarRegistros(filas){
+  let cambios = false;
+  filas.forEach(f=>{
+    const id = f.ID; if(!id) return;
+    // Las omisiones no se traen de la hoja: son una marca del momento y,
+    // si la persona omitio y luego entreno igual, taparia la sesion buena.
+    if(String(id).endsWith('~omitida')) return;
+    if(!LOG[id]){
+      if(id.endsWith('~extra')){
+        const tit = String(f.EJERCICIO||'').replace(/^EXTRA\s*·\s*/,'');
+        if(tit) LOG[id] = {extra:{titulo:tit, min:String(f.TIEMPO||'').replace(/\s*min$/,''),
+                                  int:parseInt(f.RPE)||0, nota:f.NOTAS||''}, ok:true, sent:true};
+      } else if(id.endsWith('~salto')){
+        if(String(f.ESTADO||'').toLowerCase() === 'omitida') LOG[id] = {salto:true, ok:true, sent:true};
+      } else if(id.endsWith('~reg')){
+        LOG[id] = {d:{km:f.KM||'', tiempo:f.TIEMPO||'', rpe:f.RPE||'', piernas:f.PIERNAS||'',
+                      carga:f.CARGA||'', metros:f.REPS||''}, ok:true, sent:true, ts:f.FECHA||''};
+      } else if(id.endsWith('~valoracion')){
+        LOG[id] = {val:parseInt(f.VALORACION)||0, ok:true, sent:true};
+      } else {
+        LOG[id] = {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', ok:true, sent:true, ts:f.FECHA||'',
+                   est:f.ESTADO||'', obs:f.NOTAS||'', nota:f.NOTAS||''};
+      }
+      cambios = true;
+    }
+  });
+  if(cambios) LS.set('log', LOG);
+}
+/* ============ pintado ============ */
+function pinta(){
+  const app = document.getElementById('app');
+  // Si la pagina se declara en espanol, Chrome le ofrece "traducir del
+  // espanol" a quien la tiene en ingles y estropea el texto.
+  try { document.documentElement.lang = enIngles() ? 'en' : 'es'; } catch(e){}
+  if(S.err && !S.d){ app.innerHTML = vErr(); return; }
+  if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
+  const v = {hoy:vHoy, plan:vPlan, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias}[S.vista] || vHoy;
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() +
+    (S.toast?`<div class="toast">${esc(S.toast)}</div>`:'');
+}
+function vErr(){
+  return `<div class="top"><div class="rowt"><div class="wm">SALVA</div></div></div>
+  <main><div class="err"><b>${tr("No se ha podido cargar tu plan.")}</b>
+  <p style="margin-top:8px;font-size:14px">${esc(S.err)}</p>
+  <p style="margin-top:8px;font-size:14px">${tr("Suele arreglarse volviendo a intentarlo. Si acabas de registrar series, siguen guardadas en el móvil.")}</p>
+  <button class="btn big" style="margin-top:14px" onclick="cargar()">${tr("Reintentar")}</button></div></main>`;
+}
+function cabecera(){
+  const s = S.semana;
+  return `<div class="top"><div class="rowt">
+    <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
+    ${s?`<span class="pill">${tr('Semana')} ${esc(s.SEMANA)} ${tr('de')} ${(S.d.SEMANAS||[]).length}</span>`:''}
+  </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}</div>`;
+}
+function nav(){
+  const it = [['hoy','Hoy','◱'],['plan','Mi plan','▤'],['sesion','Registro','✓'],['progreso','Progreso','◔']];
+  return `<nav>${it.map(([k,n,g])=>
+    `<button onclick="ir('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${g}</span>${tr(n)}</button>`).join('')}</nav>`;
+}
+function ir(v){ S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta(); }
+
+/* v3.14: bienvenida. Sale solo la primera vez, en el movil de cada uno:
+   se va en cuanto toca "entendido" o en cuanto anota su primera serie. */
+function bienvenida(){
+  if(LS.get('bienvenida_vista', false)) return '';
+  if(Object.keys(LOG).some(k=>LOG[k] && LOG[k].ok)) return '';
+  const n = String(campo('nombre') || (S.d && S.d.NOMBRE) || '').split(' ')[0];
+  return `<div class="card" style="border-color:var(--verde-s)">
+    <div class="lbl">${tr("Antes de empezar")}</div>
+    <h2 style="margin-top:6px">${esc(n)}${tr(", esto es tu plan.")}</h2>
+    <p class="mut" style="margin-top:10px">${tr("Aquí verás solo lo que te toca hoy. Toca Empezar sesión y ve anotando las series según las haces: repeticiones, kilos y RIR. Se guarda solo.")}</p>
+    <p class="mut" style="margin-top:8px">${tr("En Mi plan tienes el programa entero, por bloques, y qué busca cada uno.")}</p>
+    <p class="mut" style="margin-top:8px">${tr("Una vez por semana te pido el seguimiento. Son unos minutos y es con lo que te ajusto el plan.")}</p>
+    <p class="mut" style="margin-top:8px">${tr("Si algo te molesta o no te cuadra, escríbemelo en la sesión. Lo leo.")}</p>
+    <button class="btn pri big" style="margin-top:14px" onclick="cierraBienvenida()">${tr("Entendido, vamos")}</button>
+  </div>`;
+}
+function cierraBienvenida(){ LS.set('bienvenida_vista', true); pinta(); }
+
+/* ---------- otro entrenamiento ---------- */
+function abreExtra(bl, dia){
+  S.extraAbre = (S.extraAbre === bl+'~'+dia) ? null : bl+'~'+dia;
+  S.extraTmp = {titulo:'', min:'', int:0, nota:''};
+  pinta();
+}
+function tmpExtra(campo, v){
+  S.extraTmp = Object.assign({titulo:'',min:'',int:0,nota:''}, S.extraTmp);
+  S.extraTmp[campo] = v;
+}
+function tmpExtraInt(v){ tmpExtra('int', (S.extraTmp||{}).int === v ? 0 : v); pinta(); }
+function guardaExtra(bl, dia){
+  const t = document.getElementById('ex_t'), m = document.getElementById('ex_m'), n = document.getElementById('ex_n');
+  const titulo = (t ? t.value : '').trim();
+  if(!titulo){ toast(tr("Ponle un nombre: pilates, fútbol, lo que fuera.")); if(t) t.focus(); return; }
+  let i = 1; while(LOG[idExtra(bl,dia,i)]) i++;
+  LOG[idExtra(bl,dia,i)] = {extra:{titulo:titulo, min:(m?m.value:'').trim(),
+                                   int:(S.extraTmp||{}).int || 0, nota:(n?n.value:'').trim()},
+                            ok:true, ts:new Date().toISOString()};
+  LS.set('log', LOG);
+  S.extraAbre = null; S.extraTmp = null;
+  toast(tr("Apuntado. Se manda con la sesión.")); pinta();
+}
+function borraExtra(id){
+  const v = LOG[id] || {};
+  if(v.sent) LOG[id] = Object.assign({}, v, {ok:false, borrada:true, corregido:true});
+  else delete LOG[id];
+  LS.set('log', LOG); pinta();
+}
+function bloqueExtra(bl, dia){
+  const ya = extrasDe(bl, dia), abierto = S.extraAbre === bl+'~'+dia, t = S.extraTmp || {};
+  const SUG = ['Pilates','Fuerza','Running','HYROX','Bici','Natación','Clase','Pádel'];
+  return `<div class="card">
+    <h3>${tr("Otro entrenamiento")}</h3>
+    <p class="sm" style="margin-top:4px">${tr("¿Hiciste algo que no estaba en el plan? Apúntalo y me entero.")}</p>
+    ${ya.map(x=>`<div class="extra">
+        <div style="flex:1"><b>${esc(x.v.titulo||'')}</b>
+          <div class="sm">${[x.v.min?esc(x.v.min)+' min':'', x.v.int?tr('intensidad')+' '+x.v.int+'/5':''].filter(Boolean).join(' · ')}</div>
+          ${x.v.nota?`<div class="sm" style="margin-top:2px">${esc(x.v.nota)}</div>`:''}</div>
+        <button onclick="borraExtra('${x.id}')" aria-label="${tr("Quitar")}">✕</button></div>`).join('')}
+    ${abierto ? `
+      <div class="stack" style="margin-top:12px;gap:10px">
+        <div><label class="lbl" for="ex_t">${tr("Qué hiciste")}</label>
+          <input id="ex_t" type="text" class="campo" value="${esc(t.titulo||'')}"
+            oninput="tmpExtra('titulo',this.value)" placeholder="${tr("Pilates, fútbol, clase de spinning…")}"></div>
+        <div class="row wrap" style="gap:6px">${SUG.map(x=>
+          `<button class="tagb" onclick="document.getElementById('ex_t').value='${x}';tmpExtra('titulo','${x}')">${x}</button>`).join('')}</div>
+        <div><label class="lbl" for="ex_m">${tr("Cuánto duró")}</label>
+          <input id="ex_m" type="number" inputmode="numeric" class="campo" value="${esc(t.min||'')}"
+            oninput="tmpExtra('min',this.value)" placeholder="${tr("minutos")}"></div>
+        <div><span class="lbl">${tr("Intensidad")}</span>
+          <div class="escala">${[1,2,3,4,5].map(i=>
+            `<button class="${t.int===i?'on':''}" onclick="tmpExtraInt(${i})">${i}</button>`).join('')}</div>
+          <p class="sm">${tr("1 = muy suave · 5 = a tope")}</p></div>
+        <div><label class="lbl" for="ex_n">${tr("Algo que contarme")}</label>
+          <input id="ex_n" type="text" class="campo" value="${esc(t.nota||'')}" oninput="tmpExtra('nota',this.value)"></div>
+        <div class="stack" style="gap:8px">
+          <button class="btn pri" onclick="guardaExtra('${esc(bl)}','${esc(dia)}')">${tr("Guardar")}</button>
+          <button class="btn sm2" onclick="abreExtra('${esc(bl)}','${esc(dia)}')">${tr("Cancelar")}</button></div>
+      </div>`
+      : `<button class="btn sm2" style="margin-top:12px" onclick="abreExtra('${esc(bl)}','${esc(dia)}')">➕ ${tr("Añadir un entrenamiento")}</button>`}
+  </div>`;
+}
+
+/* ---------- aviso de seguimiento pendiente ---------- */
+function avisoCheckin(){
+  const ant = faltaCheckin();
+  if(!ant) return '';
+  return `<div class="aviso">
+    <b>${tr('Te falta el seguimiento de la semana')} ${esc(ant.SEMANA)}.</b>
+    <p class="mut" style="margin-top:6px;font-size:14px">${tr("Son unos minutos y es lo que me deja ajustar tu plan. Puedes entrenar igual, pero no lo dejes pasar.")}</p>
+    <button class="btn sm2" style="margin-top:10px" onclick="ir('seguimiento')">${tr("Responder ahora")}</button>
+  </div>`;
+}
+
+/* ---------- HOY ---------- */
+function vHoy(){
+  const bl = bloqueDe(S.semana), d = diaDeHoy(bl);
+  const hoyTxt = (enIngles() ? DIAS_EN : DIAS)[new Date().getDay()];
+  const fase = S.semana ? (S.semana['FASE / TÍTULO']||'') : '';
+  const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
+
+  // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
+  if(modoLibre(bl)) return bienvenida() + avisoCheckin() + vHoyLibre(bl, fase, nota);
+
+  let bloqueHoy;
+  if(!d || esDescanso(d)){
+    bloqueHoy = `<div class="card"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
+      <h2 style="margin-top:6px">${d?esc(partir(d['SESIÓN']).t):tr("Descanso")}</h2>
+      <p class="mut" style="margin-top:8px">${tr("Hoy toca recuperar. Es parte del plan, no un día perdido.")}</p></div>`;
+  } else if(!sesionDe(bl, d['DÍA']).length){
+    bloqueHoy = `<div class="card">
+      <div class="row sp"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
+        ${d['SEMÁFORO']?`<span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO'])}</span>`:''}</div>
+      <h2 style="margin-top:8px">${esc(partir(d['SESIÓN']).t)}</h2>
+      ${partir(d['SESIÓN']).sub?`<p class="mut" style="margin-top:4px">${esc(partir(d['SESIÓN']).sub)}</p>`:''}
+      <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>`;
+  } else {
+    const est = estadoSesion(bl, d['DÍA']);
+    const filas = sesionDe(bl, d['DÍA']);
+    const cal = filas.find(f=>parseInt(f.ORDEN)===0);
+    const mat = [...new Set(filas.filter(f=>parseInt(f.ORDEN)>0).map(f=>f['EJERCICIO / ELEMENTO']).filter(Boolean))].slice(0,4).join(' · ');
+    bloqueHoy = `<div class="card">
+      <div class="row sp"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
+        <span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO']||'')}</span></div>
+      <h2 style="margin-top:8px">${esc(partir(d['SESIÓN']).t)}</h2>
+      ${partir(d['SESIÓN']).sub?`<p class="mut" style="margin-top:4px">${esc(partir(d['SESIÓN']).sub)}</p>`:''}
+      ${fase?`<p class="sm" style="margin-top:6px">${esc(fase)}</p>`:''}
+      <div class="stack" style="margin-top:14px;gap:8px">
+        ${fmtMin(d.MIN)?`<div class="row sp"><span class="sm">${tr("Duración")}</span><b style="font-size:14.5px">${tr('unos')} ${esc(fmtMin(d.MIN))}</b></div>`:''}
+        <div class="row sp"><span class="sm">${tr("Estado")}</span>${chipEstado(est)}</div>
+      </div>
+      ${mat?`<hr><div class="lbl">${tr("Qué vas a hacer")}</div><p class="mut" style="margin-top:6px">${esc(mat)}</p>`:''}
+      ${cal?`<div class="calent" style="margin-top:12px"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+      <button class="btn pri big" style="margin-top:6px" onclick="abrir('${esc(d['DÍA'])}')">
+        ${est==='sin'?tr('Empezar sesión'):tr('Continuar sesión')}</button></div>`;
+  }
+
+  const pend = pendientes();
+  return bienvenida() + avisoCheckin() + bloqueHoy + `
+  ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
+  <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
+    <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
+    ${diasDeBloque(bl).map(x=>{
+      const es = estadoSesion(bl,x['DÍA']);
+      const esHoy = hoyNombres().some(h=>norm(x['DÍA']).startsWith(h));
+      const yaHecha = ['hecha','omitida'].includes(es);
+      return `<button class="dia ${esHoy?'hoy':''} ${yaHecha?'hecha':''}" onclick="abrir('${esc(x['DÍA'])}')">
+        <span class="d">${esc(String(x['DÍA']).slice(0,3))}</span>
+        <span style="flex:1"><span class="n">${esc(partir(x['SESIÓN']).t)}</span>
+          <div class="row wrap" style="gap:6px;margin-top:5px">
+            <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
+            ${esDescanso(x)||!sesionDe(bl,x['DÍA']).length?'':chipEstado(es)}
+            ${extrasDe(bl,x['DÍA']).length?`<span class="tag">+${extrasDe(bl,x['DÍA']).length} ${tr("extra")}</span>`:''}</div></span></button>`;
+    }).join('')}</div>
+  <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
+    <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
+    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
+  ${pend?`<div class="card"><div class="row sp"><div><b style="font-size:14.5px">${pend} ${tr(pend>1?'series':'serie')} ${tr('sin enviar')}</b>
+    <p class="sm" style="margin-top:3px">${tr("Guardadas en tu móvil.")}</p></div>
+    <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>`:''}
+  <p class="sm" style="text-align:center;margin-top:16px">SALVA ${VERSION}</p>`;
+}
+
+/* ---------- HOY · sesiones libres ---------- */
+function vHoyLibre(bl, fase, nota){
+  const todas = diasDeBloque(bl).filter(x=>!esDescanso(x));
+  const cuentan = sesionesContables(bl);
+  const pend = pendientesSemana(bl);
+  const hechas = cuentan.filter(x=>!pend.includes(x)).length;
+  const sinEnviar = pendientes();
+
+  return `
+  <div class="card">
+    <div class="lbl">${tr("Esta semana")}</div>
+    <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(fase))}</h2>
+    <p class="mut" style="margin-top:8px">${tr("Elige la sesión que vas a hacer hoy. Tú decides el día; yo anoto la fecha.")}</p>
+    <div class="row sp" style="margin-top:14px"><span class="sm">${tr("Completadas")}</span>
+      <b class="mono">${hechas} / ${cuentan.length}</b></div>
+    <div class="bar"><i style="width:${cuentan.length?Math.round(hechas/cuentan.length*100):0}%"></i></div>
+  </div>
+  ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
+  <div class="card">
+    <h3 style="margin-bottom:4px">${pend.length?tr('Te quedan'):tr('Todo hecho')}</h3>
+    ${pend.length?pend.map(x=>{
+      const es = estadoSesion(bl,x['DÍA']);
+      const p = partir(x['SESIÓN']);
+      return `<button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
+        <span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(p.t)}</span>
+          ${p.sub?`<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>`:''}
+          <div class="row wrap" style="gap:6px;margin-top:5px">
+            <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
+            ${fmtMin(x.MIN)?`<span class="sm">${esc(fmtMin(x.MIN))}</span>`:''}
+            ${esOpcional(x)?`<span class="tag">${tr("opcional")}</span>`:''}
+            ${es==='parcial'?chipEstado(es):''}</div></span></button>`;
+    }).join('')
+    :`<p class="mut" style="margin-top:6px">${tr("Has registrado todas las sesiones de la semana. Descansa y nos vemos en la siguiente.")}</p>`}
+  </div>
+  ${todas.filter(x=>!pend.includes(x)).length?`<div class="card">
+    <h3 style="margin-bottom:4px">${tr("Ya hechas esta semana")}</h3>
+    <p class="sm" style="margin-bottom:8px">${tr("No hace falta repetirlas. Ábrelas solo si quieres revisar o corregir lo que anotaste.")}</p>
+    ${todas.filter(x=>!pend.includes(x)).map(x=>`<button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')">
+      <span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
+      <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(estadoSesion(bl,x['DÍA']))}
+      ${fechaDe(bl,x['DÍA'])?`<span class="sm">${esc(fechaDe(bl,x['DÍA']))}</span>`:''}</div></span></button>`).join('')}
+    </div>`:''}
+  <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
+    <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
+    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
+  ${sinEnviar?`<div class="card"><div class="row sp"><div><b style="font-size:14.5px">${sinEnviar} ${tr(sinEnviar>1?'series':'serie')} ${tr('sin enviar')}</b>
+    <p class="sm" style="margin-top:3px">${tr("Guardadas en tu móvil.")}</p></div>
+    <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>`:''}
+  <p class="sm" style="text-align:center;margin-top:16px">SALVA ${VERSION}</p>`;
+}
+
+/* v3.14: las semanas se agrupan por bloque, y cada bloque lleva su
+   titulo y para que sirve. Antes salia una lista de once semanas sin
+   separacion y no se entendia que el bloque cambia el objetivo. */
+function porBloques(){
+  const g = [];
+  (S.d.SEMANAS||[]).forEach(s=>{
+    const b = s['BLOQUE (apunta a SESIONES)'] || s.BLOQUE || '';
+    let x = g.find(y=>y.b===b);
+    if(!x){ x = {b:b, semanas:[]}; g.push(x); }
+    x.semanas.push(s);
+  });
+  return g;
+}
+/* El texto de cada bloque esta en TEXTOS con la clave intro_b1, intro_w11...
+   Se busca por esa clave; si no cuadra, por el titulo. */
+function introDe(bl){
+  const ts = (S.d.TEXTOS||[]).filter(t=>norm(t.CLAVE).startsWith('intro'));
+  const tok = norm(String(bl).split('·')[0]).replace(/\s+/g,'');
+  return ts.find(t=>norm(t.CLAVE).replace(/^intro[_-]?/,'')===tok)
+      || ts.find(t=>tok && norm(t['TÍTULO']).replace(/\s+/g,'').includes(tok))
+      || null;
+}
+
+/* ---------- MI PLAN ---------- */
+function vPlan(){
+  const objetivo=campo('objetivo'), codigo=campo('codigo'), banderas=campo('banderas'),
+        datos=campo('datos'), evento=campo('evento'), leyenda=campo('semaforo_leyenda'),
+        prioridad=campo('prioridad'), lema=campo('lema'), leycod=campo('codigo_leyenda');
+  const bl = bloqueDe(S.semana);
+  return `
+  <div class="card"><div class="lbl">${tr("Tu objetivo")}</div>
+    <h2 style="margin-top:6px;font-size:19px">${esc(objetivo||'')}</h2>
+    ${prioridad?`<p class="mut" style="margin-top:8px">${esc(prioridad)}</p>`:''}
+    ${evento?`<div class="row" style="margin-top:12px"><span class="tag">${tr("Evento")}</span><b style="font-size:14px">${esc(evento)}</b></div>`:''}</div>
+  ${codigo?`<div class="card"><div class="lbl">${tr("Tu código SALVA")}</div>
+    <p class="mono" style="margin-top:8px;font-size:13.5px;line-height:1.6">${esc(codigo)}</p>
+    <p class="sm" style="margin-top:10px">${tr("Resume tu prioridad, experiencia, recuperación, carga reciente y disponibilidad. Es lo que uso para decidir desde dónde empezar y cómo ir ajustando.")}</p>
+    ${leycod?`<div style="margin-top:12px;border-top:1px solid var(--linea);padding-top:10px">
+      ${leycod.split('|').map(x=>x.trim()).filter(Boolean).map(x=>{
+        const i = x.indexOf('=');
+        return i<0 ? `<p class="sm" style="margin-top:4px">${esc(x)}</p>`
+          : `<p class="sm" style="margin-top:4px"><b class="mono">${esc(x.slice(0,i).trim())}</b> · ${esc(x.slice(i+1).trim())}</p>`;
+      }).join('')}</div>`:''}</div>`:''}
+  ${datos?`<div class="card"><div class="lbl">${tr("Tus datos")}</div><p class="mut" style="margin-top:6px">${esc(datos)}</p></div>`:''}
+  ${banderas?`<div class="card"><div class="lbl">${tr("Lo que tenemos en cuenta")}</div><p class="mut" style="margin-top:6px;line-height:1.55">${esc(banderas)}</p></div>`:''}
+  ${leyenda?`<div class="card"><div class="lbl">${tr("Cómo leer el semáforo")}</div><p class="mut" style="margin-top:6px">${esc(leyenda)}</p>
+    <p class="mut" style="margin-top:8px">${tr("Los días rojos van siempre separados: al menos 48 horas entre uno y otro. Es lo que te deja rendir en los dos y recuperar bien.")}</p></div>`:''}
+  <div class="card flat" style="margin-bottom:10px"><h3>${tr('Las')} ${(S.d.SEMANAS||[]).length} ${tr('semanas')}</h3>
+    <p class="sm" style="margin-top:4px">${tr("Cada bloque tiene su objetivo. Dentro, las semanas van sumando.")}</p></div>
+  ${porBloques().map(g=>{
+    const t = introDe(g.b), aqui = g.semanas.some(x=>S.semana && x.SEMANA===S.semana.SEMANA);
+    return `<div class="card"${aqui?' style="border-color:var(--verde-s)"':''}>
+      <div class="row sp" style="gap:8px;align-items:flex-start">
+        <h3>${esc(t ? t['TÍTULO'] : sinRepetir(g.b))}</h3>
+        ${aqui?`<span class="sem verde"><i>●</i>${tr("estás aquí")}</span>`:''}</div>
+      ${t&&t.CONTENIDO?`<p class="mut" style="margin-top:8px">${esc(t.CONTENIDO)}</p>`:''}
+      <hr>
+      ${(function(){
+        // Si las semanas del bloque se llaman igual que el bloque, repetirlo
+        // cuatro veces no dice nada: manda la fecha y el foco de esa semana.
+        const rep = g.semanas.every(x=>norm(x['FASE / TÍTULO'])===norm(g.semanas[0]['FASE / TÍTULO']));
+        return g.semanas.map(s=>{
+          const act = S.semana && s.SEMANA===S.semana.SEMANA;
+          return `<div class="dia" style="cursor:default"><span class="d">${enIngles()?'W':'S'}${esc(s.SEMANA)}</span>
+            <span style="flex:1"><span class="n" style="${act?'color:var(--verde)':''}">${esc(rep?s.FECHAS:sinRepetir(s['FASE / TÍTULO']))}</span>
+            ${rep?(act?`<div class="sm" style="margin-top:3px">${tr("estás aquí")}</div>`:'')
+                 :`<div class="sm" style="margin-top:3px">${esc(s.FECHAS)}${act?' · '+tr("estás aquí"):''}</div>`}
+            ${s['NOTA DE LA SEMANA']?`<div class="sm" style="margin-top:4px">${esc(s['NOTA DE LA SEMANA'])}</div>`:''}</span></div>`;
+        }).join('');
+      })()}</div>`;
+  }).join('')}
+  <div class="card"><div class="row sp"><h3>${tr("Guías y protocolos")}</h3>
+    <button class="btn sm2" onclick="ir('guias')">${tr("Abrir")}</button></div>
+    <p class="sm" style="margin-top:6px">${tr("Los protocolos y las guías de tu plan.")}</p></div>
+  ${(S.d.TESTS||[]).length?`<div class="card"><h3 style="margin-bottom:10px">${tr("Tests y checkpoints")}</h3>
+    ${(S.d.TESTS||[]).map(t=>`<div class="q"><div class="t">${esc(t['CUÁNDO'])} · ${esc(t.TIPO||'')}</div>
+      <p class="sm">${esc(t['QUÉ MEDIMOS Y PARA QUÉ'])}</p>
+      ${t.RESULTADO?`<p class="mut" style="margin-top:6px"><b>${tr("Resultado:")}</b> ${esc(t.RESULTADO)}</p>`:''}</div>`).join('')}</div>`:''}
+  ${lema?`<p class="sm" style="text-align:center;margin:18px 0 4px">${esc(lema)}</p>`:''}`;
+}
+/* ================= SESIÓN Y REGISTRO =================
+   Regla de oro de esta pantalla: lo que se escribe NO se pierde nunca.
+   Se guarda al teclear y la pantalla no se redibuja al confirmar una
+   serie, para no arrastrar lo escrito en las demás.
+   ===================================================== */
+function abrir(dia){
+  S.dia=dia; S.vista='sesion'; S.video=null;
+  const bl=bloqueDe(S.semana);
+  if(modoLibre(bl)) marcaFecha(bl,dia);   // queda registrado qué día la hizo
+  window.scrollTo(0,0); pinta();
+}
+
+function vSesion(){
+  const bl = bloqueDe(S.semana);
+  const dia = S.dia || (diaDeHoy(bl)||{})['DÍA'];
+  if(!dia) return `<div class="card"><h3>${tr("Elige un día")}</h3>
+    <p class="mut" style="margin-top:8px">${tr("Vuelve a Hoy y toca la sesión que quieras registrar.")}</p>
+    <button class="btn big" style="margin-top:12px" onclick="ir('hoy')">${tr("Ir a Hoy")}</button></div>`;
+
+  const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
+  const filas = sesionDe(bl, dia);
+  if(!filas.length || esDescanso(meta)){
+    return `<div class="card"><div class="lbl">${esc(dia)}</div>
+      <h2 style="margin-top:6px">${esc(partir(meta['SESIÓN']||'Descanso').t)}</h2>
+      <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>
+      ${bloqueExtra(bl, dia)}
+      <div class="card flat"><button class="btn big" onclick="ir('hoy')">${tr("Volver")}</button></div>`;
+  }
+
+  const cal = filas.find(f=>parseInt(f.ORDEN)===0);
+  const todos = filas.filter(f=>parseInt(f.ORDEN)>0);
+  const ejs = todos.filter(f=>!esExtra(f));
+  const extras = todos.filter(esExtra);
+  const est = estadoSesion(bl,dia);
+  const obs = LOG[idObs(bl,dia)];
+  const omitida = !!LOG[idOmit(bl,dia)];
+
+  return `
+  <div class="card"><div class="row sp">
+      <div><div class="lbl">${esc(dia)}${modoLibre(bl)&&fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}</div>
+        <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
+        ${partir(meta['SESIÓN']||'').sub?`<p class="sm" style="margin-top:3px">${esc(partir(meta['SESIÓN']||'').sub)}</p>`:''}</div>
+      ${chipEstado(est)}</div>
+    ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
+    ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
+      ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Toca")} <b>${tr("Anotar")}</b> ${tr("para confirmar la serie; si te equivocas, vuelve a tocarlo o usa la ✕.")}</p>`
+      : `<p class="sm" style="margin-top:12px">${tr("Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.")}</p>`}
+  </div>
+  ${est==='hecha'&&!omitida?`<div class="yahecha">
+    <b>${tr("Esta sesión ya está registrada")}${fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}.</b>
+    <p class="mut" style="margin-top:6px;font-size:14px">${tr("No hace falta que la repitas. Si te equivocaste al anotar algo, corrígelo aquí y vuelve a enviar.")}</p>
+    <button class="btn sm2" style="margin-top:10px" onclick="ir('hoy')">${tr("Volver")}</button></div>`:''}
+  ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
+    <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
+  ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+  ${ejs.map(f=>ejercicio(bl,dia,f)).join('')}
+  ${extras.length?`<div class="extra-sep">
+    <b>${tr("Si te sobran minutos")}</b>
+    <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.
+       No pasa nada si lo dejas: no cuenta como sesión a medias.</p></div>
+  ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
+  <div class="card"><div class="lbl">${tr("Observaciones")}</div>
+    <textarea id="obs" oninput="guardaObs('${esc(bl)}','${esc(dia)}',this.value)"
+      placeholder="${tr("Cómo te has sentido, molestias, lo que quieras contarme")}">${esc(obs?obs.obs||'':'')}</textarea>
+    <p class="sm" style="margin-top:8px">${tr("Puedes contarme una molestia aunque no te haya impedido entrenar.")}</p>
+    ${(function(){
+      const vid = idVal(bl,dia), n = (LOG[vid]||{}).val || 0;
+      return `<div class="valora"><div class="lbl">${tr("¿Qué tal ha ido la sesión?")}</div>
+        <p class="sm" style="margin-top:5px">${tr("Del 1 al 5. Me sirve para saber qué sesiones te funcionan.")}</p>
+        <div class="estrellas">${[1,2,3,4,5].map(i=>
+          `<button id="est_${vid}_${i}" class="${i<=n?'on':''}" onclick="valora('${esc(bl)}','${esc(dia)}',${i})"
+             aria-label="Valorar con ${i} de 5">★</button>`).join('')}</div></div>`;
+    })()}
+    <div class="stack" style="margin-top:14px">
+      <button class="btn pri big" onclick="enviar()">${tr("Guardar y enviar")}</button>
+      ${omitida?'':`<button class="btn" onclick="omitir('${esc(bl)}','${esc(dia)}')">${tr("Marcar como omitida")}</button>`}
+    </div>
+  </div>
+  ${bloqueExtra(bl, dia)}`;
+}
+
+function ejercicio(bl,dia,f){
+  const nombre = f['EJERCICIO / ELEMENTO'] || '';
+  const series = parseInt(f.SERIES)||0;
+  const ficha = fichaEj(nombre);
+  const vid = ficha ? idYoutube(ficha['VÍDEO']) : null;
+  const cues = f.CUES || (ficha ? ficha.CUES : '') || '';
+  const extra = [f.KM?'KM '+f.KM:'', f['MAIN SET']||'', f['PACE / RPE']?'Ritmo '+f['PACE / RPE']:'', f.FUEL?'Fuel: '+f.FUEL:'']
+    .filter(Boolean).join(' · ');
+  const ds = [series?series+' × '+(f['REPS / DOSIS']||''):(f['REPS / DOSIS']||''),
+    f['RIR / RPE']&&f['RIR / RPE']!=='—'?(/^\s*rpe/i.test(f['RIR / RPE'])?f['RIR / RPE']:'RIR '+f['RIR / RPE']):'',
+    f.TEMPO&&f.TEMPO!=='—'?'Tempo '+f.TEMPO:'', f.DESCANSO?tr('Descanso')+' '+f.DESCANSO:''].filter(Boolean).join(' · ');
+  const eid = slug(nombre);
+  recordarNombre(idNota(bl,dia,nombre), nombre);
+
+  const campos = camposDe(f);
+  let registro = '';
+  if(campos.length && !saltado(bl,dia,nombre)){
+    const rid = idReg(bl,dia,nombre);
+    recordarNombre(rid, nombre);
+    const v = LOG[rid] || {}, d = v.d || {}, cs = campos.join('-');
+    registro = `<div class="reg ${v.ok?'ok':''}" id="reg_${rid}">
+      ${campos.map(k=>`<div class="c"><label for="g_${rid}_${k}">${tr(CAMPOS[k].et)}</label>
+        <input id="g_${rid}_${k}" inputmode="${CAMPOS[k].modo}" placeholder="${tr(CAMPOS[k].ph)}"
+          value="${esc(d[k]||'')}" oninput="anotaReg('${rid}','${cs}')"
+          aria-label="${tr(CAMPOS[k].et)} · ${esc(nombre)}"></div>`).join('')}
+      ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
+        ? `<div class="ritmo" id="ritmo_${rid}">${esc(ritmoDe(d).replace('Ritmo', tr('Ritmo')))}</div>` : ''}
+      <button id="rb_${rid}" onclick="confirmarReg('${rid}','${cs}')">${tr(v.ok?'Hecha':'Anotar')}</button>
+    </div>`;
+  }
+
+  let sets = '';
+  if(saltado(bl,dia,nombre)){ sets = ''; registro = ''; }
+  else if(series>0){
+    sets = `<div class="sets">${Array.from({length:series},(_,i)=>{
+      const id = idSerie(bl,dia,nombre,i);
+      recordarNombre(id, nombre);
+      const v = LOG[id] || {};
+      return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
+        <span class="i">${i+1}</span>
+        <input inputmode="numeric" placeholder="reps" value="${esc(v.r||'')}" id="r_${id}"
+          oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nombre)}">
+        <input inputmode="decimal" placeholder="kg" value="${esc(v.c||'')}" id="c_${id}"
+          oninput="anota('${id}')" aria-label="Carga serie ${i+1}">
+        <input inputmode="numeric" placeholder="RIR" value="${esc(v.rir||'')}" id="i_${id}"
+          oninput="anota('${id}')" aria-label="RIR serie ${i+1}">
+        <button id="b_${id}" onclick="confirmar('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
+        <button class="x" onclick="vaciar('${id}')" aria-label="${tr('Vaciar')} ${tr('serie')} ${i+1}" title="${tr('Vaciar')}">✕</button>
+      </div>`;}).join('')}</div>`;
+  }
+
+  return `<div class="ej">
+    <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(ds)}</div>`:''}
+      ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
+    ${lineaUltima(series>0 ? ultimaVez(bl,dia,nombre) : (campos.length ? ultimaVezReg(bl,dia,nombre) : null))}
+    ${cues?`<div class="cue">${esc(cues)}</div>`:''}
+    ${(function(){
+      const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
+      const ab = S.nota===idn || !!txt;
+      return `<div class="notaej">
+        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tr("¿Algo que contarme de este ejercicio?")}</button>`}
+        ${bloqueVideo(bl,dia,nombre,f)}${bloqueFoto(bl,dia,nombre,f)}
+        ${ab?`<button class="abrir con" onclick="cerrarNota()">💬 ${tr("Tu nota para Salva")}</button>
+          <textarea id="n_${idn}" oninput="guardaNota('${idn}',this.value)"
+            placeholder="${tr("Dudas, sensaciones, si te ha gustado o no, molestias, la máquina estaba ocupada…")}">${esc(txt)}</textarea>
+          <p class="pista">${tr("Se envía junto con la sesión. Salva lo ve con el nombre del ejercicio.")}</p>`:''}
+      </div>`;
+    })()}
+    ${vid ? (S.video===eid
+      ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${esc(vid)}?rel=0&modestbranding=1"
+           title="${esc(nombre)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+         <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
+      : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
+      : (['fuerza','hibrido'].indexOf(norm(f.TIPO))>-1
+        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
+        : '')}
+    ${sets}${registro}
+    ${(function(){
+      if(!(series>0 || campos.length)) return '';
+      const sal = saltado(bl,dia,nombre);
+      return sal
+        ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
+             <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
+        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("No he hecho este ejercicio")}</button></div>`;
+    })()}</div>`;
+}
+function verVideo(id){ S.video = id; pinta(); }
+
+/* Marcar un ejercicio como no hecho. Va a la hoja como "omitida" con el
+   nombre del ejercicio, asi Salvador ve exactamente cual se salto. */
+function salta(bl, dia, ej){
+  LOG[idSalto(bl,dia,ej)] = {salto:true, ok:true, ts:new Date().toISOString()};
+  LS.set('log', LOG); toast(tr("Anotado: este no lo has hecho.")); pinta();
+}
+function quitaSalto(bl, dia, ej){
+  const id = idSalto(bl,dia,ej), v = LOG[id] || {};
+  if(v.sent) LOG[id] = Object.assign({}, v, {ok:false, borrada:true, corregido:true});
+  else delete LOG[id];
+  LS.set('log', LOG); pinta();
+}
+
+/* v3.18: mientras Salvador no tenga grabado su vídeo del ejercicio, el
+   boton lleva a una busqueda en YouTube con el nombre del ejercicio ya
+   escrito. Asi nadie tiene que copiar el nombre y buscarlo a mano.
+   En cuanto haya vídeo propio en la pestaña EJERCICIOS, manda el suyo. */
+function buscarYoutube(nombre){
+  const limpio = String(nombre||'').replace(/\([^)]*\)/g,' ')   // quita "(o prensa)"
+                                   .replace(/[\/→>|]+/g,' ')
+                                   .replace(/\s+/g,' ').trim();
+  return 'https://www.youtube.com/results?search_query=' +
+         encodeURIComponent(limpio + ' ' + tr('técnica'));
+}
+
+/* ---------- vídeos de técnica ----------
+   El botón solo sale si el puente del cliente ya sabe recibirlos (S.d.VIDEO).
+   Se manda uno por ejercicio y sesión: el nuevo sustituye al anterior. */
+/* v3.20: la foto del reloj solo tiene sentido en una carrera de verdad:
+   una tirada, un rodaje, unos intervalos. No en el core, la movilidad o el
+   enfriamiento que van dentro de una sesion de running, y no en los
+   hibridos tipo HYROX: de los 400 m entre estacion y estacion el reloj no
+   dice nada que sirva. En hibrido solo pasa la fila que es en si una
+   carrera (un "run-walk largo"), no las rondas ni el formato. */
+const CARRERA_NO = /core|diafragma|plancha|movilidad|respiraci|estiramiento|tecnica|fuerza|meta|foco|enfriamiento|calentamiento/;
+const CARRERA_SI = /\b(run|carrera|rodaje|trote|maraton|tirada|correr)/;
+const esCarrera = f => {
+  if(!f) return false;
+  const n = norm(f['EJERCICIO / ELEMENTO']);
+  if(CARRERA_NO.test(n)) return false;
+  if(!String(f['REPS / DOSIS'] || f.KM || f['MAIN SET'] || '').trim()) return false;   // fila informativa
+  const t = norm(f.TIPO);
+  if(t === 'running') return true;
+  if(t === 'hibrido') return CARRERA_SI.test(n);
+  return false;
+};
+
+/* Una foto del reloj al terminar: es la forma mas rapida de que quede el
+   dato real (ritmo, distancia, tiempo) sin copiarlo a mano. */
+function bloqueFoto(bl, dia, nombre, f){
+  if(!S.d || !S.d.VIDEO) return '';
+  if(!esCarrera(f)) return '';
+  const id = idFoto(bl, dia, nombre);
+  const v = VID[id] || {};
+  const serv = (S.d.MIS_VIDEOS||[]).find(x=>String(x.ID)===id) || {};
+  const hecha = v.estado === 'enviado' || !!serv.ID;
+  return `<input type="file" accept="image/*" id="vf_${id}" style="display:none"
+      onchange="subirVideo('${id}','${esc(bl)}','${esc(dia)}',this)">
+    ${v.estado === 'enviando'
+      ? `<p class="pista">⏳ ${tr("Enviando la foto…")}</p>`
+      : `<button class="abrir" onclick="document.getElementById('vf_${id}').click()">📸 ${
+          hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela")}</button>`}
+    ${hecha && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Foto enviada")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
+    ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}`;
+}
+
+function bloqueVideo(bl, dia, nombre, f){
+  if(!S.d || !S.d.VIDEO) return '';
+  const id = idVideo(bl, dia, nombre);
+  const v = VID[id] || {};
+  const serv = (S.d.MIS_VIDEOS||[]).find(x=>String(x.ID)===id) || {};
+  const enviado = v.estado === 'enviado' || !!serv.ID;
+  const correr = norm(f.TIPO) === 'running';
+  const aviso = tr("Máximo 20 segundos: los vídeos largos no llegan a enviarse. Puedes grabarlo ahora o subir uno que ya tengas. No hace falta la serie entera, solo un par de repeticiones lo mejor que puedas. Si puedes, recorta el vídeo hasta justo antes de empezar: así entran más repeticiones y lo veo mejor.")
+    + (correr ? ' ' + tr("En carrera, de lado o de frente se ve mucho mejor que de espaldas.") : '');
+  return `<div class="video">
+    <input type="file" accept="video/*" id="vf_${id}" style="display:none"
+      onchange="subirVideo('${id}','${esc(bl)}','${esc(dia)}',this)">
+    ${v.estado === 'enviando'
+      ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
+      : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Clica aquí y grábate")}</button>
+         ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
+           <div class="stack" style="margin:0 0 10px;gap:8px">
+             <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
+             <button class="btn sm2" onclick="avisoVideo('${id}')">${tr("Ahora no")}</button></div>` : ''}`}
+    ${enviado && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Vídeo enviado")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
+    ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}
+  </div>`;
+}
+
+function avisoVideo(id){ S.videoAviso = (S.videoAviso === id) ? null : id; pinta(); }
+
+async function subirVideo(id, bl, dia, input){
+  S.videoAviso = null;
+  const f = input.files && input.files[0];
+  input.value = '';
+  if(!f) return;
+  const esFoto = id.endsWith('~foto');
+  if(f.size > (esFoto ? 12 : 45) * 1024 * 1024){
+    toast(esFoto ? tr("Esa foto pesa demasiado.") : tr("Ese vídeo pesa demasiado. Graba uno más corto.")); return; }
+  if(!esFoto){
+    const dur = await duracion(f);
+    if(dur && dur > 30){ toast(tr("Ese vídeo es muy largo. Recórtalo a 20 segundos o menos.")); return; }
+  }
+  const nombre = nombreDe(id.replace(/~(vid|foto)$/,'')) || (id.split('~')[3]||'').replace(/-/g,' ');
+  VID[id] = {estado:'enviando'}; LS.set('videos', VID); pinta();
+  try{
+    const datos = await new Promise((ok, fail)=>{
+      const r = new FileReader();
+      r.onload = ()=>ok(String(r.result).split(',')[1]);
+      r.onerror = fail;
+      r.readAsDataURL(f);
+    });
+    const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
+    const r = await fetch(API, {method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente:CID, token:KEY, video:{
+        id: id, fecha: hoyISO(), semana: (S.semana&&S.semana.SEMANA)||'', dia: dia,
+        sesion: meta['SESIÓN']||'', ejercicio: nombre, nota: textoNota(idNota(bl,dia,nombre))||'',
+        mime: f.type || (esFoto?'image/jpeg':'video/mp4'),
+        nombre: f.name || (esFoto?'foto.jpg':'video.mp4'), datos: datos}})});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    VID[id] = {estado:'enviado', fecha: hoyISO()};
+  }catch(e){
+    VID[id] = {estado:'error'};
+    toast(esFoto ? tr("No se ha podido enviar la foto. Inténtalo otra vez con cobertura.")
+                 : tr("No se ha podido enviar el vídeo. Inténtalo otra vez con cobertura."));
+  }
+  LS.set('videos', VID); pinta();
+}
+
+function duracion(f){
+  // Si el movil tarda o el archivo es raro, no se espera para siempre: a los 4 s se sigue.
+  return new Promise(ok=>{
+    let hecho = false;
+    const fin = d => { if(!hecho){ hecho = true; ok(d); } };
+    setTimeout(()=>fin(0), 4000);
+    try{
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.onloadedmetadata = ()=>{ const d = v.duration||0; URL.revokeObjectURL(v.src); fin(d); };
+      v.onerror = ()=>fin(0);
+      v.src = URL.createObjectURL(f);
+    }catch(e){ fin(0); }
+  });
+}
+
+/* --- guardado automático: NO redibuja la pantalla --- */
+function anota(id){
+  const r=document.getElementById('r_'+id), c=document.getElementById('c_'+id), i=document.getElementById('i_'+id);
+  const prev = LOG[id] || {};
+  LOG[id] = Object.assign({}, prev, {r:r.value.trim(), c:c.value.trim(), rir:i.value.trim()});
+  if(prev.sent) LOG[id].corregido = true;      // ya estaba en la hoja: al enviar se actualizará
+  LS.set('log', LOG);
+  const fila = document.getElementById('fila_'+id);
+  if(fila && LOG[id].corregido) fila.classList.add('corr');
+}
+
+/* --- confirmar / desmarcar una serie, sin tocar el resto --- */
+function confirmar(id){
+  const r=document.getElementById('r_'+id);
+  const v = LOG[id] || {};
+  if(v.ok){                                   // desmarcar
+    LOG[id] = Object.assign({}, v, {ok:false});
+  } else {
+    if(!r.value.trim()){ toast(tr('Escribe al menos las repeticiones que hiciste.')); r.focus(); return; }
+    anota(id);
+    LOG[id].ok = true;
+    LOG[id].ts = new Date().toISOString();
+  }
+  LS.set('log', LOG);
+  const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
+  if(fila) fila.classList.toggle('ok', !!LOG[id].ok);
+  if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+}
+
+function vaciar(id){
+  const v = LOG[id] || {};
+  ['r_','c_','i_'].forEach(p=>{ const el=document.getElementById(p+id); if(el) el.value=''; });
+  if(v.sent){
+    // ya está en la hoja: se envía vacía para que allí quede corregida
+    LOG[id] = {r:'', c:'', rir:'', ok:false, sent:true, corregido:true, borrada:true};
+    toast(tr('Se corregirá en la hoja al enviar.'));
+  } else {
+    delete LOG[id];
+  }
+  LS.set('log', LOG);
+  const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
+  if(fila){ fila.classList.remove('ok'); if(LOG[id]) fila.classList.add('corr'); }
+  if(btn) btn.textContent='Anotar';
+}
+
+function abrirNota(id){ S.nota=id; pinta();
+  setTimeout(()=>{ const el=document.getElementById('n_'+id); if(el) el.focus(); },50); }
+function cerrarNota(){ S.nota=null; pinta(); }
+function guardaNota(id,txt){
+  const prev = LOG[id]||{};
+  if(!txt.trim() && !prev.sent){ delete LOG[id]; LS.set('log',LOG); return; }
+  LOG[id] = Object.assign({}, prev, {nota:txt, ok:!!txt.trim()});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+}
+
+function anotaReg(id, cs){
+  const prev = LOG[id] || {}, d = {};
+  cs.split('-').forEach(k=>{ const el=document.getElementById('g_'+id+'_'+k); if(el) d[k]=el.value.trim(); });
+  LOG[id] = Object.assign({}, prev, {d:d});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+  const r = document.getElementById('ritmo_'+id);
+  if(r) r.textContent = ritmoDe(d).replace('Ritmo', tr('Ritmo'));
+}
+function confirmarReg(id, cs){
+  const v = LOG[id] || {};
+  if(v.ok){
+    LOG[id] = Object.assign({}, v, {ok:false});
+  } else {
+    anotaReg(id, cs);
+    const d = LOG[id].d || {};
+    if(!Object.keys(d).some(k=>d[k])){ toast(tr('Anota al menos un dato antes de confirmar.')); return; }
+    LOG[id].ok = true;
+    LOG[id].ts = new Date().toISOString();
+  }
+  LS.set('log', LOG);
+  const caja=document.getElementById('reg_'+id), btn=document.getElementById('rb_'+id);
+  if(caja) caja.classList.toggle('ok', !!LOG[id].ok);
+  if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+}
+function valora(bl,dia,n){
+  const id = idVal(bl,dia), prev = LOG[id] || {};
+  const nuevo = (prev.val===n) ? 0 : n;      // tocar la misma estrella la quita
+  LOG[id] = Object.assign({}, prev, {val:nuevo, ok:nuevo>0});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+  for(let i=1;i<=5;i++){
+    const b=document.getElementById('est_'+id+'_'+i);
+    if(b) b.classList.toggle('on', i<=nuevo);
+  }
+}
+function guardaObs(bl,dia,txt){
+  const id = idObs(bl,dia);
+  const prev = LOG[id]||{};
+  LOG[id] = Object.assign({}, prev, {obs:txt, ok:!!txt.trim()});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+}
+function omitir(bl,dia){
+  LOG[idOmit(bl,dia)] = {ok:true, ts:new Date().toISOString()};
+  LS.set('log', LOG); pinta();
+  toast(tr('Marcada como omitida. Es distinto de no haberla anotado.'));
+}
+function desomitir(bl,dia){
+  const id = idOmit(bl,dia);
+  if(LOG[id] && LOG[id].sent) LOG[id] = {ok:false, sent:true, corregido:true, borrada:true};
+  else delete LOG[id];
+  LS.set('log', LOG); pinta();
+}
+/* ================= ENVÍO ================= */
+async function enviar(){
+  if(S.enviando) return;
+  const reg = [], hoy = new Date().toISOString().slice(0,10);
+
+  Object.keys(LOG).forEach(id=>{
+    const v = LOG[id]; if(!v) return;
+    // solo se manda lo confirmado, lo corregido o lo borrado
+    if(id.endsWith('~fecha')) return;      // marca interna: no es un registro
+    if(!v.ok && !v.corregido) return;
+    if(v.sent && !v.corregido) return;
+
+    const p = id.split('~');
+    const base = {id:id, fecha:(v.ts||'').slice(0,10)||hoy,
+                  semana:(p[0]||'').replace(/^s/,''), bloque:p[1]||'', dia:p[2]||'',
+                  sesion:'', ejercicio:'', serie:'', reps:'', carga:'', rir:'', notas:'', estado:'',
+                  km:'', tiempo:'', ritmo:'', rpe:'', piernas:'', valoracion:''};
+
+    if(id.endsWith('~omitida')){ reg.push(Object.assign(base,{estado:v.borrada?'':'omitida'})); return; }
+    if(id.endsWith('~extra')){
+      const e = v.extra || {};
+      reg.push(Object.assign(base,{ejercicio:'EXTRA · ' + (e.titulo||''),
+        tiempo: e.min ? e.min + ' min' : '', rpe: e.int ? String(e.int) : '',
+        notas: e.nota || '', estado: v.borrada ? '' : 'realizada'}));
+      return;
+    }
+    if(id.endsWith('~salto')){
+      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', estado:v.borrada?'':'omitida'}));
+      return;
+    }
+    if(id.endsWith('~obs')){ reg.push(Object.assign(base,{ejercicio:'OBSERVACIONES', notas:v.obs||''})); return; }
+    if(id.endsWith('~nota')){
+      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', notas:v.nota||'', estado:'nota'}));
+      return;
+    }
+    if(id.endsWith('~valoracion')){
+      reg.push(Object.assign(base,{ejercicio:'VALORACIÓN DEL DÍA',
+        valoracion: v.val ? String(v.val) : '', estado: v.val ? 'valorada' : ''}));
+      return;
+    }
+    if(id.endsWith('~reg')){
+      const d = v.d || {};
+      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'',
+        km:d.km||'', tiempo:d.tiempo||'', ritmo:ritmoDe(d).replace('Ritmo ',''),
+        rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||'',
+        estado: v.borrada ? '' : (v.ok?'realizada':'')}));
+      return;
+    }
+
+    const serie = (p[4]||'').replace('s','');
+    reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', serie:serie, reps:v.r||'', carga:v.c||'',
+      rir:v.rir||'', estado: v.borrada ? '' : (v.ok?'realizada':'')}));
+  });
+
+  // La semana que se está respondiendo es la que pide el aviso; si no hay
+  // aviso pendiente, es la actual. Tiene que ser la misma en las tres partes:
+  // el identificador, el dato que va a la hoja y la marca de "ya respondida".
+  const semResp = (faltaCheckin() || S.semana || {}).SEMANA || '0';
+  const chk = Object.keys(CHK).filter(k=>CHK[k] && (String(CHK[k].v||'').trim() || CHK[k].n)).map(k=>({
+    id: idChk(semResp, k),
+    fecha: hoy, semana: semResp, 'npregunta': k,
+    categoria: CHK[k].cat||'',
+    respuesta: (CHK[k].n ? CHK[k].n + '/5' + (String(CHK[k].v||'').trim() ? ' · ' : '') : '') + (CHK[k].v||'')
+  }));
+
+  if(!reg.length && !chk.length){ toast(tr('No hay nada nuevo que enviar.')); return; }
+
+  S.enviando = true; toast(tr('Enviando…'));
+  try{
+    const r = await fetch(API, {method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente:CID, token:KEY, registro:reg, checkin:chk})});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+
+    // se conserva todo, marcado como enviado: así se puede corregir después
+    Object.keys(LOG).forEach(id=>{
+      const v = LOG[id]; if(!v) return;
+      if(v.borrada){ delete LOG[id]; return; }
+      if(v.ok || v.corregido){ v.sent = true; delete v.corregido; }
+    });
+    LS.set('log', LOG);
+
+    if(chk.length && !ENVIADO.includes(String(semResp))){
+      ENVIADO.push(String(semResp)); LS.set('semanas_enviadas', ENVIADO);
+    }
+    CHK = {}; LS.set('checkin', CHK);   // el formulario queda limpio para la semana siguiente
+    S.enviando=false; S.vista='hoy'; pinta();
+    const c = d.corregidas||0;
+    toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}` : tr('Enviado. Salvador ya lo tiene.'));
+  }catch(e){
+    S.enviando=false;
+    toast(tr('No se ha podido enviar. Sigue guardado en tu móvil; inténtalo luego.'));
+  }
+}
+
+/* ================= PROGRESO ================= */
+function vProgreso(){
+  const bl = bloqueDe(S.semana);
+  const dias = sesionesContables(bl);
+  const hechas = dias.filter(d=>['hecha','parcial'].includes(estadoSesion(bl,d['DÍA']))).length;
+  const pct = dias.length ? Math.round(hechas/dias.length*100) : 0;
+  const totalSem = (S.d.SEMANAS||[]).length;
+  const semN = parseInt(String((S.semana||{}).SEMANA||'0').replace(/\D/g,'')) || 0;
+  const pctPrg = totalSem ? Math.round(semN/totalSem*100) : 0;
+
+  /* v3.14: el historial sale de todas las semanas, no solo de esta.
+     Ahora se puede, porque cada semana tiene su propio identificador. */
+  const porEj = {}, sesiones = {};
+  let series = 0;
+  Object.keys(LOG).forEach(k=>{
+    const v = LOG[k]; if(!v || !v.ok || v.borrada) return;
+    const p = k.split('~'); if(p.length !== 5 || !/^s\d+$/.test(p[4])) return;
+    if(!v.r && !v.c) return;
+    series++;
+    sesiones[p[0]+'~'+p[1]+'~'+p[2]] = true;
+    const it = {sem:parseInt(p[0].replace(/^s/,''))||0, c:parseFloat(String(v.c||'').replace(',','.'))||0,
+                carga:v.c||'', reps:v.r||''};
+    const e = porEj[p[3]] = porEj[p[3]] || {n:0, prim:null, mejor:null};
+    e.n++;
+    if(!e.prim || it.sem < e.prim.sem) e.prim = it;
+    if(!e.mejor || it.c > e.mejor.c || (it.c === e.mejor.c && (parseFloat(it.reps)||0) > (parseFloat(e.mejor.reps)||0))) e.mejor = it;
+  });
+  // El nombre bonito lo tiene la hoja; el identificador va sin acentos.
+  const nombres = {};
+  (S.d.SESIONES||[]).forEach(f=>{ const n=f['EJERCICIO / ELEMENTO']; if(n) nombres[slug(n)] = n; });
+  const nSes = Object.keys(sesiones).length;
+  const vids = (S.d.MIS_VIDEOS||[]).length;
+  const hayAlgo = series > 0 || nSes > 0;
+
+  const cabecera = `
+  <div class="card"><div class="lbl">${tr("Tu objetivo")}</div>
+    <p style="margin-top:6px;font-size:15.5px;line-height:1.45">${esc(campo('objetivo')||'')}</p></div>
+  ${totalSem?`<div class="card"><div class="row sp"><h3>${tr("Tu programa")}</h3>
+    <b class="mono">${tr('Semana')} ${semN} / ${totalSem}</b></div>
+    <div class="bar"><i style="width:${pctPrg}%"></i></div>
+    <p class="sm">${esc(sinRepetir((S.semana||{})['FASE / TÍTULO']||''))}</p></div>`:''}
+  <div class="card"><div class="row sp"><h3>${tr("Esta semana")}</h3><b class="mono">${hechas} / ${dias.length}</b></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <p class="sm">${tr("Sesiones registradas frente a las previstas. Lo que no has anotado cuenta como sin registrar, no como fallada.")}</p></div>`;
+
+  if(!hayAlgo) return cabecera + `
+  <div class="card"><h3>${tr("Aquí vas a ver tu progreso")}</h3>
+    <p class="mut" style="margin-top:8px">${tr("Ahora está vacío, y es normal: esto se llena solo, con lo que vas anotando mientras entrenas.")}</p>
+    <p class="mut" style="margin-top:8px">${tr("Anota las series según las haces, aunque sea rápido y a ojo. Con dos semanas ya veo por dónde vas y puedo ajustarte el plan.")}</p>
+    <p class="mut" style="margin-top:8px"><b>${tr("No busques el número perfecto. Busca no fallar.")}</b></p>
+    <button class="btn pri big" style="margin-top:14px" onclick="ir('hoy')">${tr("Ir a lo de hoy")}</button></div>
+  <div class="card"><p class="sm">${tr("Sin comparaciones con otras personas y sin premios por entrenar más de lo prescrito.")}</p></div>`;
+
+  const ejs = Object.keys(porEj).sort((a,b)=>porEj[b].n-porEj[a].n);
+  return cabecera + `
+  <div class="card"><h3 style="margin-bottom:10px">${tr("Lo que llevas")}</h3>
+    <div class="row sp"><span class="sm">${tr("Sesiones anotadas")}</span><b class="mono">${nSes}</b></div>
+    <div class="row sp" style="margin-top:6px"><span class="sm">${tr("Series anotadas")}</span><b class="mono">${series}</b></div>
+    ${vids?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Vídeos enviados")}</span><b class="mono">${vids}</b></div>`:''}</div>
+  ${ejs.length?`<div class="card"><h3 style="margin-bottom:4px">${tr("Tus cargas")}</h3>
+    <p class="sm" style="margin-bottom:8px">${tr("De la primera vez que lo anotaste a tu mejor serie.")}</p>
+    ${ejs.map(e=>{
+      const x = porEj[e], sube = x.mejor.c - (x.prim.c||0);
+      const ini2 = x.prim.carga ? x.prim.carga+' kg × '+x.prim.reps : x.prim.reps+' '+tr('reps');
+      const top = x.mejor.carga ? x.mejor.carga+' kg × '+x.mejor.reps : x.mejor.reps+' '+tr('reps');
+      const mov = x.prim.sem !== x.mejor.sem && ini2 !== top;
+      return `<div class="q"><div class="t"${nombres[e]?'':' style="text-transform:capitalize"'}>${esc(nombres[e] || e.replace(/-/g,' '))}</div>
+        <p class="sm mono">${mov?esc(ini2)+' → ':''}<b>${esc(top)}</b>${sube>0&&mov?' · +'+(Math.round(sube*10)/10)+' kg':''}</p>
+        <p class="sm">${x.n} ${x.n>1?tr('series anotadas'):tr('serie anotada')}</p></div>`;
+    }).join('')}</div>`:''}
+  <div class="card"><p class="sm">${tr("Sin comparaciones con otras personas y sin premios por entrenar más de lo prescrito.")}</p></div>`;
+}
+
+/* ================= SEGUIMIENTO ================= */
+function vSeg(){
+  const qs2 = S.d.SEGUIMIENTO||[];
+  const ant = faltaCheckin();
+  const sem = ant || S.semana;
+  const foco = sem ? (sem['NOTA DE LA SEMANA']||'') : '';
+  const pregFoco = sem ? (sem['PREGUNTA DE LA SEMANA']||'') : '';
+  return `
+  <div class="card"><h2 style="font-size:19px">${tr("Seguimiento semanal")}</h2>
+    <p class="mut" style="margin-top:8px">${ant?`${tr("Estás respondiendo la")} <b>${tr('semana')} ${esc(ant.SEMANA)}</b>.`:tr("Es lo que me deja ajustar tu plan.")} ${tr("Escribe con libertad.")}</p></div>
+  ${foco?`<div class="card"><div class="lbl">${tr("Foco de esa semana")}</div><p class="mut" style="margin-top:6px">${esc(foco)}</p></div>`:''}
+  <div class="card">
+    ${qs2.map((q,i)=>{
+      const clave = 'p'+(q['Nº']||i+1);
+      const txt = norm(q.PREGUNTA).includes('cambia cada semana') && (pregFoco||foco) ? (pregFoco||foco) : q.PREGUNTA;
+      const cat = q['CATEGORÍA']||'';
+      const n = (CHK[clave]||{}).n || 0;
+      return `<div class="q"><div class="t"><span class="tag">${esc(cat)}</span></div>
+        <div class="t">${esc(txt)}</div>
+        ${esEscala(txt)?`<div class="escala">${[1,2,3,4,5].map(x=>
+          `<button class="${x===n?'on':''}" onclick="notaQ('${esc(clave)}','${esc(cat)}',${x})"
+             aria-label="${x} de 5">${x}</button>`).join('')}</div>
+          <p class="sm" style="margin:6px 0 2px">${tr("Y cuéntame lo que quieras, si te apetece.")}</p>`:''}
+        <textarea id="q_${esc(clave)}" oninput="respQ('${esc(clave)}','${esc(cat)}',this.value)"
+          placeholder="${tr("Tu respuesta")}">${esc((CHK[clave]||{}).v||'')}</textarea></div>`;
+    }).join('')}
+    <button class="btn pri big" style="margin-top:14px" onclick="enviar()">${tr("Enviar a Salvador")}</button>
+    <p class="sm" style="margin-top:10px">${tr("Se guarda mientras escribes. Si pierdes la conexión, no se borra.")}</p>
+  </div>`;
+}
+function respQ(clave,cat,v){ CHK[clave]=Object.assign({},CHK[clave],{v:v,cat:cat}); LS.set('checkin',CHK); }
+/* v3.14: las preguntas que piden un numero del 1 al 5 se contestan con un
+   boton. Escribir "4" en un cuadro de texto era lento y luego no se podia
+   comparar una semana con otra. El cuadro de texto se queda igual, para
+   contar lo que quiera. */
+const esEscala = t => /\b1\s*(?:[-–—]|\s*al\s*)\s*5\b/i.test(String(t||''));
+function notaQ(clave,cat,n){
+  const a = CHK[clave] || {};
+  CHK[clave] = Object.assign({}, a, {cat:cat, n: a.n===n ? 0 : n, v: a.v||''});
+  LS.set('checkin',CHK); pinta();
+}
+
+/* ================= GUÍAS ================= */
+function vGuias(){
+  const gs = S.d['GUÍAS']||[], grupos = {};
+  gs.forEach(g=>{ (grupos[g.CLAVE] = grupos[g.CLAVE] || {t:g['TÍTULO'], filas:[]}).filas.push(g); });
+  const textos = (S.d.TEXTOS||[]).filter(t=>!norm(t.CLAVE).startsWith('intro'));
+  return `
+  <div class="card flat"><button class="btn sm2" onclick="ir('plan')">${tr("← Mi plan")}</button></div>
+  ${Object.keys(grupos).map(k=>{
+    const g = grupos[k];
+    return `<div class="card"><h3 style="margin-bottom:12px">${esc(g.t)}</h3>
+      ${g.filas.map(f=>`<div class="guia"><div class="p">${esc(f.PUNTO)}</div>
+        <div class="c">${esc(f.CONTENIDO)}</div></div>`).join('')}</div>`;
+  }).join('')}
+  ${textos.map(t=>`<div class="card"><h3>${esc(t['TÍTULO'])}</h3>
+    <p class="mut" style="margin-top:8px">${esc(t.CONTENIDO)}</p></div>`).join('')}`;
+}
+
+cargar();
+
+/* Sin cobertura la app tiene que abrir igual: el service worker guarda
+   la pagina. Va a la red primero, asi un despliegue nuevo se ve enseguida. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
