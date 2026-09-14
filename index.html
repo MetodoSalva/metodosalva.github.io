@@ -232,7 +232,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v4.6';
+const VERSION = 'v4.7';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1466,13 +1466,15 @@ function bloqueFoto(bl, dia, nombre, f){
 
 function bloqueVideo(bl, dia, nombre, f){
   if(!S.d || !S.d.VIDEO) return '';
+  /* v4.7: en una sesion de carrera no se pide video. Nadie se graba a si mismo
+     en mitad de una tirada de 22 km, y ahi lo util es la foto del reloj, que va
+     aparte. El video es para la tecnica de los ejercicios. */
+  if(norm(f.TIPO) === 'running') return '';
   const id = idVideo(bl, dia, nombre);
   const v = VID[id] || {};
   const serv = (S.d.MIS_VIDEOS||[]).find(x=>String(x.ID)===id) || {};
   const enviado = v.estado === 'enviado' || !!serv.ID;
-  const correr = norm(f.TIPO) === 'running';
-  const aviso = tr("Máximo 20 segundos: los vídeos largos no llegan a enviarse. Puedes grabarlo ahora o subir uno que ya tengas. No hace falta la serie entera, solo un par de repeticiones lo mejor que puedas. Si puedes, recorta el vídeo hasta justo antes de empezar: así entran más repeticiones y lo veo mejor.")
-    + (correr ? ' ' + tr("En carrera, de lado o de frente se ve mucho mejor que de espaldas.") : '');
+  const aviso = tr("Máximo 20 segundos: los vídeos largos no llegan a enviarse. Puedes grabarlo ahora o subir uno que ya tengas. No hace falta la serie entera, solo un par de repeticiones lo mejor que puedas. Si puedes, recorta el vídeo hasta justo antes de empezar: así entran más repeticiones y lo veo mejor.");
   return `<div class="video">
     <input type="file" accept="video/*" id="vf_${id}" style="display:none"
       onchange="subirVideo('${id}','${esc(bl)}','${esc(dia)}',this)">

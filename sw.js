@@ -2,7 +2,7 @@
    Red primero: un despliegue nuevo se ve en cuanto hay cobertura.
    Cache de reserva: sin cobertura, la app abre igual con lo ultimo visto.
    Lo de fuera de este dominio (el puente de Google, las fuentes) no se toca. */
-const CACHE  = 'salva-v27';
+const CACHE  = 'salva-v28';
 const NUCLEO = ['./', './index.html', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
