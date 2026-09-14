@@ -232,7 +232,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v4.7';
+const VERSION = 'v4.8';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -730,8 +730,13 @@ function estadoSesion(b,d){
   if(LOG[idOmit(b,d)]) return 'omitida';
   const todas = sesionDe(b,d).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
                                         && !saltado(b,d,f['EJERCICIO / ELEMENTO']));
-  const conSeries = todas.filter(f=>f.SERIES);
-  const conReg    = todas.filter(f=>!f.SERIES && camposDe(f).length);
+  /* v4.8: si un elemento trae SERIES y ademas casillas de carrera, manda la
+     carrera. Un "5 x 250 m de SkiErg" se mide en tiempo y RPE, no en kilos:
+     las filas de reps/kg/RIR ahi no pintan nada. Antes salian las dos cosas y,
+     peor, solo contaban las series: quien rellenaba el tiempo dejaba la sesion
+     en "parcial" para siempre. */
+  const conReg    = todas.filter(f=>camposDe(f).length);
+  const conSeries = todas.filter(f=>!camposDe(f).length && f.SERIES);
   if(!conSeries.length && !conReg.length){
     // Una carrera larga puede no tener nada que anotar. Antes se quedaba
     // "sin registrar" para siempre y nunca contaba como hecha: ahora basta
@@ -1343,7 +1348,7 @@ function ejercicio(bl,dia,f){
 
   let sets = '';
   if(saltado(bl,dia,nombre)){ sets = ''; registro = ''; }
-  else if(series>0){
+  else if(series>0 && !campos.length){
     sets = `<div class="sets">${Array.from({length:series},(_,i)=>{
       const id = idSerie(bl,dia,nombre,i);
       recordarNombre(id, nombre);
@@ -1364,7 +1369,7 @@ function ejercicio(bl,dia,f){
   return `<div class="ej">
     <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(ds)}</div>`:''}
       ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
-    ${lineaUltima(series>0 ? ultimaVez(bl,dia,nombre) : (campos.length ? ultimaVezReg(bl,dia,nombre) : null))}
+    ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null))}
     ${cues?`<div class="cue">${pintaCue(cues)}</div>`:''}
     ${(series || campos.length) ? (function(){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
@@ -1383,9 +1388,13 @@ function ejercicio(bl,dia,f){
            title="${esc(nombre)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
          <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
       : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
-      : (['fuerza','hibrido'].indexOf(norm(f.TIPO))>-1
+      : ((series>0 || campos.length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
         ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
         : '')}
+    ${/* v4.8: antes esto se decidia por el TIPO, y solo valia "fuerza" e
+         "hibrido". Pero un face pull marcado como "extra" sigue siendo un
+         ejercicio, y a Sergio se le quedaban nueve sin el buscador. Lo que
+         decide no es la etiqueta: es si hay SERIES que hacer. */''}
     ${sets}${registro}
     ${(function(){
       if(!(series>0 || campos.length)) return '';
