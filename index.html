@@ -232,7 +232,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v4.8';
+const VERSION = 'v4.9';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1317,7 +1317,13 @@ function ejercicio(bl,dia,f){
      effort allows" no lo lee nadie. */
   const etiqueta = (v, et) => { const t = String(v||'').trim();
     if(!t || t==='—') return '';
-    return (esEsfuerzo(t) || t.length > 24 || !et) ? t : et+' '+t; };
+    if(!et || esEsfuerzo(t) || t.length > 24) return t;
+    // Si el valor ya empieza por la propia etiqueta, no se repite:
+    // "Descanso descanso igual" no lo escribe nadie a proposito.
+    if(norm(t).startsWith(norm(et))) return t;
+    // "RIR" solo delante de un numero. Un "fuerte" o un "pesado" no es un RIR.
+    if(norm(et)==='rir' && !/^\d/.test(t)) return t;
+    return et+' '+t; };
   const dosis = f['REPS / DOSIS']||'', main = f['MAIN SET']||'';
   const mismo = norm(main) === norm(dosis);
   const extra = [f.KM?'KM '+f.KM:'', mismo?'':main,
@@ -1325,7 +1331,7 @@ function ejercicio(bl,dia,f){
     f.FUEL?'Fuel: '+f.FUEL:''].filter(Boolean).join(' · ');
   const ds = [series?series+' × '+dosis:dosis,
     etiqueta(f['RIR / RPE'], esRitmo(f['RIR / RPE'])?tr('Ritmo'):'RIR'),
-    f.TEMPO&&f.TEMPO!=='—'?'Tempo '+f.TEMPO:'', f.DESCANSO?tr('Descanso')+' '+f.DESCANSO:''].filter(Boolean).join(' · ');
+    etiqueta(f.TEMPO, 'Tempo'), etiqueta(f.DESCANSO, tr('Descanso'))].filter(Boolean).join(' · ');
   const eid = slug(nombre);
   recordarNombre(idNota(bl,dia,nombre), nombre);
 
