@@ -232,7 +232,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.0';
+const VERSION = 'v5.1';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -528,7 +528,10 @@ const EN = {
   "Tus 3 × 1 km": "Your 3 × 1 km",
   "Revisa el dato: son los metros totales que marca la cinta al acabar, con el kilómetro de calentamiento (por ejemplo, 2150).": "Check the number: it's the total metres on the treadmill at the end, warm-up kilometre included (for example, 2150).",
   "Tu velocidad aeróbica máxima, del Test A": "Your maximal aerobic speed, from Test A",
-  "De ella salen tus velocidades: en cada sesión verás la que te toca.": "Your speeds come from it: each session shows yours."
+  "De ella salen tus velocidades: en cada sesión verás la que te toca.": "Your speeds come from it: each session shows yours.",
+  "min/km": "min/km",
+  "de": "from",
+  "a": "to"
 };
 /* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
    hay ficha, asi que se mira el enlace (&lang=en) y lo que se guardo la
@@ -662,7 +665,7 @@ function ultimaVezReg(bl, dia, nombre){
   cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
   const d = cand[0].d;
   const partes = [d.km?d.km+' km':'', d.tiempo||'', d.metros||'',
-                  vamDe(d.vam)?'VAM '+kmh(vamDe(d.vam))+' km/h':'', d.carga?d.carga+' kg':'',
+                  vamDe(d.vam)?'VAM '+paso(vamDe(d.vam))+' min/km':'', d.carga?d.carga+' kg':'',
                   d.rpe?'RPE '+d.rpe:''].filter(Boolean);
   return partes.length ? {sem:cand[0].sem, txt:partes.join(' · ')} : null;
 }
@@ -718,6 +721,10 @@ function vamDe(v){
 }
 // El 1e-9 evita que 10,05 salga 10,0 por la coma flotante
 const kmh = x => String(Math.round(x*10 + 1e-9)/10).replace('.', enIngles() ? '.' : ',');
+/* v5.1: todo lo que se prescribe va en minutos por kilometro, no en km/h.
+   Salvador lo pidio asi: es como lo leen ellas en el reloj. */
+const paso = x => { const s = Math.round(3600/x);
+                    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
 /* La ultima VAM anotada y confirmada, sea de la semana que sea */
 function miVAM(){
   let mejor = null;
@@ -734,18 +741,16 @@ function textoVAM(valor){
   if(!String(valor||'').trim()) return '';
   const x = vamDe(valor);
   if(!x) return tr('Revisa el dato: son los metros totales que marca la cinta al acabar, con el kilómetro de calentamiento (por ejemplo, 2150).');
-  const s = [0, 0.5, 1].map(a=>kmh(x*0.75 + a)).join(' · ');
-  return `${tr('Tu VAM')}: ${kmh(x)} km/h · ${tr('Tus 3 × 1 km')}: ${s} km/h`;
+  const s = [75, 79, 83].map(p=>paso(x*p/100)).join(' · ');
+  return `${tr('Tu VAM')}: ${paso(x)} ${tr('min/km')} · ${tr('Tus 3 × 1 km')}: ${s} ${tr('min/km')}`;
 }
-/* "95 % de tu VAM" pasa a "95 % de tu VAM (12,5 km/h)" en cuanto hay VAM.
-   Vale para rangos ("60-70 %") y para sumas ("75 % de tu VAM + 0,5 km/h"). */
+/* "95 % de tu VAM" pasa a "95 % de tu VAM (4:35 min/km)" en cuanto hay VAM.
+   Vale para rangos: "60-70 % de tu VAM" da "de 7:15 a 6:13 min/km". */
 function conVAM(t){
   const x = miVAM(); if(!x || !t) return t;
-  return String(t).replace(/(\d+)(?:\s*[-–]\s*(\d+))?\s*%\s*de tu VAM(?:\s*\+\s*(\d+(?:[.,]\d+)?)\s*km\/h)?/gi,
-    (m, a, b, mas) => {
-      const suma = mas ? parseFloat(mas.replace(',','.')) : 0;
-      return m + ' (' + kmh(x.v*a/100 + suma) + (b ? '-' + kmh(x.v*b/100 + suma) : '') + ' km/h)';
-    });
+  return String(t).replace(/(\d+)(?:\s*[-–]\s*(\d+))?\s*%\s*de tu VAM/gi,
+    (m, a, b) => m + ' (' + (b ? tr('de') + ' ' + paso(x.v*a/100) + ' ' + tr('a') + ' ' + paso(x.v*b/100)
+                               : paso(x.v*a/100)) + ' ' + tr('min/km') + ')');
 }
 const textoNota = id => { const v=LOG[id]; return v && v.nota ? v.nota : ''; };
 /* El identificador lleva el nombre en minúsculas y con guiones, pero a la
@@ -1779,7 +1784,7 @@ async function enviar(){
       const d = v.d || {};
       reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'',
         km:d.km||'', tiempo:d.tiempo||'',
-        ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + kmh(vamDe(d.vam)) + ' km/h' : '')
+        ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + paso(vamDe(d.vam)) + ' min/km' : '')
                      : ritmoDe(d).replace('Ritmo ',''),
         rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'',
         estado: v.borrada ? '' : (v.ok?'realizada':'')}));
@@ -1871,11 +1876,11 @@ function vProgreso(){
   const fechaVAM = vam && vam.ts ? new Date(vam.ts).toLocaleDateString(enIngles()?'en-GB':'es-ES',
                      {day:'numeric', month:'short'}) : '';
   const cabecera = `
-  ${vam?`<div class="card"><div class="row sp"><h3>${tr("Tu VAM")}</h3><b class="mono">${kmh(vam.v)} km/h</b></div>
+  ${vam?`<div class="card"><div class="row sp"><h3>${tr("Tu VAM")}</h3><b class="mono">${paso(vam.v)} ${tr('min/km')}</b></div>
     <p class="sm" style="margin-top:6px">${tr("Tu velocidad aeróbica máxima, del Test A")}${fechaVAM?' · '+esc(fechaVAM):''}.
       ${tr("De ella salen tus velocidades: en cada sesión verás la que te toca.")}</p>
     <div class="row sp" style="margin-top:8px"><span class="sm">Z2 (60-70 %)</span>
-      <b class="mono">${kmh(vam.v*0.6)}-${kmh(vam.v*0.7)} km/h</b></div></div>`:''}
+      <b class="mono">${paso(vam.v*0.6)} - ${paso(vam.v*0.7)}</b></div></div>`:''}
   <div class="card"><div class="lbl">${tr("Tu objetivo")}</div>
     <p style="margin-top:6px;font-size:15.5px;line-height:1.45">${esc(campo('objetivo')||'')}</p></div>
   ${totalSem?`<div class="card"><div class="row sp"><h3>${tr("Tu programa")}</h3>
