@@ -205,6 +205,7 @@ nav .g{font-size:17px;line-height:1}
   font-weight:600;white-space:nowrap}
 .verej .tocar, .nohecho button .tocar{color:var(--verde);text-decoration:underline;
   text-underline-offset:3px;font-weight:600;white-space:nowrap}
+.dia .tocar{color:var(--verde);text-decoration:underline;text-underline-offset:3px;font-weight:600}
 .notaej button.abrir.con{color:var(--verde)}
 .notaej textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;
   font-size:16px;min-height:64px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:4px}
@@ -246,7 +247,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.3';
+const VERSION = 'v5.4';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -255,7 +256,7 @@ const CID = (qs.get('c') || '').trim().toLowerCase();
 const KEY = (qs.get('k') || '').trim();
 
 /* ---------- estado ---------- */
-const S = { d:null, vista:'hoy', dia:null, semana:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null };
+const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null };
 const K = k => 'salva_' + CID + '_' + k;
 const LS = {
   get(k,f){ try{ return JSON.parse(localStorage.getItem(K(k))) ?? f; }catch(e){ return f; } },
@@ -326,6 +327,19 @@ function semanaActual(){
   let e = null; for(const w of ss){ const i=fechaIni(w.FECHAS); if(i && h>=i) e=w; }
   return e || ss[0];
 }
+/* v5.4: LA SEMANA QUE MIRAS.
+   Hasta ahora la app solo sabia de "la semana de hoy" (S.semana) y en Mi plan
+   las semanas siguientes eran un titulo y nada mas. Ahora hay UNA sola idea
+   nueva: S.mirando, la semana que el cliente ha abierto para verla.
+     - S.mirando vacio  -> se mira la de hoy y se puede anotar, como siempre.
+     - S.mirando puesto -> se mira otra semana y la pantalla va en modo lectura.
+   Todo lo que pinta una sesion pregunta a semanaVista() y a soloLectura(), asi
+   que no hay una segunda pantalla paralela que mantener: es la misma. Lo que se
+   anota sigue colgando SIEMPRE de S.semana (el identificador de cada serie lo
+   da SEM()), y en modo lectura no se pinta nada que escriba. */
+const semanaVista = () => S.mirando || S.semana;
+const soloLectura = () => !!S.mirando;
+
 const campo = k => {
   const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
   if(!f || String(f.VISIBLE||'').toUpperCase()==='NO') return null;
@@ -549,6 +563,15 @@ const EN = {
   /* v5.2: las casillas de carrera dicen que se pide y que significa cada
      extremo. Smi y Justine son las que mas corren y las dos van en ingles. */
   "toca aquí": "tap here",
+  /* v5.4: ver otras semanas en modo lectura */
+  "solo lectura": "read only",
+  "Ver sus sesiones": "See its sessions",
+  "Sus sesiones": "Its sessions",
+  "ejercicios": "exercises",
+  "Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.": "This is what's coming, so you can plan. You log it when the week arrives.",
+  "Esta semana ya pasó. Puedes verla, pero se anota en la semana en curso.": "That week is over. You can look at it, but logging happens in the current week.",
+  "Volver a lo de hoy": "Back to today",
+  "← Volver a la semana": "← Back to the week",
   "¿No sabes si lo estás haciendo bien? Grábate haciéndolo": "Not sure you're doing it right? Film yourself",
   "km de toda la sesión": "km for the whole session",
   "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
@@ -1099,7 +1122,7 @@ function pinta(){
   try { document.documentElement.lang = enIngles() ? 'en' : 'es'; } catch(e){}
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
-  const v = {hoy:vHoy, plan:vPlan, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias}[S.vista] || vHoy;
+  const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias}[S.vista] || vHoy;
   app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() +
     (S.toast?`<div class="toast">${esc(S.toast)}</div>`:'');
 }
@@ -1122,7 +1145,20 @@ function nav(){
   return `<nav>${it.map(([k,n,g])=>
     `<button onclick="ir('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${g}</span>${tr(n)}</button>`).join('')}</nav>`;
 }
-function ir(v){ S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta(); }
+function ir(v){
+  // Los cuatro botones de abajo son "el presente": al tocarlos se sale de la
+  // semana que se estaba mirando.
+  if(v!=='semana') S.mirando = null;
+  S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta();
+}
+/* Abre una semana para verla. Si es la de hoy, no hay modo lectura: se va a Hoy. */
+function verSemana(num){
+  const w = (S.d.SEMANAS||[]).find(x=>String(x.SEMANA)===String(num));
+  if(!w) return;
+  if(S.semana && String(w.SEMANA)===String(S.semana.SEMANA)){ ir('hoy'); return; }
+  S.mirando = w; S.dia = null; S.vista = 'semana'; S.video = null;
+  window.scrollTo(0,0); pinta();
+}
 
 /* v3.14: bienvenida. Sale solo la primera vez, en el movil de cada uno:
    se va en cuanto toca "entendido" o en cuanto anota su primera serie. */
@@ -1400,11 +1436,14 @@ function vPlan(){
         const rep = g.semanas.every(x=>norm(x['FASE / TÍTULO'])===norm(g.semanas[0]['FASE / TÍTULO']));
         return g.semanas.map(s=>{
           const act = S.semana && s.SEMANA===S.semana.SEMANA;
-          return `<div class="dia" style="cursor:default"><span class="d">${enIngles()?'W':'S'}${esc(s.SEMANA)}</span>
+          /* v5.4: cada semana se abre. La de hoy lleva a Hoy; las demás, a
+             verla en modo lectura, que es lo que pedían para organizarse. */
+          return `<button class="dia" onclick="verSemana('${esc(s.SEMANA)}')"><span class="d">${enIngles()?'W':'S'}${esc(s.SEMANA)}</span>
             <span style="flex:1"><span class="n" style="${act?'color:var(--verde)':''}">${esc(rep?s.FECHAS:sinRepetir(s['FASE / TÍTULO']))}</span>
             ${rep?(act?`<div class="sm" style="margin-top:3px">${tr("estás aquí")}</div>`:'')
                  :`<div class="sm" style="margin-top:3px">${esc(s.FECHAS)}${act?' · '+tr("estás aquí"):''}</div>`}
-            ${s['NOTA DE LA SEMANA']?`<div class="sm" style="margin-top:4px">${esc(s['NOTA DE LA SEMANA'])}</div>`:''}</span></div>`;
+            ${s['NOTA DE LA SEMANA']?`<div class="sm" style="margin-top:4px">${esc(s['NOTA DE LA SEMANA'])}</div>`:''}
+            <div class="sm" style="margin-top:4px">${act?tr("Ir a lo de hoy"):tr("Ver sus sesiones")} <span class="tocar">${tr('toca aquí')}</span></div></span></button>`;
         }).join('');
       })()}</div>`;
   }).join('')}
@@ -1417,6 +1456,43 @@ function vPlan(){
       ${t.RESULTADO?`<p class="mut" style="margin-top:6px"><b>${tr("Resultado:")}</b> ${esc(t.RESULTADO)}</p>`:''}</div>`).join('')}</div>`:''}
   ${lema?`<p class="sm" style="text-align:center;margin:18px 0 4px">${esc(lema)}</p>`:''}`;
 }
+/* ---------- UNA SEMANA, EN MODO LECTURA ----------
+   Es la misma pantalla de siempre, pero de otra semana: sirve para que el
+   cliente se organice (que dias entrena, de que color y cuanto dura). No se
+   puede anotar nada: eso se abre solo cuando llega su semana. */
+function vSemana(){
+  const w = S.mirando; if(!w) return vHoy();
+  const bl = bloqueDe(w);
+  const dias = diasDeBloque(bl);
+  const ini = fechaIni(w.FECHAS);
+  const futura = ini ? (ini > new Date()) : true;
+  return `
+  <div class="card" style="border-color:var(--verde-s)">
+    <div class="row sp"><div class="lbl">${tr('Semana')} ${esc(w.SEMANA)} ${tr('de')} ${(S.d.SEMANAS||[]).length}</div>
+      <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
+    <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
+    ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
+    <p class="mut" style="margin-top:10px">${futura
+      ? tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")
+      : tr("Esta semana ya pasó. Puedes verla, pero se anota en la semana en curso.")}</p>
+    ${w['NOTA DE LA SEMANA']?`<div class="calent" style="margin-top:12px">${esc(w['NOTA DE LA SEMANA'])}</div>`:''}
+  </div>
+  <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Sus sesiones")}</h3>
+    <button class="btn sm2" onclick="ir('plan')">${tr("← Mi plan")}</button></div>
+    ${dias.map(x=>{
+      const vacio = esDescanso(x) || !sesionDe(bl,x['DÍA']).length;
+      return `<button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
+        <span class="d">${esc(String(x['DÍA']).slice(0,3))}</span>
+        <span style="flex:1"><span class="n">${esc(partir(x['SESIÓN']).t)}</span>
+          <div class="row wrap" style="gap:6px;margin-top:5px">
+            <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
+            ${x.MIN?`<span class="tag">${esc(x.MIN)} min</span>`:''}
+            ${vacio?'':`<span class="tag">${sesionDe(bl,x['DÍA']).filter(f=>parseInt(f.ORDEN)>0).length} ${tr("ejercicios")}</span>`}
+          </div></span></button>`;
+    }).join('')}</div>
+  <div class="card flat"><button class="btn big" onclick="ir('hoy')">${tr("Volver a lo de hoy")}</button></div>`;
+}
+
 /* ================= SESIÓN Y REGISTRO =================
    Regla de oro de esta pantalla: lo que se escribe NO se pierde nunca.
    Se guarda al teclear y la pantalla no se redibuja al confirmar una
@@ -1424,13 +1500,14 @@ function vPlan(){
    ===================================================== */
 function abrir(dia){
   S.dia=dia; S.vista='sesion'; S.video=null;
-  const bl=bloqueDe(S.semana);
-  if(modoLibre(bl)) marcaFecha(bl,dia);   // queda registrado qué día la hizo
+  const bl=bloqueDe(semanaVista());
+  // En modo lectura no se marca nada: mirar una semana futura no es hacerla.
+  if(!soloLectura() && modoLibre(bl)) marcaFecha(bl,dia);
   window.scrollTo(0,0); pinta();
 }
 
 function vSesion(){
-  const bl = bloqueDe(S.semana);
+  const bl = bloqueDe(semanaVista());
   const dia = S.dia || (diaDeHoy(bl)||{})['DÍA'];
   if(!dia) return `<div class="card"><h3>${tr("Elige un día")}</h3>
     <p class="mut" style="margin-top:8px">${tr("Vuelve a Hoy y toca la sesión que quieras registrar.")}</p>
@@ -1442,8 +1519,8 @@ function vSesion(){
     return `<div class="card"><div class="lbl">${esc(dia)}</div>
       <h2 style="margin-top:6px">${esc(partir(meta['SESIÓN']||'Descanso').t)}</h2>
       <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>
-      ${bloqueExtra(bl, dia)}
-      <div class="card flat"><button class="btn big" onclick="ir('hoy')">${tr("Volver")}</button></div>`;
+      ${soloLectura()?'':bloqueExtra(bl, dia)}
+      <div class="card flat"><button class="btn big" onclick="ir('${soloLectura()?'semana':'hoy'}')">${tr("Volver")}</button></div>`;
   }
 
   const cal = filas.find(f=>parseInt(f.ORDEN)===0);
@@ -1453,6 +1530,27 @@ function vSesion(){
   const est = estadoSesion(bl,dia);
   const obs = LOG[idObs(bl,dia)];
   const omitida = !!LOG[idOmit(bl,dia)];
+
+  /* Modo lectura: se ve la sesión entera (ejercicios, dosis e indicaciones)
+     y no se pinta nada que escriba. Es la misma tarjeta de ejercicio de
+     siempre: ejercicio() se encarga de quitar lo que no toca. */
+  if(soloLectura()){
+    const w = semanaVista();
+    return `
+    <div class="card" style="border-color:var(--verde-s)">
+      <div class="row sp"><div class="lbl">${esc(dia)} · ${tr('Semana')} ${esc(w.SEMANA)}</div>
+        <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
+      <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
+      ${meta.MIN?`<p class="sm" style="margin-top:4px">${tr("Duración")} · ${esc(meta.MIN)} min</p>`:''}
+      <p class="mut" style="margin-top:10px">${tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")}</p>
+    </div>
+    ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+    ${ejs.map(f=>ejercicio(bl,dia,f)).join('')}
+    ${extras.length?`<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
+      <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.</p></div>
+      ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
+    <div class="card flat"><button class="btn big" onclick="ir('semana')">${tr("← Volver a la semana")}</button></div>`;
+  }
 
   return `
   <div class="card"><div class="row sp">
@@ -1545,6 +1643,20 @@ function ejercicio(bl,dia,f){
     etiqueta(f.TEMPO, 'Tempo'), etiqueta(f.DESCANSO, tr('Descanso'))].filter(Boolean).join(' · ');
   const eid = slug(nombre);
   recordarNombre(idNota(bl,dia,nombre), nombre);
+
+  /* v5.4: mirando otra semana se ve la tarjeta entera (nombre, dosis,
+     indicaciones y el buscador de vídeo) y NADA que escriba: ni casillas, ni
+     series, ni nota, ni "no lo he hecho". */
+  if(soloLectura()){
+    const vid2 = ficha ? idYoutube(ficha['VÍDEO']) : null;
+    return `<div class="ej">
+      <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(conVAM(ds))}</div>`:''}
+        ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
+      ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
+      ${!vid2 && (series || camposDe(f).length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
+        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tocar(tr("Ver cómo se hace"))}</a>`
+        : ''}</div>`;
+  }
 
   const campos = camposDe(f);
   let registro = '';
@@ -2168,7 +2280,12 @@ function respQ(clave,cat,v){ CHK[clave]=Object.assign({},CHK[clave],{v:v,cat:cat
    boton. Escribir "4" en un cuadro de texto era lento y luego no se podia
    comparar una semana con otra. El cuadro de texto se queda igual, para
    contar lo que quiera. */
-const esEscala = t => /\b1\s*(?:[-–—]|\s*(?:al|to|a)\s*)\s*5\b/i.test(String(t||''));   /* v4.5: vale "1-5", "1 al 5" y "1 to 5": las hojas en ingles tambien */
+/* v4.5: vale "1-5", "1 al 5" y "1 to 5": las hojas en ingles tambien.
+   21 sep: y tambien las escalas con sus extremos escritos, "1 = wrecked,
+   5 = fully recovered", que es como quedaron tras la v5.2. Sin esto, a Smi
+   le desaparecian los botones en tres de sus nueve preguntas. */
+const esEscala = t => /\b1\s*(?:[-–—]|\s*(?:al|to|a)\s*)\s*5\b/i.test(String(t||'')) ||
+                      /\b1\s*=[^]{1,60}?\b5\s*=/i.test(String(t||''));
 function notaQ(clave,cat,n){
   const a = CHK[clave] || {};
   CHK[clave] = Object.assign({}, a, {cat:cat, n: a.n===n ? 0 : n, v: a.v||''});
