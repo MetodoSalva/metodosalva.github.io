@@ -201,6 +201,10 @@ nav .g{font-size:17px;line-height:1}
 .notaej button.abrir{background:none;border:0;padding:6px 0;font-size:13px;font-weight:600;
   color:var(--txt3);cursor:pointer;display:flex;align-items:center;gap:6px;text-align:left}
 .notaej button.abrir:hover{color:var(--verde)}
+.notaej button.abrir .tocar{color:var(--verde);text-decoration:underline;text-underline-offset:3px;
+  font-weight:600;white-space:nowrap}
+.verej .tocar, .nohecho button .tocar{color:var(--verde);text-decoration:underline;
+  text-underline-offset:3px;font-weight:600;white-space:nowrap}
 .notaej button.abrir.con{color:var(--verde)}
 .notaej textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;
   font-size:16px;min-height:64px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:4px}
@@ -242,7 +246,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.2';
+const VERSION = 'v5.3';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -544,6 +548,8 @@ const EN = {
   "a": "to",
   /* v5.2: las casillas de carrera dicen que se pide y que significa cada
      extremo. Smi y Justine son las que mas corren y las dos van en ingles. */
+  "toca aquí": "tap here",
+  "¿No sabes si lo estás haciendo bien? Grábate haciéndolo": "Not sure you're doing it right? Film yourself",
   "km de toda la sesión": "km for the whole session",
   "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
   "de principio a fin, calentamiento y vuelta a la calma incluidos": "start to finish, warm-up and cool-down included",
@@ -1591,7 +1597,7 @@ function ejercicio(bl,dia,f){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
       return `<div class="notaej">
-        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tr("¿Algo que contarme de este ejercicio?")}</button>`}
+        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tocar(tr("¿Algo que contarme de este ejercicio?"))}</button>`}
         ${bloqueVideo(bl,dia,nombre,f)}${bloqueFoto(bl,dia,nombre,f)}
         ${ab?`<button class="abrir con" onclick="cerrarNota()">💬 ${tr("Tu nota para Salva")}</button>
           <textarea id="n_${idn}" oninput="guardaNota('${idn}',this.value)"
@@ -1603,9 +1609,9 @@ function ejercicio(bl,dia,f){
       ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${esc(vid)}?rel=0&modestbranding=1"
            title="${esc(nombre)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
          <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
-      : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
+      : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tocar(tr("Ver ejercicio"))}</button>`)
       : ((series>0 || campos.length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
-        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
+        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tocar(tr("Ver cómo se hace"))}</a>`
         : '')}
     ${/* v4.8: antes esto se decidia por el TIPO, y solo valia "fuerza" e
          "hibrido". Pero un face pull marcado como "extra" sigue siendo un
@@ -1618,9 +1624,13 @@ function ejercicio(bl,dia,f){
       return sal
         ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
              <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
-        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("No he hecho este ejercicio")}</button></div>`;
+        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tocar(tr("No he hecho este ejercicio"))}</button></div>`;
     })()}</div>`;
 }
+/* v5.3: varias clientas no sabian que estas lineas eran botones. Ahora lo
+   dicen al final de la frase, y en verde. */
+const tocar = t => t + ' <span class="tocar">' + tr('toca aquí') + '</span>';
+
 function verVideo(id){ S.video = id; pinta(); }
 
 /* Marcar un ejercicio como no hecho. Va a la hoja como "omitida" con el
@@ -1684,7 +1694,7 @@ function bloqueFoto(bl, dia, nombre, f){
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando la foto…")}</p>`
       : `<button class="abrir" onclick="document.getElementById('vf_${id}').click()">📸 ${
-          hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela")}</button>`}
+          tocar(hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela"))}</button>`}
     ${hecha && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Foto enviada")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
     ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}`;
 }
@@ -1705,7 +1715,7 @@ function bloqueVideo(bl, dia, nombre, f){
       onchange="subirVideo('${id}','${esc(bl)}','${esc(dia)}',this)">
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
-      : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Clica aquí y grábate")}</button>
+      : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${tocar(enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
          ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
            <div class="stack" style="margin:0 0 10px;gap:8px">
              <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
