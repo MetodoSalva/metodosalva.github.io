@@ -119,6 +119,16 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .reg .c label{font-family:var(--m);font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px}
 .reg input{border:1px solid var(--linea2);border-radius:8px;padding:9px 8px;font-size:16px;width:100%;
   background:var(--sup);color:var(--txt);font-family:var(--m)}
+.reg .c.ancho{grid-column:1/-1}
+.reg .totales{grid-column:1/-1;font-family:var(--m);font-size:11px;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--txt3)}
+.set.corre{grid-template-columns:22px 1fr 1fr 78px 26px}
+.masseries{padding:0 14px 10px}
+.masseries button{border:1px dashed var(--linea2);background:transparent;color:var(--txt2);
+  border-radius:9px;padding:8px 10px;font-size:13px;width:100%}
+.reg .ayuda{margin:3px 0 0;font-size:11.5px;line-height:1.35;color:var(--txt3)}
+.reg .escala{margin:0}
+.reg .escala button{padding:9px 0;font-size:15px}
 .reg .ritmo{grid-column:1/-1;font-family:var(--m);font-size:12.5px;color:var(--verde);min-height:16px}
 .reg button{grid-column:1/-1;border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;
   border-radius:8px;padding:11px;font-size:14px;font-weight:600}
@@ -232,7 +242,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.1';
+const VERSION = 'v5.2';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -531,7 +541,34 @@ const EN = {
   "De ella salen tus velocidades: en cada sesión verás la que te toca.": "Your speeds come from it: each session shows yours.",
   "min/km": "min/km",
   "de": "from",
-  "a": "to"
+  "a": "to",
+  /* v5.2: las casillas de carrera dicen que se pide y que significa cada
+     extremo. Smi y Justine son las que mas corren y las dos van en ingles. */
+  "km de toda la sesión": "km for the whole session",
+  "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
+  "de principio a fin, calentamiento y vuelta a la calma incluidos": "start to finish, warm-up and cool-down included",
+  "esfuerzo (1 al 10)": "effort (1 to 10)",
+  "1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope": "1 = walking · 5 = full sentences · 8 = short sentences only · 10 = all out",
+  "cómo quedaron las piernas": "how your legs felt",
+  "1 = frescas · 5 = destrozadas": "1 = fresh · 5 = very heavy",
+  "metros totales que marca la cinta al acabar": "total metres on the treadmill at the end",
+  "con el kilómetro de calentamiento incluido": "warm-up kilometre included",
+  "ritmo o velocidad": "pace or speed",
+  "como te lo dé el reloj o la cinta; escribe la unidad": "as your watch or the treadmill gives it; write the unit",
+  "avituallamiento": "fuelling",
+  "lo tomé todo": "took it all",
+  "dímelo sobre todo si te lo saltaste o te sentó mal": "tell me above all if you skipped it or it upset your stomach",
+  "Avituallamiento": "Fuelling",
+  "esfuerzo": "effort",
+  "Totales de la sesión": "Session totals",
+  "Anotar serie a serie (opcional)": "Log each rep (optional)",
+  "Ocultar las series": "Hide the reps",
+  "Tus kilómetros": "Your kilometres",
+  "En este bloque": "In this block",
+  "Tiempo corriendo en el bloque": "Time running in this block",
+  "Tu ritmo medio": "Your average pace",
+  "Tu tirada más larga": "Your longest run",
+  "Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.": "It comes from what you log in each run. A run you don't log doesn't count."
 };
 /* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
    hay ficha, asi que se mira el enlace (&lang=en) y lo que se guardo la
@@ -679,17 +716,123 @@ function lineaUltima(u){
 /* Que se pide en cada fila lo declara la hoja en la columna REGISTRO.
    Antes solo habia casillas donde habia SERIES, asi que una carrera o una
    ronda de HYROX no tenian donde anotarse. */
+/* v5.2: cada casilla dice QUE se le pide y, cuando es una escala, que
+   significan sus extremos. Antes ponia "piernas 1-5" y nadie sabia si 5
+   eran las piernas frescas o destrozadas: ni siquiera coincidian entre si
+   la app y el seguimiento. Decision de Salvador: 1 = frescas, 5 = destrozadas.
+   "ayuda" es la linea pequena bajo la casilla; "escala" pinta botones. */
 const CAMPOS = {
-  km:      {et:'km reales',   ph:'km',      modo:'decimal'},
-  tiempo:  {et:'tiempo',      ph:'mm:ss',   modo:'text'},
-  rpe:     {et:'RPE',         ph:'1-10',    modo:'numeric'},
-  piernas: {et:'piernas 1-5', ph:'1-5',     modo:'numeric'},
+  km:      {et:'km de toda la sesión', ph:'5,2', modo:'decimal',
+            ayuda:'de principio a fin, calentamiento y vuelta a la calma incluidos'},
+  tiempo:  {et:'tiempo',      ph:'45:30',   modo:'text',
+            ayuda:'45 son 45 min · 45:30 · 1:10:00'},
+  rpe:     {et:'esfuerzo (1 al 10)', ph:'1-10', modo:'numeric',
+            ayuda:'1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope'},
+  piernas: {et:'cómo quedaron las piernas', ph:'1-5', modo:'numeric', escala:5,
+            ayuda:'1 = frescas · 5 = destrozadas'},
   carga:   {et:'carga',       ph:'kg',      modo:'decimal'},
   metros:  {et:'metros / reps',ph:'m o reps',modo:'text'},
-  vam:     {et:'metros de la cinta', ph:'m', modo:'decimal'}
+  vam:     {et:'metros totales que marca la cinta al acabar', ph:'2150', modo:'decimal',
+            ayuda:'con el kilómetro de calentamiento incluido'},
+  ritmo:   {et:'ritmo o velocidad', ph:'5:30 min/km · 11 km/h', modo:'text',
+            ayuda:'como te lo dé el reloj o la cinta; escribe la unidad'},
+  fuel:    {et:'avituallamiento', ph:'lo tomé todo', modo:'text',
+            ayuda:'dímelo sobre todo si te lo saltaste o te sentó mal'}
 };
 const camposDe = f => String((f&&f.REGISTRO)||'').split(',')
                         .map(x=>norm(x)).filter(k=>CAMPOS[k]);
+/* Una casilla del bloque de registro. Las escalas salen como botones (se
+   contestan de un toque y no hay que teclear), el resto como casilla de
+   texto. Debajo, la linea de ayuda si la tiene. */
+const ANCHAS = {vam:1, ritmo:1, fuel:1};
+function casilla(rid, k, d, cs, nombre){
+  const C = CAMPOS[k], val = String(d[k]||'');
+  const ay = C.ayuda ? `<p class="ayuda">${esc(tr(C.ayuda))}</p>` : '';
+  const ancho = (ANCHAS[k] || C.escala) ? ' ancho' : '';
+  if(C.escala) return `<div class="c${ancho}"><label>${esc(tr(C.et))}</label>
+    <div class="escala">${Array.from({length:C.escala},(_,i)=>i+1).map(n=>
+      `<button type="button" class="${val===String(n)?'on':''}" id="eb_${rid}_${k}_${n}"
+        onclick="anotaEscala('${rid}','${k}',${n})"
+        aria-label="${esc(tr(C.et))} ${n} ${esc(nombre)}">${n}</button>`).join('')}</div>${ay}</div>`;
+  return `<div class="c${ancho}"><label for="g_${rid}_${k}">${esc(tr(C.et))}</label>
+    <input id="g_${rid}_${k}" inputmode="${C.modo}" placeholder="${esc(tr(C.ph))}"
+      value="${esc(val)}" oninput="anotaReg('${rid}','${cs}')"
+      aria-label="${esc(tr(C.et))} · ${esc(nombre)}">${ay}</div>`;
+}
+
+/* v5.2: que casillas salen en una carrera. No es lo mismo que esCarrera()
+   (mas abajo), que decide la foto del reloj y deja fuera a proposito los
+   calentamientos: aqui SI entran, porque los 15 min de Z2 de una vuelta a la
+   calma son carrera que suma y hoy pedian kilos.
+   Se mira el TIPO de la hoja, nunca el nombre: hay hojas donde la sesion de
+   fuerza entera viene marcada como running. Y para QUITAR las casillas de
+   kilos hace falta ademas que la dosis sea de tiempo o de distancia: un
+   ejercicio de 10 reps dentro de un hibrido sigue siendo fuerza. */
+const DOSIS_TIEMPO = /^\s*\d+([.,]\d+)?\s*(''|"|s|seg|segundos|sec|min|minutos|minutes|h|km|m|metros|mi|miles)\b/i;
+const esCorrer = f => ['running','hibrido'].indexOf(norm(f && f.TIPO)) > -1;
+const corrPorTiempo = f => esCorrer(f) && DOSIS_TIEMPO.test(String((f && f['REPS / DOSIS']) || ''));
+const ABIERTAS = {};                       // series desplegadas, solo en esta visita
+function abreSeries(id){ ABIERTAS[id] = !ABIERTAS[id]; pinta(); }
+
+/* Filas de una carrera: tiempo y esfuerzo por serie. Nunca kilos. */
+function setsCorre(bl, dia, nombre, series, hayTotales){
+  const base = slug(bl)+'~'+slug(dia)+'~'+slug(nombre);
+  const ids = Array.from({length:series},(_,i)=>idSerie(bl,dia,nombre,i));
+  const conDatos = ids.some(id=>{ const v=LOG[id]||{}; return v.t || v.e; });
+  const abierto = !hayTotales || conDatos || !!ABIERTAS[base];
+  const filas = abierto ? `<div class="sets">${ids.map((id,i)=>{
+      recordarNombre(id, nombre);
+      const v = LOG[id] || {};
+      return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
+        <span class="i">${series>1?i+1:'·'}</span>
+        <input inputmode="text" placeholder="${tr('tiempo')}" value="${esc(v.t||'')}" id="t_${id}"
+          oninput="anotaC('${id}')" aria-label="${tr('tiempo')} ${i+1} ${esc(nombre)}">
+        <input inputmode="numeric" placeholder="${tr('esfuerzo')}" value="${esc(v.e||'')}" id="e_${id}"
+          oninput="anotaC('${id}')" aria-label="${tr('esfuerzo (1 al 10)')} ${i+1}">
+        <button id="b_${id}" onclick="confirmarC('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
+        <button class="x" onclick="vaciarC('${id}')" aria-label="${tr('Vaciar')}" title="${tr('Vaciar')}">✕</button>
+      </div>`;}).join('')}</div>` : '';
+  const boton = hayTotales
+    ? `<div class="masseries"><button onclick="abreSeries('${base}')">${
+        abierto ? tr('Ocultar las series') : tr('Anotar serie a serie (opcional)')}</button></div>`
+    : '';
+  return filas + boton;
+}
+function anotaC(id){
+  const t=document.getElementById('t_'+id), e=document.getElementById('e_'+id);
+  const prev = LOG[id] || {};
+  LOG[id] = Object.assign({}, prev, {t:t?t.value.trim():'', e:e?e.value.trim():''});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+  const fila = document.getElementById('fila_'+id);
+  if(fila && LOG[id].corregido) fila.classList.add('corr');
+}
+function confirmarC(id){
+  const v = LOG[id] || {};
+  if(v.ok){ LOG[id] = Object.assign({}, v, {ok:false}); }
+  else {
+    anotaC(id);
+    if(!LOG[id].t && !LOG[id].e){ toast(tr('Anota al menos un dato antes de confirmar.')); return; }
+    LOG[id].ok = true;
+    LOG[id].ts = new Date().toISOString();
+  }
+  LS.set('log', LOG);
+  const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
+  if(fila) fila.classList.toggle('ok', !!LOG[id].ok);
+  if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+}
+function vaciarC(id){
+  const v = LOG[id] || {};
+  ['t_','e_'].forEach(p=>{ const el=document.getElementById(p+id); if(el) el.value=''; });
+  if(v.sent){
+    LOG[id] = {t:'', e:'', ok:false, sent:true, corregido:true, borrada:true};
+    toast(tr('Se corregirá en la hoja al enviar.'));
+  } else { delete LOG[id]; }
+  LS.set('log', LOG);
+  const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
+  if(fila){ fila.classList.remove('ok'); if(LOG[id]) fila.classList.add('corr'); }
+  if(btn) btn.textContent = tr('Anotar');
+}
 
 function aSegundos(t){
   const p = String(t||'').trim().split(':').map(x=>parseInt(x,10));
@@ -1404,10 +1547,8 @@ function ejercicio(bl,dia,f){
     recordarNombre(rid, nombre);
     const v = LOG[rid] || {}, d = v.d || {}, cs = campos.join('-');
     registro = `<div class="reg ${v.ok?'ok':''}" id="reg_${rid}">
-      ${campos.map(k=>`<div class="c"><label for="g_${rid}_${k}">${tr(CAMPOS[k].et)}</label>
-        <input id="g_${rid}_${k}" inputmode="${CAMPOS[k].modo}" placeholder="${tr(CAMPOS[k].ph)}"
-          value="${esc(d[k]||'')}" oninput="anotaReg('${rid}','${cs}')"
-          aria-label="${tr(CAMPOS[k].et)} · ${esc(nombre)}"></div>`).join('')}
+      ${esCorrer(f) && series>1 ? `<div class="totales">${tr('Totales de la sesión')}</div>` : ''}
+      ${campos.map(k=>casilla(rid, k, d, cs, nombre)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
         ? `<div class="ritmo" id="ritmo_${rid}">${esc(ritmoDe(d).replace('Ritmo', tr('Ritmo')))}</div>` : ''}
       ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam))}</div>` : ''}
@@ -1417,6 +1558,12 @@ function ejercicio(bl,dia,f){
 
   let sets = '';
   if(saltado(bl,dia,nombre)){ sets = ''; registro = ''; }
+  else if(campos.length ? (esCorrer(f) && series>1) : (corrPorTiempo(f) && series>0)){
+    /* v5.2: una carrera no se anota con kilos. Si son series o cuestas,
+       cada una tiene su fila (tiempo y esfuerzo) y los totales van debajo;
+       plegado, porque la mayoria de dias solo hace falta el total. */
+    sets = setsCorre(bl, dia, nombre, series, campos.length>0);
+  }
   else if(series>0 && !campos.length){
     sets = `<div class="sets">${Array.from({length:series},(_,i)=>{
       const id = idSerie(bl,dia,nombre,i);
@@ -1683,7 +1830,9 @@ function guardaNota(id,txt){
 }
 
 function anotaReg(id, cs){
-  const prev = LOG[id] || {}, d = {};
+  /* v5.2: se parte de lo que ya habia. Las escalas se pintan con botones,
+     no con casillas, y antes se perdian al escribir en cualquier otra. */
+  const prev = LOG[id] || {}, d = Object.assign({}, prev.d || {});
   cs.split('-').forEach(k=>{ const el=document.getElementById('g_'+id+'_'+k); if(el) d[k]=el.value.trim(); });
   LOG[id] = Object.assign({}, prev, {d:d});
   if(prev.sent) LOG[id].corregido = true;
@@ -1692,6 +1841,19 @@ function anotaReg(id, cs){
   if(r) r.textContent = ritmoDe(d).replace('Ritmo', tr('Ritmo'));
   const va = document.getElementById('vam_'+id);
   if(va) va.textContent = textoVAM(d.vam);
+}
+/* Escala de botones: tocar el mismo numero lo quita, como las estrellas. */
+function anotaEscala(id, k, n){
+  const prev = LOG[id] || {}, d = Object.assign({}, prev.d || {});
+  d[k] = (String(d[k]||'') === String(n)) ? '' : String(n);
+  LOG[id] = Object.assign({}, prev, {d:d});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+  const C = CAMPOS[k] || {};
+  for(let i=1;i<=(C.escala||5);i++){
+    const b = document.getElementById('eb_'+id+'_'+k+'_'+i);
+    if(b) b.classList.toggle('on', String(d[k]) === String(i));
+  }
 }
 function confirmarReg(id, cs){
   const v = LOG[id] || {};
@@ -1784,16 +1946,21 @@ async function enviar(){
       const d = v.d || {};
       reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'',
         km:d.km||'', tiempo:d.tiempo||'',
+        /* v5.2: si lo escribio ella (con su unidad), manda lo suyo; si no, el
+           ritmo que sale de km y tiempo. El avituallamiento va en notas: la
+           hoja no tiene columna propia y asi Salvador lo lee con el resto. */
+        notas: d.fuel ? tr('Avituallamiento') + ': ' + d.fuel : '',
         ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + paso(vamDe(d.vam)) + ' min/km' : '')
-                     : ritmoDe(d).replace('Ritmo ',''),
+                     : (d.ritmo || ritmoDe(d).replace('Ritmo ','')),
         rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'',
         estado: v.borrada ? '' : (v.ok?'realizada':'')}));
       return;
     }
 
     const serie = (p[4]||'').replace('s','');
+    // Una serie de fuerza trae reps, kilos y RIR; una de carrera, tiempo y esfuerzo.
     reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', serie:serie, reps:v.r||'', carga:v.c||'',
-      rir:v.rir||'', estado: v.borrada ? '' : (v.ok?'realizada':'')}));
+      rir:v.rir||'', tiempo:v.t||'', rpe:v.e||'', estado: v.borrada ? '' : (v.ok?'realizada':'')}));
   });
 
   // La semana que se está respondiendo es la que pide el aviso; si no hay
@@ -1855,9 +2022,10 @@ function vProgreso(){
   Object.keys(LOG).forEach(k=>{
     const v = LOG[k]; if(!v || !v.ok || v.borrada) return;
     const p = k.split('~'); if(p.length !== 5 || !/^s\d+$/.test(p[4])) return;
-    if(!v.r && !v.c) return;
+    if(!v.r && !v.c && !v.t && !v.e) return;
     series++;
     sesiones[p[0]+'~'+p[1]+'~'+p[2]] = true;
+    if(!v.r && !v.c) return;                 // serie de carrera: cuenta, pero no es una carga
     const it = {sem:parseInt(p[0].replace(/^s/,''))||0, c:parseFloat(String(v.c||'').replace(',','.'))||0,
                 carga:v.c||'', reps:v.r||''};
     const e = porEj[p[3]] = porEj[p[3]] || {n:0, prim:null, mejor:null};
@@ -1872,6 +2040,41 @@ function vProgreso(){
   const vids = (S.d.MIS_VIDEOS||[]).length;
   const hayAlgo = series > 0 || nSes > 0;
 
+  /* v5.2: quien solo corre no veia nada suyo aqui. Su progreso no son las
+     cargas: son los kilometros, el tiempo en pie y el ritmo que le sale. */
+  const blSlug = slug(bl||'');
+  let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0;
+  Object.keys(LOG).forEach(k=>{
+    const v = LOG[k];
+    if(!v || !v.ok || v.borrada || !k.endsWith('~reg')) return;
+    const d = v.d || {};
+    const km = parseFloat(String(d.km||'').replace(',','.')) || 0;
+    const sg = aSegundos(d.tiempo);
+    if(!km && !sg) return;
+    const p = k.split('~');
+    if(km > masLarga) masLarga = km;
+    if(p[1] === blSlug){ kmBl+=km; sgBl+=sg; carrBl++; }
+    if(p[0] === SEM()){ kmSem+=km; sgSem+=sg; carrSem++; }
+  });
+  const unKm = n => (Math.round(n*10)/10).toString().replace('.', enIngles()?'.':',');
+  const enHoras = sg => sg>=3600 ? Math.floor(sg/3600)+' h '+String(Math.round(sg%3600/60)).padStart(2,'0')+' min'
+                                 : Math.round(sg/60)+' min';
+  const ritmoMedio = (km, sg) => { if(!km || !sg) return ''; const s=Math.round(sg/km);
+    return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' '+tr('min/km'); };
+  const hayCarrera = kmBl>0 || sgBl>0;
+  const tarjetaKm = hayCarrera ? `<div class="card"><h3 style="margin-bottom:10px">${tr("Tus kilómetros")}</h3>
+    <div class="row sp"><span class="sm">${tr("Esta semana")}</span>
+      <b class="mono">${kmSem?unKm(kmSem)+' km':enHoras(sgSem)}</b></div>
+    <div class="row sp" style="margin-top:6px"><span class="sm">${tr("En este bloque")}</span>
+      <b class="mono">${kmBl?unKm(kmBl)+' km':enHoras(sgBl)}</b></div>
+    ${sgBl?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tiempo corriendo en el bloque")}</span>
+      <b class="mono">${enHoras(sgBl)}</b></div>`:''}
+    ${ritmoMedio(kmBl,sgBl)?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu ritmo medio")}</span>
+      <b class="mono">${ritmoMedio(kmBl,sgBl)}</b></div>`:''}
+    ${masLarga?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu tirada más larga")}</span>
+      <b class="mono">${unKm(masLarga)} km</b></div>`:''}
+    <p class="sm" style="margin-top:8px">${tr("Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.")}</p></div>` : '';
+
   const vam = miVAM();
   const fechaVAM = vam && vam.ts ? new Date(vam.ts).toLocaleDateString(enIngles()?'en-GB':'es-ES',
                      {day:'numeric', month:'short'}) : '';
@@ -1881,6 +2084,7 @@ function vProgreso(){
       ${tr("De ella salen tus velocidades: en cada sesión verás la que te toca.")}</p>
     <div class="row sp" style="margin-top:8px"><span class="sm">Z2 (60-70 %)</span>
       <b class="mono">${paso(vam.v*0.6)} - ${paso(vam.v*0.7)}</b></div></div>`:''}
+  ${tarjetaKm}
   <div class="card"><div class="lbl">${tr("Tu objetivo")}</div>
     <p style="margin-top:6px;font-size:15.5px;line-height:1.45">${esc(campo('objetivo')||'')}</p></div>
   ${totalSem?`<div class="card"><div class="row sp"><h3>${tr("Tu programa")}</h3>
@@ -1891,7 +2095,7 @@ function vProgreso(){
     <div class="bar"><i style="width:${pct}%"></i></div>
     <p class="sm">${tr("Sesiones registradas frente a las previstas. Lo que no has anotado cuenta como sin registrar, no como fallada.")}</p></div>`;
 
-  if(!hayAlgo) return cabecera + `
+  if(!hayAlgo && !hayCarrera) return cabecera + `
   <div class="card"><h3>${tr("Aquí vas a ver tu progreso")}</h3>
     <p class="mut" style="margin-top:8px">${tr("Ahora está vacío, y es normal: esto se llena solo, con lo que vas anotando mientras entrenas.")}</p>
     <p class="mut" style="margin-top:8px">${tr("Anota las series según las haces, aunque sea rápido y a ojo. Con dos semanas ya veo por dónde vas y puedo ajustarte el plan.")}</p>
