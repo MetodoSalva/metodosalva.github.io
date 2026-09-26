@@ -129,7 +129,7 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .reg .ayuda{margin:3px 0 0;font-size:11.5px;line-height:1.35;color:var(--txt3)}
 .reg .escala{margin:0}
 .reg .escala button{padding:9px 0;font-size:15px}
-.reg .ritmo{grid-column:1/-1;font-family:var(--m);font-size:12.5px;color:var(--verde);min-height:16px}
+.reg .ritmo{grid-column:1/-1;font-family:var(--m);font-size:12.5px;color:var(--verde);min-height:16px;white-space:pre-line}
 .reg button{grid-column:1/-1;border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;
   border-radius:8px;padding:11px;font-size:14px;font-weight:600}
 .reg.ok{background:var(--verde-b);margin:0 10px 12px;padding:12px;border-radius:10px}
@@ -247,7 +247,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.4';
+const VERSION = 'v5.6';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -511,6 +511,8 @@ const EN = {
   "¿Qué tal ha ido la sesión?": "How did the session go?",
   "Del 1 al 5. Me sirve para saber qué sesiones te funcionan.": "From 1 to 5. It tells me which sessions work for you.",
   "Guardar y enviar": "Save and send",
+  "Se guarda solo mientras escribes. Al terminar, ": "It saves itself as you type. When you finish, ",
+  " lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.": " sends everything, whether or not you tapped Log it. Log it is just for ticking off what you have done; if you get something wrong, tap it again or use the ✕.",
   "Marcar como omitida": "Mark as skipped",
   "Marcaste esta sesión como omitida.": "You marked this session as skipped.",
   "Marcada como omitida. Es distinto de no haberla anotado.": "Marked as skipped. That's different from not logging it.",
@@ -554,6 +556,14 @@ const EN = {
   "metros de la cinta": "treadmill metres",
   "Tu VAM": "Your MAS",
   "Tus 3 × 1 km": "Your 3 × 1 km",
+  "Fácil": "Easy",
+  "La anterior": "Previous",
+  "Eso son": "That's",
+  "s/km": "s/km",
+  "más rápido": "faster",
+  "más lento": "slower",
+  "Comprueba los metros antes de confirmar: de este número salen todos tus ritmos.": "Check the metres before confirming: all your paces come from this number.",
+  "Ese número es poco habitual. Comprueba que son los metros TOTALES que marca la cinta, con el kilómetro de calentamiento dentro.": "That number is unusual. Check it's the TOTAL metres on the treadmill, warm-up kilometre included.",
   "Revisa el dato: son los metros totales que marca la cinta al acabar, con el kilómetro de calentamiento (por ejemplo, 2150).": "Check the number: it's the total metres on the treadmill at the end, warm-up kilometre included (for example, 2150).",
   "Tu velocidad aeróbica máxima, del Test A": "Your maximal aerobic speed, from Test A",
   "De ella salen tus velocidades: en cada sesión verás la que te toca.": "Your speeds come from it: each session shows yours.",
@@ -908,13 +918,48 @@ function miVAM(){
   });
   return mejor;
 }
-/* Lo que sale debajo de la casilla del test mientras se escribe */
-function textoVAM(valor){
+/* La ultima VAM confirmada que NO sea la que se esta escribiendo. Un numero
+   suelto no se puede juzgar; al lado del anterior, si. Mientras escribe, su
+   registro todavia no esta confirmado, asi que esto devuelve el test previo. */
+function vamPrevia(exceptoId){
+  let mejor = null;
+  Object.keys(LOG).forEach(k=>{
+    if(exceptoId && k === exceptoId) return;
+    const v = LOG[k];
+    if(!v || !v.ok || v.borrada || !k.endsWith('~reg') || !v.d || !v.d.vam) return;
+    const x = vamDe(v.d.vam); if(!x) return;
+    if(!mejor || (v.ts||'') > mejor.ts) mejor = {v:x, ts:v.ts||''};
+  });
+  return mejor;
+}
+/* Lo que sale debajo de la casilla del test mientras se escribe.
+   v5.5: ademas de los ritmos, la comparacion con el test anterior.
+   Por que: una VAM mal teclada no da ningun error. Mueve en silencio TODOS los
+   ritmos del bloque, porque la app los calcula al pintar cada sesion. Y un
+   numero plausible pero equivocado se acepta solo. El rango 6-26 km/h es
+   demasiado ancho para filtrar nada, asi que el filtro de verdad es su propio
+   test anterior. */
+function textoVAM(valor, rid){
   if(!String(valor||'').trim()) return '';
   const x = vamDe(valor);
   if(!x) return tr('Revisa el dato: son los metros totales que marca la cinta al acabar, con el kilómetro de calentamiento (por ejemplo, 2150).');
   const s = [75, 79, 83].map(p=>paso(x*p/100)).join(' · ');
-  return `${tr('Tu VAM')}: ${paso(x)} ${tr('min/km')} · ${tr('Tus 3 × 1 km')}: ${s} ${tr('min/km')}`;
+  let t = `${tr('Tu VAM')}: ${paso(x)} ${tr('min/km')}`
+        + ` · ${tr('Fácil')}: ${paso(x*0.6)}-${paso(x*0.7)}`
+        + ` · ${tr('Tus 3 × 1 km')}: ${s} ${tr('min/km')}`;
+  const p = vamPrevia(rid);
+  if(p){
+    t += `\n${tr('La anterior')}: ${paso(p.v)} ${tr('min/km')}.`;
+    const dif = (x - p.v) / p.v * 100;
+    if(Math.abs(dif) >= 8){
+      const sg = Math.abs(Math.round(3600/x) - Math.round(3600/p.v));
+      t += ` ⚠ ${tr('Eso son')} ${sg} ${tr('s/km')} ${tr(dif > 0 ? 'más rápido' : 'más lento')}. `
+         + tr('Comprueba los metros antes de confirmar: de este número salen todos tus ritmos.');
+    }
+  } else if(x < 9 || x > 21){
+    t += `\n⚠ ${tr('Ese número es poco habitual. Comprueba que son los metros TOTALES que marca la cinta, con el kilómetro de calentamiento dentro.')}`;
+  }
+  return t;
 }
 /* "95 % de tu VAM" pasa a "95 % de tu VAM (4:35 min/km)" en cuanto hay VAM.
    Vale para rangos: "60-70 % de tu VAM" da "de 7:15 a 6:13 min/km". */
@@ -997,7 +1042,38 @@ function estadoSesion(b,d){
 }
 const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida']};
 const chipEstado = e => { const [c,t]=ETQ[e]||ETQ.sin; return `<span class="sem ${c}"><i>${semForma(c)}</i>${tr(t)}</span>`; };
-const pendientes = () => Object.keys(LOG).filter(k=>LOG[k] && LOG[k].ok && !LOG[k].sent).length;
+/* v5.6: lo que hay escrito y todavia no esta en la hoja.
+   Antes solo contaba lo confirmado con "Anotar", asi que quien escribia sus
+   pesos y no confirmaba no veia NINGUNA senal de que su sesion no habia
+   salido del movil. Ahora cuenta tambien lo escrito: es lo que se enviara. */
+const tieneAlgo = v => !v ? false
+  : (v.d ? Object.keys(v.d).some(k=>String(v.d[k]||'').trim())
+         : [v.r, v.c, v.rir, v.t, v.e].some(x=>String(x||'').trim()));
+const pendientes = () => Object.keys(LOG).filter(k=>{
+  const v = LOG[k];
+  if(!v || v.borrada || k.endsWith('~fecha')) return false;
+  if(v.sent && !v.corregido) return false;
+  return v.ok || v.corregido || tieneAlgo(v);
+}).length;
+
+/* v5.6: "Guardar y enviar" confirma ademas todo lo que tenga algo escrito.
+   Antes solo viajaba lo que llevara "Anotar" serie a serie. Quien rellenaba
+   la sesion entera y pulsaba este boton se encontraba con "No hay nada nuevo
+   que enviar" y perdia el entrenamiento sin que nadie le avisara de nada.
+   Lo pidio Salvador el 25 sep 2026: si le da a guardar y enviar, se envia. */
+function confirmaLoEscrito(){
+  let n = 0;
+  Object.keys(LOG).forEach(id=>{
+    const v = LOG[id];
+    if(!v || v.ok || v.borrada || id.endsWith('~fecha')) return;
+    if(!tieneAlgo(v)) return;
+    v.ok = true;
+    if(!v.ts) v.ts = new Date().toISOString();
+    n++;
+  });
+  if(n) LS.set('log', LOG);
+  return n;
+}
 
 /* ---------- aviso de seguimiento ---------- */
 function faltaCheckin(){
@@ -1560,7 +1636,7 @@ function vSesion(){
       ${chipEstado(est)}</div>
     ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
     ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
-      ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Toca")} <b>${tr("Anotar")}</b> ${tr("para confirmar la serie; si te equivocas, vuelve a tocarlo o usa la ✕.")}</p>`
+      ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Al terminar, ")}<b>${tr("Guardar y enviar")}</b>${tr(" lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.")}</p>`
       : `<p class="sm" style="margin-top:12px">${tr("Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.")}</p>`}
   </div>
   ${est==='hecha'&&!omitida?`<div class="yahecha">
@@ -1669,7 +1745,7 @@ function ejercicio(bl,dia,f){
       ${campos.map(k=>casilla(rid, k, d, cs, nombre)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
         ? `<div class="ritmo" id="ritmo_${rid}">${esc(ritmoDe(d).replace('Ritmo', tr('Ritmo')))}</div>` : ''}
-      ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam))}</div>` : ''}
+      ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam, rid))}</div>` : ''}
       <button id="rb_${rid}" onclick="confirmarReg('${rid}','${cs}')">${tr(v.ok?'Hecha':'Anotar')}</button>
     </div>`;
   }
@@ -1962,7 +2038,7 @@ function anotaReg(id, cs){
   const r = document.getElementById('ritmo_'+id);
   if(r) r.textContent = ritmoDe(d).replace('Ritmo', tr('Ritmo'));
   const va = document.getElementById('vam_'+id);
-  if(va) va.textContent = textoVAM(d.vam);
+  if(va) va.textContent = textoVAM(d.vam, id);
 }
 /* Escala de botones: tocar el mismo numero lo quita, como las estrellas. */
 function anotaEscala(id, k, n){
@@ -2027,6 +2103,7 @@ function desomitir(bl,dia){
 /* ================= ENVÍO ================= */
 async function enviar(){
   if(S.enviando) return;
+  confirmaLoEscrito();      // v5.6: lo escrito cuenta, aunque no lleve "Anotar"
   const reg = [], hoy = new Date().toISOString().slice(0,10);
 
   Object.keys(LOG).forEach(id=>{
