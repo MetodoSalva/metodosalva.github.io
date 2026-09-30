@@ -247,7 +247,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.6';
+const VERSION = 'v5.6.1';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -511,6 +511,7 @@ const EN = {
   "¿Qué tal ha ido la sesión?": "How did the session go?",
   "Del 1 al 5. Me sirve para saber qué sesiones te funcionan.": "From 1 to 5. It tells me which sessions work for you.",
   "Guardar y enviar": "Save and send",
+  "Revisa los metros de la cinta: parece que falta alguna cifra.": "Check the treadmill metres: a digit looks missing.",
   "Se guarda solo mientras escribes. Al terminar, ": "It saves itself as you type. When you finish, ",
   " lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.": " sends everything, whether or not you tapped Log it. Log it is just for ticking off what you have done; if you get something wrong, tap it again or use the ✕.",
   "Marcar como omitida": "Mark as skipped",
@@ -1061,17 +1062,34 @@ const pendientes = () => Object.keys(LOG).filter(k=>{
    la sesion entera y pulsaba este boton se encontraba con "No hay nada nuevo
    que enviar" y perdia el entrenamiento sin que nadie le avisara de nada.
    Lo pidio Salvador el 25 sep 2026: si le da a guardar y enviar, se envia. */
+/* v5.6.1: la VAM no se confirma sola si esta a medio escribir.
+   El 26 de septiembre, con el test de VAM ya puesto en cuatro sesiones, se vio
+   que un "2" suelto en la casilla de metros pasa de largo: vamDe('2') lo lee
+   como 2.000 m, o sea 12 km/h, que esta dentro de lo plausible y no dispara
+   ningun aviso. Y de ese numero salen TODAS las velocidades del bloque.
+   Los metros de una cinta son cuatro cifras (1.500-3.500) o vienen en km con
+   coma ("2,15"). Cualquier otra cosa esta a medias, asi que se deja sin
+   confirmar: la casilla se queda abierta y ella ve que falta. */
+const vamCompleta = s => {
+  const t = String(s||'').trim();
+  if(!t) return false;
+  if(/[.,]/.test(t)) return true;               // escrito en km: "2,15"
+  return t.replace(/\D/g,'').length >= 4;       // metros: cuatro cifras
+};
+
 function confirmaLoEscrito(){
-  let n = 0;
+  let n = 0, aMedias = 0;
   Object.keys(LOG).forEach(id=>{
     const v = LOG[id];
     if(!v || v.ok || v.borrada || id.endsWith('~fecha')) return;
     if(!tieneAlgo(v)) return;
+    if(v.d && String(v.d.vam||'').trim() && !vamCompleta(v.d.vam)){ aMedias++; return; }
     v.ok = true;
     if(!v.ts) v.ts = new Date().toISOString();
     n++;
   });
   if(n) LS.set('log', LOG);
+  if(aMedias) toast(tr('Revisa los metros de la cinta: parece que falta alguna cifra.'));
   return n;
 }
 
