@@ -260,7 +260,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.10';
+const VERSION = 'v5.10.1';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -512,6 +512,7 @@ const EN = {
   "Lo que te dice Salva": "What Salva says",
   "Fotos de progreso": "Progress photos",
   "Marcar como hecho": "Mark as done",
+  "Semana de preparación": "Prep week",
   "Ver cómo hacerlas": "See how to take them",
   "Hecho ✓": "Done ✓",
   "Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.": "It's photo month: three photos, front, side and back. They are optional.",
@@ -1388,7 +1389,8 @@ function cabecera(){
   const s = S.semana;
   return `<div class="top"><div class="rowt">
     <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
-    ${s?`<span class="pill">${tr('Semana')} ${esc(s.SEMANA)} ${tr('de')} ${(S.d.SEMANAS||[]).length}</span>`:''}
+    ${s?`<span class="pill">${/^0+$/.test(String(s.SEMANA).trim()) ? tr('Semana de preparación')
+        : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+(S.d.SEMANAS||[]).filter(w=>!/^0+$/.test(String(w.SEMANA).trim())).length}</span>`:''}
   </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}</div>`;
 }
 function nav(){
@@ -1722,7 +1724,7 @@ function vSemana(){
   const futura = ini ? (ini > new Date()) : true;
   return `
   <div class="card" style="border-color:var(--verde-s)">
-    <div class="row sp"><div class="lbl">${tr('Semana')} ${esc(w.SEMANA)} ${tr('de')} ${(S.d.SEMANAS||[]).length}</div>
+    <div class="row sp"><div class="lbl">${tr('Semana')} ${esc(w.SEMANA)} ${enIngles()?'of':'de'} ${(S.d.SEMANAS||[]).filter(w=>!/^0+$/.test(String(w.SEMANA).trim())).length}</div>
       <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
     <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
     ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
@@ -2565,22 +2567,15 @@ function vSeg(){
    Criterio nuestro, sin respaldo en el metodo: la hora (por la manana), la
    altura del movil (cadera) y el lado del perfil (derecho). */
 /* 2 oct: para todas menos Ignacio, que nunca empezo. Una clienta nueva las
-   tiene sin tocar nada. Y nadie las ve antes de que empiece su plan (Ana
-   empieza el 19 oct): cuenta la fecha de inicio de su primera semana. */
+   tiene sin tocar nada. Tambien quien aun no ha empezado su plan (Madelina,
+   Ana): asi hay una foto de partida antes del primer entrenamiento. */
 const FOTOS_SIN = ['ignacio'];
-function planEmpezado(){
-  const ss = (S.d && S.d.SEMANAS) || [];
-  const i = ss.length ? fechaIni(ss[0].FECHAS) : null;
-  if(!i) return true;                         // sin fecha legible, no se bloquea
-  const h = new Date(); h.setHours(0,0,0,0);
-  return h >= i;
-}
 const FOTOS_DIAS = 28;
 const POSES = [['frontal','Frontal','de frente al móvil, pies a la anchura de las caderas'],
                ['lateral','Lateral','de perfil, siempre con el lado derecho hacia el móvil'],
                ['posterior','Posterior','de espaldas, en la misma postura que la frontal']];
 const fotosActivas = () => FOTOS_SIN.indexOf(String(CID||'').toLowerCase()) < 0
-                           && !!(S.d && S.d.VIDEO) && planEmpezado();
+                           && !!(S.d && S.d.VIDEO);
 const diasDesde = f => Math.floor((new Date(hoyISO()) - new Date(String(f).slice(0,10))) / 86400000);
 /* Todas las fotos de progreso que constan: las del servidor y las que este
    movil acaba de mandar y el servidor aun no ha devuelto. */
