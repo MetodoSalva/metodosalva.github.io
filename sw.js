@@ -2,7 +2,7 @@
    Red primero: un despliegue nuevo se ve en cuanto hay cobertura.
    Cache de reserva: sin cobertura, la app abre igual con lo ultimo visto.
    Lo de fuera de este dominio (el puente de Google, las fuentes) no se toca. */
-const CACHE  = 'salva-v50';
+const CACHE  = 'salva-v51';
 const NUCLEO = ['./', './index.html', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -22,6 +22,18 @@ self.addEventListener('fetch', function (e) {
   const req = e.request;
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== location.origin) return;   // el puente va siempre a la red
+
+  /* las fotos de cabecera no cambian: primero las del movil (ahorra datos) */
+  if (new URL(req.url).pathname.indexOf('/img/') > -1) {
+    e.respondWith(caches.match(req).then(function (r) {
+      return r || fetch(req).then(function (res) {
+        const copia = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copia); }).catch(function () {});
+        return res;
+      });
+    }));
+    return;
+  }
 
   e.respondWith(
     fetch(req).then(function (res) {

@@ -366,6 +366,37 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .rec-l li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--linea);font-size:14px}
 .rec-l li:last-child{border-bottom:0}
 .rec-l li b{font-family:var(--m);font-size:12.5px;color:var(--verde);white-space:nowrap;align-self:center}
+.ests{padding:0 14px 12px}
+.ests .lbl{margin:4px 0 6px}
+.est{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--linea)}
+.est .en{font-size:13.5px;color:var(--txt);line-height:1.3}
+.est .ec{display:grid;grid-template-columns:104px 72px;gap:6px;align-items:center}
+.est .ec.r{grid-template-columns:72px}
+.est .hms{width:104px}
+.est input{border:1px solid var(--linea2);border-radius:8px;padding:8px 4px;font-size:16px;width:100%;min-height:42px;
+  background:var(--sup);color:var(--tinta);text-align:center;font-family:var(--m)}
+.est .ec > input{width:72px}
+.est.sent input{border-style:dashed}
+.ests .ayuda{font-size:11.5px;color:var(--txt3);margin-top:6px}
+.cabf{position:relative;margin:-4px -4px 14px;height:190px;border-radius:12px;overflow:hidden;background:#111613;isolation:isolate}
+.cabf img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;filter:grayscale(1)}
+.cabf .pl{position:absolute;left:12px;top:12px;background:var(--verde);color:var(--on-verde);font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:5px 11px;border-radius:99px}
+/* HYROX en los colores SALVA: negro -> verde, amarillo -> crema */
+/* el logo entero, sin recortar, con aire alrededor; las dos bandas siguen por
+   detras (en gris: las capas de color de abajo las pasan a crema y verde) */
+.cabf.hx{height:auto;padding:18px 0;background:linear-gradient(#DADADA calc(48.4% + .5px), #202020 calc(48.4% + .5px))}
+.cabf.hx img{height:auto;object-fit:fill}
+.cabf.hx i{position:absolute;inset:0}
+.cabf.hx .m{background:#F1EDE6;mix-blend-mode:multiply}
+.cabf.hx .s{background:#2F6B4A;mix-blend-mode:screen}
+.cambio{display:flex;align-items:center;gap:14px;background:var(--portada);border-radius:14px;overflow:hidden;margin:18px 0 12px;min-height:84px;isolation:isolate}
+.cambio .cf{position:relative;width:42%;max-width:160px;align-self:stretch;flex:none;background:#111613}
+.cambio .cf img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1)}
+.cambio .cf.co img{filter:grayscale(1) brightness(1.7) contrast(1.4)}
+.cambio .cf.co i{position:absolute;inset:0;background:#8FD0A6;mix-blend-mode:multiply}
+.cambio b{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B8D9C3}
+.cambio span{display:block;font-family:var(--c);font-size:19px;font-weight:700;color:var(--sobre);margin-top:3px}
 .tema{display:flex;gap:6px;margin-top:10px}
 .tema button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;padding:10px 4px;
   font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px}
@@ -398,7 +429,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.14';
+const VERSION = 'v5.16';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -788,7 +819,9 @@ const EN = {
   "Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.": "Automatic follows your phone: light, or dark if your phone is in dark mode.",
   "Claro": "Light", "Oscuro": "Dark", "Automático": "Automatic",
   "Músculos que trabajas hoy": "Muscles you work today",
-  "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work", "Ayudan": "Helping", "aductores": "adductors",
+  "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work", "Ayudan": "Helping", "Ahora toca correr": "Now it's time to run", "Ahora toca fuerza": "Now it's strength time", "Cada estación": "Each station", "Peso de cada estación": "Weight for each station",
+  "Opcional. El tiempo va arriba, en el total.": "Optional. The time goes above, in the total.",
+  "Opcional: el tiempo de cada una y el peso donde lo haya.": "Optional: the time for each one, and the weight where there is one.", "aductores": "adductors",
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
@@ -1072,8 +1105,69 @@ const CAMPOS = {
    grabado). Una carta para cualquier evaluacion en video. Solo donde la
    hoja lo pone; se puede juntar con otras ("hecho, video"). */
 const pideVideo = f => String((f&&f.REGISTRO)||'').split(',').map(x=>norm(x)).indexOf('video') > -1;
-const camposDe = f => String((f&&f.REGISTRO)||'').split(',')
+const camposHoja = f => String((f&&f.REGISTRO)||'').split(',')
                         .map(x=>norm(x)).filter(k=>CAMPOS[k]);
+/* ---------- v5.15: lo que se pide, coherente con lo que se hace ----------
+   Revision de las quince hojas (2 oct, peticion de Salvador): la app corrige
+   aqui, sin tocar las hojas, lo que no casa con el ejercicio:
+   - Varias estaciones HYROX en una fila: el bloque se queda (tiempo total,
+     esfuerzo) y debajo sale una fila por estacion con su tiempo y, si la
+     estacion lleva peso, su carga. La carga suelta del bloque se quita:
+     con ocho estaciones no se sabe a que se refiere.
+   - Una estacion sola: sin carga si no lleva peso (SkiErg, burpees, remo);
+     con tiempo si se hace por distancia o repeticiones; con carga si lleva peso.
+   - Planchas y aguantes ("30 s", "20-40 s/lado"): tiempo y esfuerzo por serie,
+     no repeticiones, kilos y RIR. Movilidad o respiracion de minutos: "hecho".
+   - Una carrera sin nada que anotar: tiempo, esfuerzo y km. */
+const EST_PESO = /trineo|sled|farmer|zancada|lunge|sandbag|saco|wall ?balls?|thruster|kettlebell|mancuerna|\bkb\b/;
+const EST_SIN  = /\bski|skierg|burpee|\bremo\b|\brow\b|rowing|\bbici|\bbike|carrera|\brun\b|trote/;
+const EST_ALGO = new RegExp(EST_PESO.source + '|' + EST_SIN.source);
+/* una estacion de HYROX de verdad (no una mancuerna cualquiera) */
+const EST_HYROX = /\bski|skierg|trineo|sled|burpee|\bremo\b|\brow\b|farmer|zancada|lunge|sandbag|wall ?balls?/;
+const tipoHyrox = f => ['hibrido','hyrox','evento','running'].indexOf(norm(f && f.TIPO)) > -1;
+const enRondas = f => (parseInt(f && f.SERIES)||0) > 1 || /\b(rondas?|rounds?|vueltas?)\b/.test(norm(f && f['REPS / DOSIS']))
+                      || /\d+\s*[×x]\s*\d/.test(String(f && f['REPS / DOSIS']||''));   // "3×15 m" por estacion
+/* "ski 500 m · trineo 25 + 25 m · burpees 40 m" -> ["Ski 500 m","Trineo 25 + 25 m","Burpees 40 m"] */
+function estacionesDe(f){
+  if(!f || !tipoHyrox(f)) return [];
+  if(/activaci|calent|warm|vuelta a la calma|cool/.test(norm(f['EJERCICIO / ELEMENTO']))) return [];
+  const txt = String(f['REPS / DOSIS'] || '') || String(f['MAIN SET'] || '');
+  const out = [];
+  txt.split(/\s*·\s*|\s+-\s+|\s*;\s*|,\s+(?=[a-záéíóú])/i).forEach(parte=>{
+    let cur = '';
+    parte.split(/\s+\+\s+/).forEach(tr2=>{
+      if(EST_ALGO.test(norm(tr2))){ if(cur) out.push(cur); cur = tr2; }
+      else if(cur) cur += ' + ' + tr2;            // "trineo 25" + "25 m" = una estacion
+    });
+    if(cur) out.push(cur);
+  });
+  const limpias = out.map(x=>x.replace(/^\s*\d+\s*(rondas?|rounds?)\s*/i,'').replace(/^\s*\d+\s*[×x]\s*/,'').trim())
+                     .filter(Boolean).map(x=>x.charAt(0).toUpperCase() + x.slice(1));
+  // un texto largo (instrucciones, rotaciones por ronda) no se parte: saldria ilegible
+  if(limpias.some(x=>x.length > 40)) return [];
+  return limpias.length >= 2 ? limpias : [];
+}
+const esPorTiempo = d => /^\s*\d+([.,]\d+)?(\s*[-–]\s*\d+([.,]\d+)?)?\s*(''|"|s|seg|segundos|sec|min|minutos)\b/i.test(String(d||''));
+const esMovilidad = f => /movilidad|respiraci|estiramiento|mobility|stretch|breath|opener/.test(norm(f && f['EJERCICIO / ELEMENTO']));
+/* una serie que se aguanta (plancha) en vez de contarse en repeticiones */
+const aguantePorTiempo = f => (parseInt(f && f.SERIES)||0) > 0 && !camposHoja(f).length
+                              && !esCorrer(f) && esPorTiempo(f && f['REPS / DOSIS']) && !esMovilidad(f);
+function camposDe(f){
+  let c = camposHoja(f);
+  const nom = norm(f && f['EJERCICIO / ELEMENTO']);
+  if(estacionesDe(f).length){ c = c.filter(k=>k!=='carga'); return c; }
+  if(tipoHyrox(f) && c.length && EST_HYROX.test(nom)){        // una estacion sola
+    const peso = EST_PESO.test(nom);
+    if(!peso) c = c.filter(k=>k!=='carga');
+    if(peso && c.indexOf('carga') < 0) c.push('carga');
+    if(c.indexOf('tiempo') < 0 && !esPorTiempo(f['REPS / DOSIS'])) c.unshift('tiempo');
+    return c;
+  }
+  if(!c.length && (parseInt(f && f.SERIES)||0) > 0 && esMovilidad(f) && esPorTiempo(f && f['REPS / DOSIS'])) return ['hecho'];
+  if(!c.length && !(parseInt(f && f.SERIES)||0) && ['running','hibrido'].indexOf(norm(f && f.TIPO)) > -1
+     && esCarrera(f) && CARRERA_SI.test(nom) && !estacionesDe(f).length) return norm(f.TIPO)==='running' ? ['km','tiempo','rpe'] : ['tiempo','rpe'];
+  return c;
+}
 /* Una casilla del bloque de registro. Las escalas salen como botones (se
    contestan de un toque y no hay que teclear), el resto como casilla de
    texto. Debajo, la linea de ayuda si la tiene. */
@@ -1117,6 +1211,37 @@ const ABIERTAS = {};                       // series desplegadas, solo en esta v
 function abreSeries(id){ ABIERTAS[id] = !ABIERTAS[id]; pinta(); }
 
 /* Filas de una carrera: tiempo y esfuerzo por serie. Nunca kilos. */
+/* v5.15: una fila por estacion. Tiempo (min y s) y, si la estacion lleva
+   peso, carga. En rondas, solo la carga: el tiempo va en el total. */
+const idEst = (b,d,ej,i) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~e${i+1}`;
+function filasEstaciones(bl, dia, nombre, f){
+  const est = estacionesDe(f); if(!est.length) return '';
+  const rondas = enRondas(f);
+  const filas = est.map((e,i)=>{
+    const id = idEst(bl,dia,nombre,i), v = LOG[id] || {}, peso = EST_PESO.test(norm(e));
+    if(rondas && !peso) return '';
+    recordarNombre(id, nombre + ' · ' + e);
+    const t = partesTiempo(v.t), mm = t.h ? String(t.h*60 + +t.m) : t.m;
+    return `<div class="est ${v.sent?'sent':''}" id="fila_${id}"><div class="en">${esc(e)}</div><div class="ec${rondas?' r':''}">
+      ${rondas ? '' : `<div class="hms">${['m','s'].map(q=>`<span><input inputmode="numeric" pattern="[0-9]*" maxlength="3"
+          placeholder="${q==='m'?'min':'s'}" value="${q==='m'?mm:t.s}" id="t_${id}_${q}" oninput="anotaEst('${id}','${esc(e)}')"
+          aria-label="${tr('tiempo')} ${q==='m'?'min':'s'} · ${esc(e)}"></span>`).join('')}</div>`}
+      ${peso ? `<input inputmode="decimal" placeholder="kg" value="${esc(v.c||'')}" id="c_${id}" oninput="anotaEst('${id}','${esc(e)}')"
+          aria-label="${tr('carga')} · ${esc(e)}">` : (rondas ? '' : '<span></span>')}</div></div>`;
+  }).join('');
+  if(!filas) return '';
+  return `<div class="ests"><div class="lbl">${tr(rondas ? 'Peso de cada estación' : 'Cada estación')}</div>${filas}
+    <p class="ayuda">${tr(rondas ? 'Opcional. El tiempo va arriba, en el total.' : 'Opcional: el tiempo de cada una y el peso donde lo haya.')}</p></div>`;
+}
+function anotaEst(id, etq){
+  const tm=document.getElementById('t_'+id+'_m'), ts=document.getElementById('t_'+id+'_s'), c=document.getElementById('c_'+id);
+  const prev = LOG[id] || {};
+  LOG[id] = Object.assign({}, prev, {t: tm ? juntaTiempo('', tm.value, ts && ts.value) : (prev.t||''),
+                                     c: c ? c.value.trim() : (prev.c||''), est: etq});
+  if(prev.sent) LOG[id].corregido = true;
+  LS.set('log', LOG);
+}
+
 function setsCorre(bl, dia, nombre, series, hayTotales){
   const base = slug(bl)+'~'+slug(dia)+'~'+slug(nombre);
   const ids = Array.from({length:series},(_,i)=>idSerie(bl,dia,nombre,i));
@@ -1540,7 +1665,7 @@ function fusionarRegistros(filas){
       } else if(id.endsWith('~valoracion')){
         LOG[id] = {val:parseInt(f.VALORACION)||0, ok:true, sent:true};
       } else {
-        LOG[id] = {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', ok:true, sent:true, ts:f.FECHA||'',
+        LOG[id] = {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', t:f.TIEMPO||'', e:f.RPE||'', ok:true, sent:true, ts:f.FECHA||'',
                    est:f.ESTADO||'', obs:f.NOTAS||'', nota:f.NOTAS||''};
         // anotada en libras: se le vuelve a ensenar lo que el escribio
         const lb = /^\s*(\d+(?:[.,]\d+)?)\s*lb\s*$/i.exec(String(f.NOTAS||''));
@@ -2198,12 +2323,85 @@ DIBUJO.hibrido = DIBUJO.hyrox;
 DIBUJO.test = '<path d="M14 70h92" stroke-width="4"/><path d="M24 70v-12M40 70v-20M56 70v-12M72 70v-20M88 70v-12"/>';
 DIBUJO.movilidad = '<path d="M60 18a32 32 0 1 1-30 21"/><path d="M24 30l6 9 9-5"/><circle cx="60" cy="50" r="6"/>';
 const ETIQ_TIPO = {fuerza:'Fuerza', carrera:'Carrera', hyrox:'HYROX', hibrido:'Híbrido', test:'Tests y medidas', movilidad:'Movilidad'};
+/* v5.16: CABECERAS CON FOTO (elegidas por Salvador, 2 oct; estilo "foto en
+   tarjeta, blanco y negro"). Chica para ellas y chico para ellos (figuraDe).
+   - fuerza: foto de fuerza. Si despues viene carrera, a mitad de sesion la
+     tarjeta verde con el corredor: "Ahora toca correr".
+   - carrera: foto corriendo; suave o rapida segun la intensidad del dia. Si
+     despues viene fuerza: "Ahora toca fuerza".
+   - HYROX (o hibrido): su logo en los colores SALVA (Salvador tiene permiso).
+   - movilidad y cardio suave: foto de movilidad.
+   La cabecera la decide la PRIMERA parte de la sesion (fuerza o carrera). */
+const generoFoto = () => figuraDe() === 'h' ? 'hombre' : 'mujer';
+const CORRER = /\b(run|running|carrera|rodaje|trote|maraton|marathon|tirada|correr|jog|fartlek|cambios de ritmo|series|cuestas|hill|tempo|umbral|threshold|sprint|strides|progresivos|pace|interval)|\bkm\b|\/km|^\S*\s*\d+\s*[x×]\s*\d+\s*(min|m|km|s)\b/;
+const MAQUINA = /\bski|skierg|bici|bike|cycl|remo|\brow|elipti|ellipti|assault|stair|escaladora/;
+function claseFila(f){
+  const t = norm(f && f.TIPO), n = norm(f && f['EJERCICIO / ELEMENTO']);
+  if(t === 'fuerza' || t === 'extra') return 'f';
+  // maquinas y bici no son correr (el SkiErg de Ben, la bici de Ana)
+  if(t !== 'running') return '';
+  if(esPaseo(f) || CARRERA_NO.test(n) || (MAQUINA.test(n) && !CARRERA_SI.test(n))) return '';
+  /* solo cuenta como correr si el nombre o la dosis lo dicen: el "Motor" de
+     Jorge, el HIIT de Ben o el titulo "Strength A" de Smi no son carrera */
+  const txt = n + ' ' + norm(f['REPS / DOSIS']) + ' ' + norm(f['MAIN SET']);
+  return CORRER.test(txt) ? 'c' : '';
+  return '';
+}
+/* CRITERIO NUESTRO: intensa si el semaforo es rojo o hay series, cuestas,
+   intervalos, fartlek, umbral, tempo, sprints o un "6 x 400 m". */
+function carreraIntensa(bl, dia){
+  const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
+  if(semColor(meta['SEMÁFORO']) === 'rojo') return true;
+  return filasTrabajo(bl, dia).filter(f=>claseFila(f)==='c').some(f=>{
+    const t = norm([f['EJERCICIO / ELEMENTO'], f['REPS / DOSIS'], f['MAIN SET'], meta['SESIÓN']].join(' '));
+    if(/run.?walk|trote.?(andar|camina)|andar|caminar/.test(t)) return false;     // el run-walk es suave
+    return /series|cuesta|interval|fartlek|umbral|tempo|sprint|ritmo de carrera|\b\d+\s*[x×]\s*\d/.test(t);
+  });
+}
+function cabTipo(bl, dia){
+  const t = tipoSesion(bl, dia);
+  if(t === 'hyrox' || t === 'hibrido') return 'hyrox';
+  if(t === 'test') return 'test';
+  if(t === 'movilidad') return 'movilidad';
+  if(!t){
+    // cardio suave: solo paseos o bici, o filas de movilidad
+    const fs = filasSesion(bl, dia);
+    return fs.some(f=>esPaseo(f) || norm(f.TIPO)==='movilidad' || esMovilidad(f)) ? 'movilidad' : null;
+  }
+  const primera = filasTrabajo(bl, dia).map(claseFila).find(Boolean);
+  if(primera === 'c') return 'carrera';
+  if(!primera) return null;          // solo maquinas o bici: sin foto
+  return 'fuerza';
+}
 function cabeceraSesion(bl, dia){
-  const t = tipoSesion(bl, dia); if(!t) return '';
-  const foto = CABECERA_FOTO[t];
-  return `<div class="cab">${foto ? `<img src="${esc(foto)}" alt="">` : ''}
-    <svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">${DIBUJO[t]}</svg>
-    <span class="k">${tr(ETIQ_TIPO[t])}</span></div>`;
+  const t = cabTipo(bl, dia); if(!t) return '';
+  if(t === 'test') return `<div class="cab"><svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">${DIBUJO.test}</svg>
+    <span class="k">${tr(ETIQ_TIPO.test)}</span></div>`;
+  if(t === 'hyrox') return `<div class="cabf hx"><img src="img/hyrox.jpg" alt="HYROX"><i class="m"></i><i class="s"></i></div>`;
+  const g = generoFoto();
+  const src = t === 'fuerza' ? `img/fuerza-${g}.jpg`
+            : t === 'movilidad' ? `img/movilidad-${g}.jpg`
+            : `img/correr-${g}-${carreraIntensa(bl, dia) ? 'rapido' : 'suave'}.jpg`;
+  const et = {fuerza:'Fuerza', carrera:'Carrera', movilidad:'Movilidad'}[t];
+  return `<div class="cabf"><img src="${src}" alt=""><span class="pl">${tr(et)}</span></div>`;
+}
+/* El cambio a mitad de sesion: de fuerza a carrera, o de carrera a fuerza */
+function cambioDeParte(clase){
+  if(clase === 'c') return `<div class="cambio"><div class="cf co"><img src="img/corredor.jpg" alt=""><i></i></div>
+    <div><b>${tr('Carrera')}</b><span>${tr('Ahora toca correr')}</span></div></div>`;
+  return `<div class="cambio"><div class="cf"><img src="img/fuerza-${generoFoto()}.jpg" alt=""></div>
+    <div><b>${tr('Fuerza')}</b><span>${tr('Ahora toca fuerza')}</span></div></div>`;
+}
+function ejerciciosConCambios(bl, dia, ejs){
+  const t = cabTipo(bl, dia);
+  let primera = null, puesto = false;
+  return ejs.map(f=>{
+    const c = claseFila(f);
+    let antes = '';
+    if(c && !primera) primera = c;
+    else if(c && !puesto && c !== primera && (t === 'fuerza' || t === 'carrera')){ antes = cambioDeParte(c); puesto = true; }
+    return antes + ejercicio(bl, dia, f);
+  }).join('');
 }
 
 /* ---------- barra de progreso de la sesion (en la cabecera) ----------
@@ -2294,7 +2492,7 @@ function vSesion(){
       <p class="mut" style="margin-top:10px">${tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")}</p>
     </div>
     ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
-    ${ejs.map(f=>ejercicio(bl,dia,f)).join('')}
+    ${ejerciciosConCambios(bl, dia, ejs)}
     ${extras.length?`<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
       <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.</p></div>
       ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
@@ -2320,7 +2518,7 @@ function vSesion(){
   ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
     <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
   ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
-  ${ejs.map(f=>ejercicio(bl,dia,f)).join('')}
+  ${ejerciciosConCambios(bl, dia, ejs)}
   ${extras.length?`<div class="extra-sep">
     <b>${tr("Si te sobran minutos")}</b>
     <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.
@@ -2432,7 +2630,7 @@ function ejercicio(bl,dia,f){
 
   let sets = '';
   if(saltado(bl,dia,nombre)){ sets = ''; registro = ''; }
-  else if(campos.length ? (esCorrer(f) && series>1) : (corrPorTiempo(f) && series>0)){
+  else if(campos.length ? (esCorrer(f) && series>1) : ((corrPorTiempo(f) || aguantePorTiempo(f)) && series>0)){
     /* v5.2: una carrera no se anota con kilos. Si son series o cuestas,
        cada una tiene su fila (tiempo y esfuerzo) y los totales van debajo;
        plegado, porque la mayoria de dias solo hace falta el total. */
@@ -2490,7 +2688,7 @@ function ejercicio(bl,dia,f){
          "hibrido". Pero un face pull marcado como "extra" sigue siendo un
          ejercicio, y a Sergio se le quedaban nueve sin el buscador. Lo que
          decide no es la etiqueta: es si hay SERIES que hacer. */''}
-    ${sets}${registro}
+    ${sets}${registro}${saltado(bl,dia,nombre) ? '' : filasEstaciones(bl, dia, nombre, f)}
     ${(function(){
       if(!(series>0 || campos.length)) return '';
       const sal = saltado(bl,dia,nombre);
@@ -2921,6 +3119,11 @@ async function enviar(opc){
       return;
     }
 
+    if(/^e\d+$/.test(p[4]||'')){                 // v5.15: una estacion
+      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||((p[3]||'')+' · '+(v.est||'')), serie:p[4].slice(1),
+        tiempo:v.t||'', carga:v.c||'', estado: v.borrada ? '' : 'realizada'}));
+      return;
+    }
     const serie = (p[4]||'').replace('s','');
     // Una serie de fuerza trae reps, kilos y RIR; una de carrera, tiempo y esfuerzo.
     // en libras: a CARGA van los kilos y lo que escribio, a NOTAS
