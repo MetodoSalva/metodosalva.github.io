@@ -255,7 +255,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.9.2';
+const VERSION = 'v5.9.3';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -624,6 +624,8 @@ const EN = {
   "Volver a lo de hoy": "Back to today",
   "← Volver a la semana": "← Back to the week",
   "¿No sabes si lo estás haciendo bien? Grábate haciéndolo": "Not sure you're doing it right? Film yourself",
+  "Clic aquí": "Click here",
+  "para grabar o subir el vídeo": "to record or upload the video",
   "km de toda la sesión": "km for the whole session",
   "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
   "como lo marca el reloj: 55 min 43 s va en min y s": "as your watch shows it: 55 min 43 s goes in min and s",
@@ -826,6 +828,13 @@ const CAMPOS = {
   fuel:    {et:'avituallamiento', ph:'lo tomé todo', modo:'text',
             ayuda:'dímelo sobre todo si te lo saltaste o te sentó mal'}
 };
+/* 2 oct: "video" en REGISTRO no es una casilla, es una peticion: el video lo
+   pedimos nosotros (el hombro de Jorge para comparar el 6 nov). El boton deja
+   de preguntar si no sabe hacerlo y dice "Clic aqui para grabar o subir el
+   video" (redaccion de Salvador: "subir" a la vista, puede tenerlo ya
+   grabado). Una carta para cualquier evaluacion en video. Solo donde la
+   hoja lo pone; se puede juntar con otras ("hecho, video"). */
+const pideVideo = f => String((f&&f.REGISTRO)||'').split(',').map(x=>norm(x)).indexOf('video') > -1;
 const camposDe = f => String((f&&f.REGISTRO)||'').split(',')
                         .map(x=>norm(x)).filter(k=>CAMPOS[k]);
 /* Una casilla del bloque de registro. Las escalas salen como botones (se
@@ -1896,7 +1905,7 @@ function ejercicio(bl,dia,f){
       ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
     ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null))}
     ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
-    ${(series || campos.length) ? (function(){
+    ${(series || campos.length || pideVideo(f)) ? (function(){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
       return `<div class="notaej">
@@ -2018,7 +2027,9 @@ function bloqueVideo(bl, dia, nombre, f){
       onchange="subirVideo('${id}','${esc(bl)}','${esc(dia)}',this)">
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
-      : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${tocar(enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
+      : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${!enviado && pideVideo(f)
+          ? `<span class="tocar">${tr("Clic aquí")}</span> ${tr("para grabar o subir el vídeo")}`
+          : tocar(enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
          ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
            <div class="stack" style="margin:0 0 10px;gap:8px">
              <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
