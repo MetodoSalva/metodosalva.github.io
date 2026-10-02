@@ -336,6 +336,20 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .menu .op{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:none;border:0;
   padding:12px 2px;font-size:15px;font-weight:600;color:var(--tinta);cursor:pointer;text-align:left;min-height:44px}
 .menu .op::after{content:'';width:7px;height:7px;border-right:2px solid var(--txt3);border-top:2px solid var(--txt3);transform:rotate(45deg)}
+.pill-b{display:inline-flex;align-items:center;gap:5px;color:var(--sobre);cursor:pointer;font-family:inherit;padding:5px 9px 5px 11px}
+.pill-b svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lista-sem{width:min(260px,calc(100vw - 24px));padding:6px 10px}
+.lista-sem .op{font-weight:500;padding:10px 4px;border-bottom:1px solid var(--linea);border-radius:0}
+.lista-sem .op:last-child{border-bottom:0}
+.lista-sem .op::after{display:none}
+.lista-sem .op .f{color:var(--txt3);font-size:13.5px}
+.lista-sem .op.on{color:var(--verde)}
+.lista-sem .op.on b{color:var(--verde)}
+.flechas{display:inline-flex;gap:4px}
+.flecha{width:32px;height:32px;border-radius:9px;border:1px solid var(--linea);background:var(--sup);color:var(--tinta);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.flecha svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.flecha:disabled{opacity:.3;cursor:default}
 .novedades li{margin:0 0 8px 0;line-height:1.45}
 .novedades ul{margin:10px 0 0 18px;padding:0;color:var(--txt2);font-size:14.5px}
 /* ---------- v5.14 · graficas de Progreso y resumen de la semana ---------- */
@@ -439,7 +453,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.18';
+const VERSION = 'v5.19';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -448,7 +462,7 @@ const CID = (qs.get('c') || '').trim().toLowerCase();
 const KEY = (qs.get('k') || '').trim();
 
 /* ---------- estado ---------- */
-const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null, menu:false };
+const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null, menu:false, listaSem:false };
 const K = k => 'salva_' + CID + '_' + k;
 const LS = {
   get(k,f){ try{ return JSON.parse(localStorage.getItem(K(k))) ?? f; }catch(e){ return f; } },
@@ -850,7 +864,7 @@ const EN = {
   "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
   "Tu sesión": "Your session",
   "Tu mejor serie de cada semana. Toca un punto para ver el dato.": "Your best set each week. Tap a point to see it.",
-  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
+  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
   "Récords de esta semana": "This week's records", "sesión anotada": "session logged", "sesiones anotadas": "sessions logged",
   "kilos movidos": "kilos lifted", "corridos": "run", "Seguimiento enviado": "Check-in sent", "Lo que mejoró": "What improved",
   "Sumar semanas así es lo que hace que el cambio llegue.": "Stacking weeks like this is what makes the change happen.",
@@ -1780,7 +1794,9 @@ function pinta(){
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
   const v = {hoy:vHoy, novedades:vNovedades, resumen:vResumen, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '');
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '');
+  if(S.listaSem){ const L = document.querySelector('.lista-sem'), a = L && (L.querySelector('.on') || L.querySelector('.aqui'));
+    if(a) L.scrollTop = Math.max(0, a.offsetTop - L.clientHeight/2 + a.offsetHeight/2); }
 }
 function vErr(){
   return `<div class="top"><div class="rowt"><div class="wm">SALVA</div></div></div>
@@ -1793,8 +1809,10 @@ function cabecera(){
   const s = S.semana;
   return `<div class="top"><div class="rowt">
     <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
-    <div class="der">${s?`<span class="pill">${esPrep(s) ? tr('Semana de preparación')
-        : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</span>`:''}
+    <div class="der">${s?(()=>{ const w = S.mirando || s;
+        return `<button class="pill pill-b" onclick="abreSemanas()" aria-haspopup="listbox" aria-expanded="${S.listaSem}"
+          aria-label="${tr('Elegir semana')}">${esPrep(w) ? tr('Semana de preparación')
+          : tr('Semana')+' '+esc(numSem(w))+' '+(enIngles()?'of':'de')+' '+semanasReales().length}<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></button>`; })():''}
       <button class="menu-b" onclick="abreMenu()" aria-label="${tr('Menú')}" aria-expanded="${S.menu}" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
   </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}${barraSesion()}</div>`;
@@ -1816,6 +1834,7 @@ function ir(v){
   // Los cuatro botones de abajo son "el presente": al tocarlos se sale de la
   // semana que se estaba mirando.
   if(v!=='semana') S.mirando = null;
+  S.listaSem = false;
   S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta();
 }
 /* Abre una semana para verla. Si es la de hoy, no hay modo lectura: se va a Hoy. */
@@ -2000,7 +2019,7 @@ function vHoy(){
   return bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
-    <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
+    <div class="row" style="gap:6px">${flechasSem(S.semana)}<button class="btn sm2" onclick="abreSemanas()" aria-haspopup="listbox">${tr("Ver todo")}</button></div></div>
     ${diasDeBloque(bl).map(x=>{
       const es = estadoSesion(bl,x['DÍA']);
       const esHoy = hoyNombres().some(h=>norm(x['DÍA']).startsWith(h));
@@ -2169,7 +2188,7 @@ function vSemana(){
   return `
   <div class="card" style="border-color:var(--verde-s)">
     <div class="row sp"><div class="lbl">${esPrep(w) ? tr('Semana de preparación') : tr('Semana')+' '+esc(w.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</div>
-      <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
+      <div class="row" style="gap:8px"><span class="sem verde"><i>◔</i>${tr("solo lectura")}</span>${flechasSem(w)}</div></div>
     <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
     ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
     <p class="mut" style="margin-top:10px">${futura
@@ -2208,12 +2227,47 @@ function ponTema(t){ LS.set('tema', t); aplicaTema(); pinta(); }
 if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicaTema); }catch(e){} }
 
 
+/* ---------- v5.19 · saltar de una semana a otra (3 oct, Salvador) ----------
+   La pildora de arriba ("Semana 8 de 12") y "Ver todo" abren la lista de las
+   semanas, limpia: "S5 · 28 sep-4 oct", con la de hoy marcada. Y dentro de una
+   semana, flechas para la anterior y la siguiente. Antes habia que volver a
+   Mi plan y bajar a buscarla cada vez. */
+const todasSem = () => (S.d && S.d.SEMANAS) || [];
+function vecinaSem(w, d){
+  const ws = todasSem(), i = ws.findIndex(x=>w && String(x.SEMANA)===String(w.SEMANA));
+  return i < 0 ? null : (ws[i + d] || null);
+}
+function flechasSem(w){
+  if(!w || todasSem().length < 2) return '';
+  const a = vecinaSem(w, -1), b = vecinaSem(w, 1);
+  const f = (x, d, et) => `<button class="flecha" ${x ? `onclick="verSemana('${esc(x.SEMANA)}')"` : 'disabled'}
+      aria-label="${tr(et)}"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="${d}"/></svg></button>`;
+  return `<span class="flechas">${f(a, 'M7.5 2.5L4 6l3.5 3.5', 'Semana anterior')}${f(b, 'M4.5 2.5L8 6 4.5 9.5', 'Semana siguiente')}</span>`;
+}
+const numSem = w => /^\d+$/.test(String(w.SEMANA).trim()) ? String(parseInt(w.SEMANA, 10)) : String(w.SEMANA);
+const etiqSemana = w => esPrep(w) ? tr('Preparación') : (enIngles() ? 'W' : 'S') + numSem(w);
+function abreSemanas(){ S.menu = false; S.listaSem = !S.listaSem; pinta(); if(S.listaSem) setTimeout(()=>{ const b=document.querySelector('.lista-sem .on, .lista-sem .aqui'); if(b) b.focus(); }, 30); }
+function cierraSemanas(){ if(!S.listaSem) return; S.listaSem = false; pinta(); }
+function eligeSemana(n){ S.listaSem = false; verSemana(n); }
+function vListaSem(){
+  const hoy = S.semana, mira = S.mirando || hoy;
+  return `<div class="menu-fondo" onclick="cierraSemanas()"></div>
+  <div class="menu lista-sem" role="listbox" aria-label="${tr('Elegir semana')}">
+    ${todasSem().map(w=>{
+      const esHoy = hoy && String(w.SEMANA)===String(hoy.SEMANA), on = mira && String(w.SEMANA)===String(mira.SEMANA);
+      return `<button class="op${on?' on':''}${esHoy?' aqui':''}" role="option" aria-selected="${on}" onclick="eligeSemana('${esc(w.SEMANA)}')">
+        <span><b class="mono">${esc(etiqSemana(w))}</b>${w.FECHAS?` <span class="f">· ${esc(w.FECHAS)}</span>`:''}</span>
+        ${esHoy?`<span class="sem verde"><i>●</i>${tr("estás aquí")}</span>`:''}</button>`;
+    }).join('')}
+  </div>`;
+}
+
 /* ---------- menu de la esquina (v5.13) ----------
    Un sitio fijo para el aspecto y para lo que vayamos anadiendo. */
-function abreMenu(){ S.menu = !S.menu; pinta(); if(S.menu) setTimeout(()=>{ const b=document.querySelector('.menu button'); if(b) b.focus(); }, 30); }
+function abreMenu(){ S.listaSem = false; S.menu = !S.menu; pinta(); if(S.menu) setTimeout(()=>{ const b=document.querySelector('.menu button'); if(b) b.focus(); }, 30); }
 function cierraMenu(){ if(!S.menu) return; S.menu = false; pinta(); }
 function irMenu(v){ S.menu = false; ir(v); }
-document.addEventListener('keydown', e=>{ if(e.key === 'Escape') cierraMenu(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ cierraMenu(); cierraSemanas(); } });
 function vMenu(){
   const t = LS.get('tema', 'auto');
   return `<div class="menu-fondo" onclick="cierraMenu()"></div>
