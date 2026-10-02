@@ -350,6 +350,11 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .flecha svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .flecha:disabled{opacity:.3;cursor:default}
+.ej .alt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
+.ej .alt button{font:inherit;font-size:13px;padding:6px 10px;border-radius:99px;border:1px solid var(--linea);
+  background:var(--sup);color:var(--txt2);cursor:pointer;min-height:32px}
+.ej .alt button.on{border-color:var(--verde);background:var(--verde-s);color:var(--tinta);font-weight:600}
+.aviso.corrige{border-color:var(--ambar, #c9962b)}
 .novedades li{margin:0 0 8px 0;line-height:1.45}
 .novedades ul{margin:10px 0 0 18px;padding:0;color:var(--txt2);font-size:14.5px}
 /* ---------- v5.14 · graficas de Progreso y resumen de la semana ---------- */
@@ -453,7 +458,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.19';
+const VERSION = 'v5.20';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -555,12 +560,18 @@ function semanaActual(){
    anota sigue colgando SIEMPRE de S.semana (el identificador de cada serie lo
    da SEM()), y en modo lectura no se pinta nada que escriba. */
 const semanaVista = () => S.mirando || S.semana;
+/* v5.20 (3 oct, Salvador): una semana que YA PASO se puede corregir. Antes era
+   solo lectura y un error (los 100 kg de Alexia que eran de la prensa) se
+   quedaba para siempre en las graficas. Solo lectura queda para las que vienen.
+   Lo que se corrige cuelga de ESA semana: SEM() da la semana que se mira. */
+const esFutura = w => { const ini = w && fechaIni(w.FECHAS); return ini ? ini > new Date() : true; };
+const corrigiendo = () => !!S.mirando && !esFutura(S.mirando);
 /* v5.11: la semana 00 es de preparacion y no cuenta en ningun total. Antes
    solo la quitaban la cabecera y la semana en lectura; el titulo de Mi plan y
    la barra de Progreso la contaban (aviso de la sesion de Jorge). */
 const esPrep = w => !!w && /^0+$/.test(String(w.SEMANA).trim());
 const semanasReales = () => ((S.d && S.d.SEMANAS) || []).filter(w=>!esPrep(w));
-const soloLectura = () => !!S.mirando;
+const soloLectura = () => !!S.mirando && esFutura(S.mirando);
 
 const campo = k => {
   const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
@@ -864,7 +875,7 @@ const EN = {
   "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
   "Tu sesión": "Your session",
   "Tu mejor serie de cada semana. Toca un punto para ver el dato.": "Your best set each week. Tap a point to see it.",
-  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
+  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Hoy haces": "Today you do", "Qué ejercicio haces": "Which exercise you do", "se puede corregir": "can be corrected", "Estás en la semana": "You are in week", "que ya pasó.": "which has passed.", "Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.": "What you change here is corrected in that week. Tap Save and send when you finish.", "Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.": "This week has passed. If you logged something wrong or forgot a session, open it and fix it: it is saved in this week.", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
   "Récords de esta semana": "This week's records", "sesión anotada": "session logged", "sesiones anotadas": "sessions logged",
   "kilos movidos": "kilos lifted", "corridos": "run", "Seguimiento enviado": "Check-in sent", "Lo que mejoró": "What improved",
   "Sumar semanas así es lo que hace que el cambio llegue.": "Stacking weeks like this is what makes the change happen.",
@@ -992,7 +1003,7 @@ const semForma = s => { const v=semColor(s); return v==='rojo'?'■':v==='ambar'
    v3.14: empieza por la semana. Un bloque dura varias semanas, asi que
    sin este prefijo el lunes de la semana 3 era el mismo lunes que el de
    la 2: se pisaban el registro y se perdia la progresion. */
-const SEM = () => 's' + slug(String((S.semana && S.semana.SEMANA) || '0'));
+const SEM = () => 's' + slug(String(((corrigiendo() ? S.mirando : S.semana) || {}).SEMANA || '0'));
 const idSerie = (b,d,ej,i) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~s${i+1}`;
 const idOmit  = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~omitida`;
 const idObs   = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~obs`;
@@ -1604,7 +1615,7 @@ function estadoSesion(b,d){
   conSeries.forEach(f=>{
     const n = parseInt(f.SERIES)||1; ejercicios++;
     let m = 0;
-    for(let i=0;i<n;i++){ const v=LOG[idSerie(b,d,f['EJERCICIO / ELEMENTO'],i)]; if(v && v.ok) m++; }
+    for(let i=0;i<n;i++){ const v=LOG[idSerie(b,d,nombreEf(b,d,f),i)]; if(v && v.ok) m++; }
     anotadas += m; if(m) conAlgo++;
   });
   conReg.forEach(f=>{
@@ -1781,6 +1792,23 @@ function fusionarRegistros(filas){
         if(lb) Object.assign(LOG[id], {c:lb[1], u:'lb', obs:'', nota:''});
       }
       cambios = true;
+    } else {
+      /* v5.20: lo que ya estaba enviado y no se ha tocado en el movil lo manda
+         la hoja. Antes la app solo traia lo que no tenia, asi que una
+         correccion hecha en la hoja (el 55:43:00 de Smi, D-106) no llegaba
+         nunca al movil que ya tenia el dato. Lo pendiente de enviar no se pisa.
+         ESTADO "anulada" en la hoja quita la fila del movil (la serie de
+         Alexia que paso a la prensa). */
+      const v = LOG[id];
+      if(!v.sent || v.corregido || !/~(s\d+|reg|e\d+)$/.test(id)) return;
+      const anu = String(f.ESTADO||'').toLowerCase() === 'anulada';
+      const nuevo = id.endsWith('~reg')
+        ? Object.assign({}, v, {d:Object.assign({}, v.d, {km:f.KM||'', tiempo:f.TIEMPO||'', rpe:f.RPE||'', piernas:f.PIERNAS||'',
+                                carga:f.CARGA||''})})
+        : /~e\d+$/.test(id) ? Object.assign({}, v, {t:f.TIEMPO||'', c:f.CARGA||''})
+        : (/\blb\s*$/i.test(String(f.NOTAS||'')) ? v : Object.assign({}, v, {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', t:f.TIEMPO||'', e:f.RPE||''}));
+      if(anu) nuevo.borrada = true; else delete nuevo.borrada;
+      if(JSON.stringify(nuevo) !== JSON.stringify(v)){ LOG[id] = nuevo; cambios = true; }
     }
   });
   if(cambios) LS.set('log', LOG);
@@ -2188,12 +2216,12 @@ function vSemana(){
   return `
   <div class="card" style="border-color:var(--verde-s)">
     <div class="row sp"><div class="lbl">${esPrep(w) ? tr('Semana de preparación') : tr('Semana')+' '+esc(w.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</div>
-      <div class="row" style="gap:8px"><span class="sem verde"><i>◔</i>${tr("solo lectura")}</span>${flechasSem(w)}</div></div>
+      <div class="row" style="gap:8px">${futura ? `<span class="sem verde"><i>◔</i>${tr("solo lectura")}</span>` : `<span class="sem ambar"><i>✎</i>${tr("se puede corregir")}</span>`}${flechasSem(w)}</div></div>
     <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
     ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
     <p class="mut" style="margin-top:10px">${futura
       ? tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")
-      : tr("Esta semana ya pasó. Puedes verla, pero se anota en la semana en curso.")}</p>
+      : tr("Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.")}</p>
     ${w['NOTA DE LA SEMANA']?`<div class="calent" style="margin-top:12px">${esc(w['NOTA DE LA SEMANA'])}</div>`:''}
   </div>
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Sus sesiones")}</h3>
@@ -2559,7 +2587,7 @@ function ejerciciosConCambios(bl, dia, ejs){
 function progresoSesion(bl, dia){
   let total = 0, hechos = 0;
   sesionDe(bl, dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)).forEach(f=>{
-    const nombre = f['EJERCICIO / ELEMENTO'], n = parseInt(f.SERIES)||0, cs = camposDe(f);
+    const nombre = nombreEf(bl, dia, f), n = parseInt(f.SERIES)||0, cs = camposDe(f);
     if(!cs.length && !n) return;
     total++;
     if(saltado(bl, dia, nombre)){ hechos++; return; }
@@ -2597,7 +2625,7 @@ function abrir(dia){
   S.dia=dia; S.vista='sesion'; S.video=null;
   const bl=bloqueDe(semanaVista());
   // En modo lectura no se marca nada: mirar una semana futura no es hacerla.
-  if(!soloLectura() && modoLibre(bl)) marcaFecha(bl,dia);
+  if(!S.mirando && modoLibre(bl)) marcaFecha(bl,dia);
   window.scrollTo(0,0); pinta();
 }
 
@@ -2615,7 +2643,7 @@ function vSesion(){
       <h2 style="margin-top:6px">${esc(partir(meta['SESIÓN']||'Descanso').t)}</h2>
       <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>
       ${soloLectura()?'':bloqueExtra(bl, dia)}
-      <div class="card flat"><button class="btn big" onclick="ir('${soloLectura()?'semana':'hoy'}')">${tr("Volver")}</button></div>`;
+      <div class="card flat"><button class="btn big" onclick="ir('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`;
   }
 
   const cal = filas.find(f=>parseInt(f.ORDEN)===0);
@@ -2648,7 +2676,8 @@ function vSesion(){
     <div class="card flat"><button class="btn big" onclick="ir('semana')">${tr("← Volver a la semana")}</button></div>`;
   }
 
-  return `
+  return `${corrigiendo() ? `<div class="aviso corrige"><b>${tr('Estás en la semana')} ${esc(numSem(S.mirando))}, ${tr('que ya pasó.')}</b>
+    <p class="sm" style="margin-top:4px">${tr('Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.')}</p></div>` : ''}
   <div class="card">${cabeceraSesion(bl, dia)}<div class="row sp">
       <div><div class="lbl">${esc(dia)}${modoLibre(bl)&&fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}</div>
         <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
@@ -2663,7 +2692,7 @@ function vSesion(){
   ${est==='hecha'&&!omitida?`<div class="yahecha">
     <b>${tr("Esta sesión ya está registrada")}${fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}.</b>
     <p class="mut" style="margin-top:6px;font-size:14px">${tr("No hace falta que la repitas. Si te equivocaste al anotar algo, corrígelo aquí y vuelve a enviar.")}</p>
-    <button class="btn sm2" style="margin-top:10px" onclick="ir('hoy')">${tr("Volver")}</button></div>`:''}
+    <button class="btn sm2" style="margin-top:10px" onclick="ir('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`:''}
   ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
     <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
   ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
@@ -2705,7 +2734,54 @@ function pintaCue(t){
   }).join('');
 }
 
+/* ---------- v5.20 · ejercicios con alternativa (3 oct, Salvador) ----------
+   "Sentadilla trasera con barra (o prensa)": Alexia hizo prensa y sus 100 kg
+   acabaron en la sentadilla. Ahora la tarjeta trae dos botones y lo que se
+   anota se guarda con el ejercicio que de verdad se hizo, y asi sale en
+   Progreso. La primera opcion conserva el nombre de siempre (el historial no
+   se parte); la otra lleva el suyo. Solo en fuerza: en "bici o caminata" no
+   hay kilos que separar. */
+const MATERIAL = /^(con |en )?(la |el )?(barra|multipower|m[aá]quina|mancuernas?|polea|disco|kettlebell|machine|dumbbells?|cable|barbell)$/i;
+const may = t => t.charAt(0).toUpperCase() + t.slice(1);
+function alternativasDe(f){
+  const n = String((f && f['EJERCICIO / ELEMENTO']) || '').trim();
+  if(!f || ['fuerza','hibrido'].indexOf(norm(f.TIPO)) < 0 || !(parseInt(f.SERIES) > 0)) return null;
+  if(/^(calentamiento|warm-?up|si tienes)/i.test(n) || /\((potencia|power)\)/i.test(n)) return null;
+  let a, b, m, suf = '';
+  if((m = n.match(/^(.+?)\s*\((?:o|or)\s+([^)]+)\)\s*$/i))){ a = m[1].trim(); b = m[2].trim(); }
+  else {
+    const sp = n.match(/^(.*?)(\s*\([^)]*\))?\s*$/); const cuerpo = sp[1]; suf = sp[2] || '';
+    if((m = cuerpo.match(/^(.+?)\s+\/\s+(.+)$/))){ a = m[1].trim(); b = m[2].trim(); }
+    else if((m = cuerpo.match(/^(.+?)\s+(?:o|or)\s+(.+)$/i)) && m[1].trim().split(/\s+/).length > 1){
+      a = m[1].trim(); b = m[2].trim();
+      if(b.split(/\s+/).length === 1 && !MATERIAL.test(b)) b = a.split(/\s+/).slice(0,-1).join(' ') + ' ' + b;
+    } else return null;
+  }
+  if(!a || !b) return null;
+  if(MATERIAL.test(b)){
+    const cab = a.split(/\s+(?:en|con|on|with)\s+/i)[0];
+    b = cab + ' ' + (/^(con|en) /i.test(b) ? b : (/^m[aá]quina/i.test(b) ? 'en ' + b : 'con ' + b));
+  }
+  return [n, may(b) + suf.replace(/^\s*/, suf ? ' ' : '')].map((x,i)=>({id: i ? x : n, txt: i ? x : may(a) + (suf ? suf : '')}));
+}
+const idAlt = (bl,dia,n) => `${SEM()}~${slug(bl)}~${slug(dia)}~${slug(n)}~alt`;
+function altElegida(bl, dia, f){
+  const alts = alternativasDe(f); if(!alts) return 0;
+  const v = LOG[idAlt(bl,dia,alts[0].id)];
+  if(v && typeof v.alt === 'number') return v.alt;
+  // sin eleccion guardada: si ya hay series de la alternativa, es la alternativa
+  return [0,1,2,3,4,5].some(i=>{ const x = LOG[idSerie(bl,dia,alts[1].id,i)]; return x && (x.ok || x.r || x.c); }) ? 1 : 0;
+}
+/* el nombre con el que se anota hoy */
+const nombreEf = (bl, dia, f) => { const a = alternativasDe(f); return a ? a[altElegida(bl,dia,f)].id : (f['EJERCICIO / ELEMENTO'] || ''); };
+function eligeAlt(bl, dia, n, i){ LOG[idAlt(bl,dia,n)] = {alt:i}; LS.set('log', LOG); pinta(); }
+
 function ejercicio(bl,dia,f){
+  const alts = soloLectura() ? null : alternativasDe(f), elegida = alts ? altElegida(bl,dia,f) : 0;
+  const botonesAlt = alts ? `<div class="alt" role="group" aria-label="${tr('Qué ejercicio haces')}">
+      <span class="sm">${tr('Hoy haces')}</span>${alts.map((x,i)=>`<button class="${i===elegida?'on':''}" aria-pressed="${i===elegida}"
+        onclick="eligeAlt('${esc(bl)}','${esc(dia)}','${esc(alts[0].id)}',${i})">${esc(x.txt)}</button>`).join('')}</div>` : '';
+  if(alts) f = Object.assign({}, f, {'EJERCICIO / ELEMENTO': alts[elegida].id});
   const nombre = f['EJERCICIO / ELEMENTO'] || '';
   const series = parseInt(f.SERIES)||0;
   const ficha = fichaEj(nombre);
@@ -2809,7 +2885,7 @@ function ejercicio(bl,dia,f){
   }
 
   return `<div class="ej">
-    <div class="h"><div><div class="nm">${esc(nombre)}</div>${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
+    <div class="h"><div><div class="nm">${esc(alts ? alts[elegida].txt : nombre)}</div>${botonesAlt}${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
       ${extra?`<div class="ds">${esc(conLb(extra,uni))}</div>`:''}</div></div>
     ${(function(){ const sg = (!campos.length && series>0 && !aguantePorTiempo(f)) ? sugerencia(bl,dia,f) : '';
         return sg || lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni); })()}
@@ -3221,7 +3297,7 @@ async function enviar(opc){
   Object.keys(LOG).forEach(id=>{
     const v = LOG[id]; if(!v) return;
     // solo se manda lo confirmado, lo corregido o lo borrado
-    if(id.endsWith('~fecha')) return;      // marca interna: no es un registro
+    if(id.endsWith('~fecha') || id.endsWith('~alt')) return;      // marcas internas: no son registros
     if(!v.ok && !v.corregido) return;
     if(v.sent && !v.corregido) return;
     foto[id] = JSON.stringify(v);
@@ -3568,7 +3644,8 @@ function vProgreso(){
   });
   // El nombre bonito lo tiene la hoja; el identificador va sin acentos.
   const nombres = {};
-  (S.d.SESIONES||[]).forEach(f=>{ const n=f['EJERCICIO / ELEMENTO']; if(n) nombres[slug(n)] = n; });
+  (S.d.SESIONES||[]).forEach(f=>{ const n=f['EJERCICIO / ELEMENTO']; if(n) nombres[slug(n)] = n;
+    const a = alternativasDe(f); if(a) nombres[slug(a[1].id)] = a[1].id; });
   const nSes = Object.keys(sesiones).length;
   const vids = (S.d.MIS_VIDEOS||[]).length;
   const hayAlgo = series > 0 || nSes > 0;
@@ -3582,7 +3659,10 @@ function vProgreso(){
     if(!v || !v.ok || v.borrada || !k.endsWith('~reg')) return;
     const d = v.d || {};
     const km = parseFloat(String(d.km||'').replace(',','.')) || 0;
-    const sg = aSegundos(d.tiempo);
+    /* v5.20: un tiempo que da un ritmo imposible (fuera de 2:30-15:00 min/km)
+       no entra en el tiempo ni en el ritmo medio: el 55:43:00 de Smi, leido
+       como 55 horas, le ponia 109:21 min/km de media. Los km si cuentan. */
+    const sg = (km && aSegundos(d.tiempo) && !ritmoCreible(d)) ? 0 : aSegundos(d.tiempo);
     if(!km && !sg) return;
     const p = k.split('~');
     if(km > masLarga) masLarga = km;
