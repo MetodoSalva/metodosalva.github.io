@@ -123,6 +123,14 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .reg .totales{grid-column:1/-1;font-family:var(--m);font-size:11px;letter-spacing:.5px;
   text-transform:uppercase;color:var(--txt3)}
 .set.corre{grid-template-columns:22px 1fr 1fr 78px 26px}
+/* v5.7: el tiempo en casillas separadas, cada una con su unidad debajo */
+.hms{display:flex;gap:4px;align-items:flex-start;min-width:0}
+.hms span{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.hms input{text-align:center;padding-left:2px!important;padding-right:2px!important;min-width:0}
+.hms small{font-family:var(--m);font-size:10px;color:var(--txt3);margin-top:2px}
+/* 2 oct: frase del dia, columna FRASE de la pestana SEMANA (empieza Jorge) */
+.frase{margin-top:12px;font-size:21px;line-height:1.3;font-weight:700;color:var(--txt)}
+.reg .ritmo.mal{color:var(--rojo,#B3261E)}
 .masseries{padding:0 14px 10px}
 .masseries button{border:1px dashed var(--linea2);background:transparent;color:var(--txt2);
   border-radius:9px;padding:8px 10px;font-size:13px;width:100%}
@@ -247,7 +255,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.6.1';
+const VERSION = 'v5.8';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -496,6 +504,32 @@ const EN = {
   "Ese vídeo pesa demasiado. Graba uno más corto.": "That video is too heavy. Record a shorter one.",
   "Grabar otro": "Record another",
   "Lo que te dice Salva": "What Salva says",
+  "Fotos de progreso": "Progress photos",
+  "Marcar como hecho": "Mark as done",
+  "Ver cómo hacerlas": "See how to take them",
+  "Hecho ✓": "Done ✓",
+  "Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.": "It's photo month: three photos, front, side and back. They are optional.",
+  "Son para ver tu cambio con el tiempo, no para juzgarte. Solo las veo yo: se guardan en mi Drive, no se comparten ni se publican.": "They are to see how you change over time, not to judge you. Only I see them: they are stored in my Drive, never shared or published.",
+  "Para que se puedan comparar, las tres, y cada mes, igual:": "So they can be compared, all three, every month, the same way:",
+  "Mismo sitio, misma luz y misma distancia cada vez. Luz de frente, nunca a contraluz, y fondo liso si puedes.": "Same place, same light and same distance every time. Light in front of you, never behind, and a plain background if you can.",
+  "Móvil en vertical, apoyado a la altura de la cadera y a 2-3 metros, con temporizador o que te la haga alguien. Que se te vea de la cabeza a los pies.": "Phone upright, resting at hip height, 2-3 metres away, with the timer or someone else taking it. Head to feet in the frame.",
+  "Ropa ajustada, y siempre la misma (top y short, o ropa interior).": "Tight clothes, always the same ones (top and shorts, or underwear).",
+  "Antes de entrenar, nunca justo después: el bombeo cambia la foto. Mejor por la mañana, al levantarte.": "Before training, never right after: the pump changes the photo. Best in the morning, when you get up.",
+  "Postura natural: brazos relajados a los lados, sin meter tripa, sin apretar y sin posar.": "Natural stance: arms relaxed at your sides, no sucking in, no squeezing, no posing.",
+  "Frontal": "Front",
+  "Lateral": "Side",
+  "Posterior": "Back",
+  "de frente al móvil, pies a la anchura de las caderas": "facing the phone, feet hip-width apart",
+  "de perfil, siempre con el lado derecho hacia el móvil": "side on, always with your right side to the phone",
+  "de espaldas, en la misma postura que la frontal": "back to the phone, same stance as the front one",
+  "Hacer o elegir la foto": "Take or choose the photo",
+  "Cambiar esta foto": "Replace this photo",
+  "Foto enviada": "Photo sent",
+  "Prefiero no mandar fotos": "I'd rather not send photos",
+  "Sin problema. No te las vuelvo a pedir; si cambias de idea, lo tienes aquí.": "No problem. I won't ask again; if you change your mind, it's right here.",
+  "Has decidido no mandar fotos de progreso.": "You chose not to send progress photos.",
+  "Cambiar de idea": "Change my mind",
+  "Prefiere no mandar fotos de progreso": "Prefers not to send progress photos",
   "No hay nada que registrar hoy.": "Nothing to log today.",
   "Calentamiento.": "Warm-up.",
   "Duración": "Duration",
@@ -586,6 +620,8 @@ const EN = {
   "¿No sabes si lo estás haciendo bien? Grábate haciéndolo": "Not sure you're doing it right? Film yourself",
   "km de toda la sesión": "km for the whole session",
   "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
+  "como lo marca el reloj: 55 min 43 s va en min y s": "as your watch shows it: 55 min 43 s goes in min and s",
+  "Revisa el tiempo o los km: así sale un ritmo de": "Check the time or the km: that gives a pace of",
   "de principio a fin, calentamiento y vuelta a la calma incluidos": "start to finish, warm-up and cool-down included",
   "esfuerzo (1 al 10)": "effort (1 to 10)",
   "1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope": "1 = walking · 5 = full sentences · 8 = short sentences only · 10 = all out",
@@ -764,8 +800,8 @@ function lineaUltima(u){
 const CAMPOS = {
   km:      {et:'km de toda la sesión', ph:'5,2', modo:'decimal',
             ayuda:'de principio a fin, calentamiento y vuelta a la calma incluidos'},
-  tiempo:  {et:'tiempo',      ph:'45:30',   modo:'text',
-            ayuda:'45 son 45 min · 45:30 · 1:10:00'},
+  tiempo:  {et:'tiempo',      ph:'',        modo:'numeric', hms:1,
+            ayuda:'como lo marca el reloj: 55 min 43 s va en min y s'},
   rpe:     {et:'esfuerzo (1 al 10)', ph:'1-10', modo:'numeric',
             ayuda:'1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope'},
   piernas: {et:'cómo quedaron las piernas', ph:'1-5', modo:'numeric', escala:5,
@@ -776,6 +812,11 @@ const CAMPOS = {
             ayuda:'con el kilómetro de calentamiento incluido'},
   ritmo:   {et:'ritmo o velocidad', ph:'5:30 min/km · 11 km/h', modo:'text',
             ayuda:'como te lo dé el reloj o la cinta; escribe la unidad'},
+  /* 2 oct: "hecho" no pide nada, solo marcar que se hizo. Para lo que no
+     tiene kilos ni tiempo que anotar: los cinco minutos de hombro de Jorge.
+     Lo pide la hoja con "hecho" en REGISTRO, como cualquier otra casilla, asi
+     que solo sale donde alguien lo ha puesto a proposito. */
+  hecho:   {et:'hecho', solo:1},
   fuel:    {et:'avituallamiento', ph:'lo tomé todo', modo:'text',
             ayuda:'dímelo sobre todo si te lo saltaste o te sentó mal'}
 };
@@ -787,8 +828,17 @@ const camposDe = f => String((f&&f.REGISTRO)||'').split(',')
 const ANCHAS = {vam:1, ritmo:1, fuel:1};
 function casilla(rid, k, d, cs, nombre){
   const C = CAMPOS[k], val = String(d[k]||'');
+  if(C.solo) return '';
   const ay = C.ayuda ? `<p class="ayuda">${esc(tr(C.ayuda))}</p>` : '';
   const ancho = (ANCHAS[k] || C.escala) ? ' ancho' : '';
+  if(C.hms){
+    const t = partesTiempo(val);
+    const u = (q, v, ph) => `<span><input id="g_${rid}_${k}_${q}" inputmode="numeric" pattern="[0-9]*"
+        maxlength="${q==='h'?1:3}" placeholder="${ph}" value="${v}" oninput="anotaReg('${rid}','${cs}')"
+        aria-label="${esc(tr(C.et))} ${q} · ${esc(nombre)}"><small>${q==='m'?'min':q}</small></span>`;
+    return `<div class="c${ancho}"><label for="g_${rid}_${k}_m">${esc(tr(C.et))}</label>
+      <div class="hms">${u('h',t.h,'0')}${u('m',t.m,'00')}${u('s',t.s,'00')}</div>${ay}</div>`;
+  }
   if(C.escala) return `<div class="c${ancho}"><label>${esc(tr(C.et))}</label>
     <div class="escala">${Array.from({length:C.escala},(_,i)=>i+1).map(n=>
       `<button type="button" class="${val===String(n)?'on':''}" id="eb_${rid}_${k}_${n}"
@@ -825,8 +875,10 @@ function setsCorre(bl, dia, nombre, series, hayTotales){
       const v = LOG[id] || {};
       return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
         <span class="i">${series>1?i+1:'·'}</span>
-        <input inputmode="text" placeholder="${tr('tiempo')}" value="${esc(v.t||'')}" id="t_${id}"
-          oninput="anotaC('${id}')" aria-label="${tr('tiempo')} ${i+1} ${esc(nombre)}">
+        <div class="hms">${(()=>{ const t = partesTiempo(v.t); const mm = t.h ? String(t.h*60 + +t.m) : t.m;
+          return ['m','s'].map(q=>`<span><input inputmode="numeric" pattern="[0-9]*" maxlength="3"
+            placeholder="${q==='m'?'min':'s'}" value="${q==='m'?mm:t.s}" id="t_${id}_${q}"
+            oninput="anotaC('${id}')" aria-label="${tr('tiempo')} ${q==='m'?'min':'s'} ${i+1} ${esc(nombre)}"></span>`).join(''); })()}</div>
         <input inputmode="numeric" placeholder="${tr('esfuerzo')}" value="${esc(v.e||'')}" id="e_${id}"
           oninput="anotaC('${id}')" aria-label="${tr('esfuerzo (1 al 10)')} ${i+1}">
         <button id="b_${id}" onclick="confirmarC('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
@@ -839,9 +891,11 @@ function setsCorre(bl, dia, nombre, series, hayTotales){
   return filas + boton;
 }
 function anotaC(id){
-  const t=document.getElementById('t_'+id), e=document.getElementById('e_'+id);
+  const tm=document.getElementById('t_'+id+'_m'), ts=document.getElementById('t_'+id+'_s'),
+        e=document.getElementById('e_'+id);
   const prev = LOG[id] || {};
-  LOG[id] = Object.assign({}, prev, {t:t?t.value.trim():'', e:e?e.value.trim():''});
+  LOG[id] = Object.assign({}, prev, {t:tm ? juntaTiempo('', tm.value, ts&&ts.value) : (prev.t||''),
+                                     e:e?e.value.trim():''});
   if(prev.sent) LOG[id].corregido = true;
   LS.set('log', LOG);
   const fila = document.getElementById('fila_'+id);
@@ -863,7 +917,7 @@ function confirmarC(id){
 }
 function vaciarC(id){
   const v = LOG[id] || {};
-  ['t_','e_'].forEach(p=>{ const el=document.getElementById(p+id); if(el) el.value=''; });
+  ['t_'+id+'_m','t_'+id+'_s','e_'+id].forEach(x=>{ const el=document.getElementById(x); if(el) el.value=''; });
   if(v.sent){
     LOG[id] = {t:'', e:'', ok:false, sent:true, corregido:true, borrada:true};
     toast(tr('Se corregirá en la hoja al enviar.'));
@@ -880,6 +934,40 @@ function aSegundos(t){
   if(p.length===3) return p[0]*3600 + p[1]*60 + p[2];
   if(p.length===2) return p[0]*60 + p[1];
   return p[0]*60;                        // "45" se entiende como 45 minutos
+}
+/* v5.7: el tiempo ya no se escribe con dos puntos. El 29 de septiembre
+   Smiljana puso "55:43:00" para 55 min 43 s, la app lo leyo como 55 horas y
+   le salio un ritmo de 342:52 min/km. En iPhone, ademas, el teclado numerico
+   no tiene ":". Ahora son tres casillas (h · min · s) y la app arma el texto
+   de siempre ("55:43", "1:10:00"), asi que la hoja y el puente no cambian.
+   Si alguien pone 75 min, se guarda como 1:15:00. */
+function partesTiempo(t){
+  const sg = aSegundos(t);
+  if(!sg) return {h:'', m:'', s:''};
+  const h = Math.floor(sg/3600), m = Math.floor(sg%3600/60), s = sg%60;
+  return {h: h ? String(h) : '', m: String(m), s: s ? String(s).padStart(2,'0') : ''};
+}
+function juntaTiempo(h, m, s){
+  const n = x => parseInt(String(x||'').replace(/\D/g,''), 10) || 0;
+  const sg = n(h)*3600 + n(m)*60 + n(s);
+  if(!sg) return '';
+  const H = Math.floor(sg/3600), M = Math.floor(sg%3600/60), S = sg%60, dd = x => String(x).padStart(2,'0');
+  return H ? H + ':' + dd(M) + ':' + dd(S) : M + ':' + dd(S);
+}
+/* Un ritmo de carrera cae entre 2:30 y 15:00 min/km (caminando rapido
+   ronda los 10-12). Fuera de ahi es un error de tecleo: se avisa en rojo y
+   no se manda a la hoja. */
+function ritmoCreible(d){
+  const km = parseFloat(String((d&&d.km)||'').replace(',','.')), sg = aSegundos(d&&d.tiempo);
+  if(!km || !sg) return false;
+  const s = sg/km;
+  return s >= 150 && s <= 900;
+}
+function textoRitmo(d){
+  const r = ritmoDe(d);
+  if(!r) return '';
+  if(ritmoCreible(d)) return r.replace('Ritmo', tr('Ritmo'));
+  return tr('Revisa el tiempo o los km: así sale un ritmo de') + ' ' + r.replace('Ritmo ','');
 }
 function ritmoDe(d){
   const km = parseFloat(String((d&&d.km)||'').replace(',','.'));
@@ -1355,12 +1443,13 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return bienvenida() + avisoCheckin() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return bienvenida() + avisoCheckin() + avisoFotos() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   if(!d || esDescanso(d)){
     bloqueHoy = `<div class="card"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
       <h2 style="margin-top:6px">${d?esc(partir(d['SESIÓN']).t):tr("Descanso")}</h2>
+      ${d&&d.FRASE?`<p class="frase">${esc(d.FRASE)}</p>`:''}
       <p class="mut" style="margin-top:8px">${tr("Hoy toca recuperar. Es parte del plan, no un día perdido.")}</p></div>`;
   } else if(!sesionDe(bl, d['DÍA']).length){
     bloqueHoy = `<div class="card">
@@ -1368,6 +1457,7 @@ function vHoy(){
         ${d['SEMÁFORO']?`<span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO'])}</span>`:''}</div>
       <h2 style="margin-top:8px">${esc(partir(d['SESIÓN']).t)}</h2>
       ${partir(d['SESIÓN']).sub?`<p class="mut" style="margin-top:4px">${esc(partir(d['SESIÓN']).sub)}</p>`:''}
+      ${d&&d.FRASE?`<p class="frase">${esc(d.FRASE)}</p>`:''}
       <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>`;
   } else {
     const est = estadoSesion(bl, d['DÍA']);
@@ -1379,6 +1469,7 @@ function vHoy(){
         <span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO']||'')}</span></div>
       <h2 style="margin-top:8px">${esc(partir(d['SESIÓN']).t)}</h2>
       ${partir(d['SESIÓN']).sub?`<p class="mut" style="margin-top:4px">${esc(partir(d['SESIÓN']).sub)}</p>`:''}
+      ${d&&d.FRASE?`<p class="frase">${esc(d.FRASE)}</p>`:''}
       ${fase?`<p class="sm" style="margin-top:6px">${esc(fase)}</p>`:''}
       <div class="stack" style="margin-top:14px;gap:8px">
         ${fmtMin(d.MIN)?`<div class="row sp"><span class="sm">${tr("Duración")}</span><b style="font-size:14.5px">${tr('unos')} ${esc(fmtMin(d.MIN))}</b></div>`:''}
@@ -1391,7 +1482,7 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return bienvenida() + avisoCheckin() + bloqueHoy + `
+  return bienvenida() + avisoCheckin() + avisoFotos() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
@@ -1762,9 +1853,9 @@ function ejercicio(bl,dia,f){
       ${esCorrer(f) && series>1 ? `<div class="totales">${tr('Totales de la sesión')}</div>` : ''}
       ${campos.map(k=>casilla(rid, k, d, cs, nombre)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
-        ? `<div class="ritmo" id="ritmo_${rid}">${esc(ritmoDe(d).replace('Ritmo', tr('Ritmo')))}</div>` : ''}
+        ? `<div class="ritmo${d.km && aSegundos(d.tiempo) && !ritmoCreible(d) ? ' mal' : ''}" id="ritmo_${rid}">${esc(textoRitmo(d))}</div>` : ''}
       ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam, rid))}</div>` : ''}
-      <button id="rb_${rid}" onclick="confirmarReg('${rid}','${cs}')">${tr(v.ok?'Hecha':'Anotar')}</button>
+      <button id="rb_${rid}" onclick="confirmarReg('${rid}','${cs}')">${tr(cs==='hecho' ? (v.ok?'Hecho ✓':'Marcar como hecho') : (v.ok?'Hecha':'Anotar'))}</button>
     </div>`;
   }
 
@@ -2049,12 +2140,18 @@ function anotaReg(id, cs){
   /* v5.2: se parte de lo que ya habia. Las escalas se pintan con botones,
      no con casillas, y antes se perdian al escribir en cualquier otra. */
   const prev = LOG[id] || {}, d = Object.assign({}, prev.d || {});
-  cs.split('-').forEach(k=>{ const el=document.getElementById('g_'+id+'_'+k); if(el) d[k]=el.value.trim(); });
+  cs.split('-').forEach(k=>{
+    if(CAMPOS[k] && CAMPOS[k].hms){
+      const q = x => { const el=document.getElementById('g_'+id+'_'+k+'_'+x); return el ? el.value : null; };
+      if(q('m') !== null) d[k] = juntaTiempo(q('h'), q('m'), q('s'));
+      return;
+    }
+    const el=document.getElementById('g_'+id+'_'+k); if(el) d[k]=el.value.trim(); });
   LOG[id] = Object.assign({}, prev, {d:d});
   if(prev.sent) LOG[id].corregido = true;
   LS.set('log', LOG);
   const r = document.getElementById('ritmo_'+id);
-  if(r) r.textContent = ritmoDe(d).replace('Ritmo', tr('Ritmo'));
+  if(r){ r.textContent = textoRitmo(d); r.classList.toggle('mal', !!d.km && !!aSegundos(d.tiempo) && !ritmoCreible(d)); }
   const va = document.getElementById('vam_'+id);
   if(va) va.textContent = textoVAM(d.vam, id);
 }
@@ -2077,6 +2174,7 @@ function confirmarReg(id, cs){
     LOG[id] = Object.assign({}, v, {ok:false});
   } else {
     anotaReg(id, cs);
+    if(cs.split('-').indexOf('hecho') > -1) LOG[id].d = Object.assign({}, LOG[id].d, {hecho:'sí'});
     const d = LOG[id].d || {};
     if(!Object.keys(d).some(k=>d[k])){ toast(tr('Anota al menos un dato antes de confirmar.')); return; }
     LOG[id].ok = true;
@@ -2085,7 +2183,7 @@ function confirmarReg(id, cs){
   LS.set('log', LOG);
   const caja=document.getElementById('reg_'+id), btn=document.getElementById('rb_'+id);
   if(caja) caja.classList.toggle('ok', !!LOG[id].ok);
-  if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+  if(btn) btn.textContent = tr(cs==='hecho' ? (LOG[id].ok?'Hecho ✓':'Marcar como hecho') : (LOG[id].ok ? 'Hecha' : 'Anotar'));
   // v5.0: con la VAM confirmada, las series de abajo ya salen con su velocidad
   if(LOG[id].d && LOG[id].d.vam) pinta();
 }
@@ -2168,7 +2266,7 @@ async function enviar(){
            hoja no tiene columna propia y asi Salvador lo lee con el resto. */
         notas: d.fuel ? tr('Avituallamiento') + ': ' + d.fuel : '',
         ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + paso(vamDe(d.vam)) + ' min/km' : '')
-                     : (d.ritmo || ritmoDe(d).replace('Ritmo ','')),
+                     : (d.ritmo || (ritmoCreible(d) ? ritmoDe(d).replace('Ritmo ','') : '')),
         rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'',
         estado: v.borrada ? '' : (v.ok?'realizada':'')}));
       return;
@@ -2366,9 +2464,127 @@ function vSeg(){
         <textarea id="q_${esc(clave)}" oninput="respQ('${esc(clave)}','${esc(cat)}',this.value)"
           placeholder="${tr("Tu respuesta")}">${esc((CHK[clave]||{}).v||'')}</textarea></div>`;
     }).join('')}
+    ${bloqueFotosProgreso(semFotos())}
     <button class="btn pri big" style="margin-top:14px" onclick="enviar()">${tr("Enviar a Salvador")}</button>
     <p class="sm" style="margin-top:10px">${tr("Se guarda mientras escribes. Si pierdes la conexión, no se borra.")}</p>
   </div>`;
+}
+/* v5.8: fotos de progreso, una vez al mes. Salen en el seguimiento de las
+   semanas 4, 8 y 12 (cada cuatro seguimientos) y, la primera vez, en el
+   siguiente que responda: sin foto de partida no hay con que comparar.
+   Lo que pide el metodo (maestro 6988, fuerza.md: fotos cada 4-8 semanas):
+   consentimiento aparte, misma distancia, luz y postura, nada de comparar
+   con bombeo o posando, y nunca exigirlas. Por eso hay un "prefiero no",
+   que se recuerda y le llega a Salvador con el seguimiento.
+   Criterio nuestro, sin respaldo en el metodo: la hora (por la manana), la
+   altura del movil (cadera) y el lado del perfil (derecho). */
+const POSES = [['frontal','Frontal','de frente al móvil, pies a la anchura de las caderas'],
+               ['lateral','Lateral','de perfil, siempre con el lado derecho hacia el móvil'],
+               ['posterior','Posterior','de espaldas, en la misma postura que la frontal']];
+const numSem = x => parseInt(String(x||'').replace(/\D/g,''), 10) || 0;
+const idProg = (sem, pose) => `fotos~s${numSem(sem)}~${pose}`;
+const fotoProgEnviada = id => (VID[id]||{}).estado === 'enviado'
+                              || (S.d.MIS_VIDEOS||[]).some(x=>String(x.ID)===id);
+function tocanFotos(sem){
+  const n = numSem(sem && sem.SEMANA);
+  if(!n) return false;
+  if(n % 4 === 0) return true;
+  const alguna = Object.keys(VID).some(k=>k.startsWith('fotos~') && VID[k].estado==='enviado')
+              || (S.d.MIS_VIDEOS||[]).some(x=>String(x.ID).startsWith('fotos~'));
+  return !alguna;
+}
+/* 2 oct: abierto a todas (el piloto con Alexia duro un dia). Sale en la
+   pestana de seguimiento siempre que toque, haya o no un seguimiento
+   pendiente: la semana es la que se responde o, si no hay, la actual. */
+const semFotos = () => faltaCheckin() || S.semana;
+const fotosPendientes = sem => !!(sem && S.d && S.d.VIDEO && tocanFotos(sem) && !LS.get('fotos_no', false)
+                                  && POSES.some(([k])=>!fotoProgEnviada(idProg(sem.SEMANA, k))));
+function avisoFotos(){
+  const sem = semFotos();
+  if(!fotosPendientes(sem)) return '';
+  return `<div class="aviso">
+    <b>${tr("Fotos de progreso")}</b>
+    <p class="mut" style="margin-top:6px;font-size:14px">${tr("Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.")}</p>
+    <button class="btn sm2" style="margin-top:10px" onclick="ir('seguimiento')">${tr("Ver cómo hacerlas")}</button>
+  </div>`;
+}
+function bloqueFotosProgreso(ant){
+  if(!ant || !S.d || !S.d.VIDEO || !tocanFotos(ant)) return '';
+  const cab = `<div class="q"><div class="t"><span class="tag">${tr("Fotos de progreso")}</span></div>`;
+  if(LS.get('fotos_no', false)) return `${cab}
+      <p class="sm">${tr("Has decidido no mandar fotos de progreso.")}</p>
+      <button class="btn sm2" style="margin-top:8px" onclick="fotosNo(false)">${tr("Cambiar de idea")}</button></div>`;
+  const reglas = ["Mismo sitio, misma luz y misma distancia cada vez. Luz de frente, nunca a contraluz, y fondo liso si puedes.",
+    "Móvil en vertical, apoyado a la altura de la cadera y a 2-3 metros, con temporizador o que te la haga alguien. Que se te vea de la cabeza a los pies.",
+    "Ropa ajustada, y siempre la misma (top y short, o ropa interior).",
+    "Antes de entrenar, nunca justo después: el bombeo cambia la foto. Mejor por la mañana, al levantarte.",
+    "Postura natural: brazos relajados a los lados, sin meter tripa, sin apretar y sin posar."];
+  return `${cab}
+    <div class="t">${tr("Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.")}</div>
+    <p class="sm" style="margin:6px 0">${tr("Son para ver tu cambio con el tiempo, no para juzgarte. Solo las veo yo: se guardan en mi Drive, no se comparten ni se publican.")}</p>
+    <div class="calent" style="margin:8px 0"><b>${tr("Para que se puedan comparar, las tres, y cada mes, igual:")}</b>
+      <ul style="margin:6px 0 0 18px;padding:0">${reglas.map(r=>`<li style="margin-bottom:4px">${tr(r)}</li>`).join('')}</ul></div>
+    ${POSES.map(([k,et,como])=>{
+      const id = idProg(ant.SEMANA, k), v = VID[id] || {}, hecha = fotoProgEnviada(id);
+      return `<div style="margin:10px 0"><b>${tr(et)}</b> <span class="sm">· ${tr(como)}</span>
+        <input type="file" accept="image/*" id="vf_${id}" style="display:none"
+          onchange="subirFotoProgreso('${id}','${esc(ant.SEMANA)}','${k}',this)">
+        ${v.estado === 'enviando'
+          ? `<p class="pista">⏳ ${tr("Enviando la foto…")}</p>`
+          : `<div><button class="btn sm2${hecha?'':' pri'}" style="margin-top:6px" onclick="document.getElementById('vf_${id}').click()">📸 ${
+              tr(hecha ? "Cambiar esta foto" : "Hacer o elegir la foto")}</button>
+             ${hecha ? `<span class="sm"> ✅ ${tr("Foto enviada")}</span>` : ''}</div>`}</div>`;
+    }).join('')}
+    <button class="btn sm2" style="margin-top:4px" onclick="fotosNo(true)">${tr("Prefiero no mandar fotos")}</button></div>`;
+}
+function fotosNo(no){
+  LS.set('fotos_no', !!no);
+  if(no){
+    CHK.fotos = {cat:'Fotos', v:tr('Prefiere no mandar fotos de progreso')};
+    toast(tr("Sin problema. No te las vuelvo a pedir; si cambias de idea, lo tienes aquí."));
+  } else delete CHK.fotos;
+  LS.set('checkin', CHK); pinta();
+}
+/* La foto se reduce en el movil antes de salir (lado largo 1600 px, JPEG):
+   sube en segundos con poca cobertura y, al redibujarla, pierde los datos
+   EXIF, entre ellos la ubicacion GPS de donde se hizo. */
+function reducirFoto(f){
+  return new Promise((ok, fail)=>{
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = ()=>{
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth*k); c.height = Math.round(img.naturalHeight*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      ok(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); fail(new Error('foto')); };
+    img.src = url;
+  });
+}
+async function subirFotoProgreso(id, sem, pose, input){
+  const f = input.files && input.files[0];
+  input.value = '';
+  if(!f) return;
+  if(f.size > 25 * 1024 * 1024){ toast(tr("Esa foto pesa demasiado.")); return; }
+  VID[id] = {estado:'enviando'}; LS.set('videos', VID); pinta();
+  try{
+    const datos = await reducirFoto(f);
+    const r = await fetch(API, {method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente:CID, token:KEY, video:{
+        id: id, tipo: 'progreso', fecha: hoyISO(), semana: String(sem), dia: '',
+        sesion: 'Seguimiento', ejercicio: 'FOTO DE PROGRESO · ' + pose, nota: '',
+        mime: 'image/jpeg', nombre: 'progreso-' + pose + '.jpg', datos: datos}})});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    VID[id] = {estado:'enviado', fecha: hoyISO()};
+  }catch(e){
+    VID[id] = {estado:'error'};
+    toast(tr("No se ha podido enviar la foto. Inténtalo otra vez con cobertura."));
+  }
+  LS.set('videos', VID); pinta();
 }
 function respQ(clave,cat,v){ CHK[clave]=Object.assign({},CHK[clave],{v:v,cat:cat}); LS.set('checkin',CHK); }
 /* v3.14: las preguntas que piden un numero del 1 al 5 se contestan con un
