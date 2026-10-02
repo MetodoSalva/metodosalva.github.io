@@ -90,6 +90,9 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
   width:42px;flex:none;padding-top:3px}
 .dia .n{font-weight:600;font-size:15px;line-height:1.3}
 .dia.hoy .n{color:var(--verde)}
+/* v5.11: la fila entera es un boton; la flecha lo dice sin "toca aqui" */
+button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;margin:0 4px 0 2px;
+  border-right:2px solid var(--txt3);border-top:2px solid var(--txt3);transform:rotate(45deg);opacity:.7}
 
 /* ejercicio */
 .ej{border:1px solid var(--linea);border-radius:var(--r);background:var(--sup);margin-bottom:10px;overflow:hidden}
@@ -148,6 +151,8 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .reg.ok{background:var(--verde-b);margin:0 10px 12px;padding:12px;border-radius:10px}
 .reg.ok input{border-color:var(--verde-s);background:transparent}
 .valora{margin-top:16px;padding-top:14px;border-top:1px solid var(--linea)}
+#obs{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;font-size:16px;
+  min-height:80px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:6px}
 .estrellas{display:flex;gap:6px;margin-top:9px}
 .estrellas button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;
   padding:9px 0;font-size:20px;line-height:1;filter:grayscale(1);opacity:.45}
@@ -163,7 +168,8 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--sup);border-top:1px 
 nav button{flex:1;background:none;border:0;padding:9px 2px 10px;display:flex;flex-direction:column;
   align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--txt3);cursor:pointer;min-height:56px}
 nav button[aria-current]{color:var(--verde)}
-nav .g{font-size:17px;line-height:1}
+nav .g{display:block;width:22px;height:22px}
+nav .g svg{width:22px;height:22px;display:block}
 
 /* varios */
 .load{padding:60px 20px;text-align:center;color:var(--txt3)}
@@ -211,15 +217,12 @@ nav .g{font-size:17px;line-height:1}
 .yahecha{background:var(--verde-b);border:1px solid var(--verde-s);border-radius:var(--r);padding:13px 14px;margin-bottom:12px}
 /* Nota del cliente sobre un ejercicio concreto */
 .notaej{margin:0 14px 12px}
-.notaej button.abrir{background:none;border:0;padding:6px 0;font-size:13px;font-weight:600;
-  color:var(--txt3);cursor:pointer;display:flex;align-items:center;gap:6px;text-align:left}
-.notaej button.abrir:hover{color:var(--verde)}
-.notaej button.abrir .tocar{color:var(--verde);text-decoration:underline;text-underline-offset:3px;
-  font-weight:600;white-space:nowrap}
-.verej .tocar, .nohecho button .tocar{color:var(--verde);text-decoration:underline;
-  text-underline-offset:3px;font-weight:600;white-space:nowrap}
-.dia .tocar{color:var(--verde);text-decoration:underline;text-underline-offset:3px;font-weight:600}
-.notaej button.abrir.con{color:var(--verde)}
+/* v5.11: botones con pinta de boton (fondo, borde, icono) en vez de la coletilla "toca aqui" */
+.notaej button.abrir{background:var(--sup);border:1px solid var(--linea2);border-radius:9px;padding:8px 12px;
+  font-size:13.5px;font-weight:600;color:var(--verde);cursor:pointer;display:flex;align-items:center;gap:7px;
+  text-align:left;min-height:40px;margin:0 0 8px;width:100%}
+.notaej button.abrir:active{background:var(--verde-b)}
+.notaej button.abrir.con{border-color:var(--verde-s);background:var(--verde-b)}
 .notaej textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;
   font-size:16px;min-height:64px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:4px}
 .notaej .pista{font-size:12px;color:var(--txt3);margin-top:5px}
@@ -234,8 +237,8 @@ nav .g{font-size:17px;line-height:1}
 .tagb{background:var(--sup2);border:1px solid var(--linea2);border-radius:99px;padding:6px 12px;
   font-size:13px;color:var(--txt2);cursor:pointer}
 .nohecho{padding:0 14px 12px;text-align:right}
-.nohecho button{background:none;border:0;padding:4px 0;font-size:12.5px;color:var(--txt3);
-  cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.nohecho button{background:var(--sup);border:1px solid var(--linea2);border-radius:8px;padding:6px 12px;
+  font-size:12.5px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:34px}
 .saltado{margin:0 14px 12px;background:var(--sup2);border-radius:8px;padding:8px 10px;
   font-size:13px;color:var(--txt2);display:flex;justify-content:space-between;align-items:center;gap:8px}
 .saltado button{background:none;border:0;font-size:13px;font-weight:600;color:var(--verde);
@@ -244,6 +247,18 @@ nav .g{font-size:17px;line-height:1}
 .ultima{margin:0 14px 11px;font-size:12.5px;color:var(--verde);background:var(--verde-b);
   border:1px solid var(--verde-s);border-radius:8px;padding:6px 10px}
 .ultima b{font-family:var(--m);font-size:12.5px}
+/* v5.11: RIR con ayuda. La casilla sigue igual; el "?" abre la pregunta en palabras */
+.rirc{position:relative;display:block;min-width:0}
+.rirc input{width:100%}
+.set button.rq{position:absolute;top:-7px;right:-6px;width:20px;height:20px;min-height:0;padding:0;border-radius:50%;
+  border:1px solid var(--verde-s);background:var(--sup);color:var(--verde);font-size:11.5px;font-weight:700;line-height:18px;z-index:2}
+.set button.rq::after{content:'';position:absolute;inset:-10px}
+.set.ok button.rq{background:var(--sup);color:var(--verde)}
+.rirayuda{background:var(--verde-b);border:1px solid var(--verde-s);border-radius:10px;padding:10px 12px;margin:2px 0 4px}
+.rirayuda b{display:block;font-size:14px;color:var(--txt)}
+.rirayuda .escala button{min-height:44px}
+.rirayuda p{font-size:12px;color:var(--txt3);margin-top:4px;line-height:1.4}
+.rirmal{font-size:12px;color:var(--ambar);background:var(--ambar-s);border-radius:8px;padding:6px 10px;margin:0 0 4px}
 </style>
 </head>
 <body>
@@ -260,7 +275,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.10.1';
+const VERSION = 'v5.11';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -325,7 +340,16 @@ function partir(txt){
   return {t:a, sub:b};
 }
 
-function toast(msg){ S.toast=msg; pinta(); clearTimeout(toast.t); toast.t=setTimeout(()=>{S.toast=null;pinta();},3000); }
+/* v5.11: el aviso vive fuera de #app y no redibuja la pantalla. Antes cada
+   aviso repintaba todo y, con el autoenvio, se llevaba por delante el foco de
+   la casilla en la que se estaba escribiendo. */
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id = 'toast'; t.className = 'toast';
+          t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent = msg; t.style.display = '';
+  clearTimeout(toast.t); toast.t = setTimeout(()=>{ t.style.display = 'none'; }, 3000);
+}
 
 function fechaIni(txt){
   const s = String(txt||'');
@@ -351,6 +375,11 @@ function semanaActual(){
    anota sigue colgando SIEMPRE de S.semana (el identificador de cada serie lo
    da SEM()), y en modo lectura no se pinta nada que escriba. */
 const semanaVista = () => S.mirando || S.semana;
+/* v5.11: la semana 00 es de preparacion y no cuenta en ningun total. Antes
+   solo la quitaban la cabecera y la semana en lectura; el titulo de Mi plan y
+   la barra de Progreso la contaban (aviso de la sesion de Jorge). */
+const esPrep = w => !!w && /^0+$/.test(String(w.SEMANA).trim());
+const semanasReales = () => ((S.d && S.d.SEMANAS) || []).filter(w=>!esPrep(w));
 const soloLectura = () => !!S.mirando;
 
 const campo = k => {
@@ -556,7 +585,7 @@ const EN = {
   "Cómo te has sentido, molestias, lo que quieras contarme": "How you felt, any niggles, anything you want to tell me",
   "Puedes contarme una molestia aunque no te haya impedido entrenar.": "Tell me about a niggle even if it didn't stop you training.",
   "¿Qué tal ha ido la sesión?": "How did the session go?",
-  "Del 1 al 5. Me sirve para saber qué sesiones te funcionan.": "From 1 to 5. It tells me which sessions work for you.",
+  "1 = muy mal · 5 = muy bien. Me sirve para saber qué sesiones te funcionan.": "1 = very bad · 5 = very good. It tells me which sessions work for you.",
   "Guardar y enviar": "Save and send",
   "Revisa los metros de la cinta: parece que falta alguna cifra.": "Check the treadmill metres: a digit looks missing.",
   "Se guarda solo mientras escribes. Al terminar, ": "It saves itself as you type. When you finish, ",
@@ -618,9 +647,17 @@ const EN = {
   "min/km": "min/km",
   "de": "from",
   "a": "to",
-  /* v5.2: las casillas de carrera dicen que se pide y que significa cada
-     extremo. Smi y Justine son las que mas corren y las dos van en ingles. */
-  "toca aquí": "tap here",
+  /* v5.11: RIR con ayuda, autoenvio, estrellas del seguimiento, mensaje de la semana */
+  "¿Qué pongo en el RIR?": "What goes in RIR?",
+  "El RIR va de 0 a 4: las repeticiones que te quedaban, no las que hiciste. Toca ¿? si dudas.": "RIR goes from 0 to 4: the reps you had left, not the ones you did. Tap ? if unsure.",
+  "¿Cuántas más podías hacer?": "How many more could you have done?",
+  "0 = no podías ni una más · 2 = te quedaban dos · 4 = cuatro o más. Eso es el RIR.": "0 = not a single one more · 2 = two left · 4 = four or more. That is your RIR.",
+  "Hoy buscamos": "Today we're aiming for",
+  "Grabar o subir el vídeo": "Record or upload the video",
+  "¿Qué te pareció este seguimiento?": "How useful was this check-in?",
+  "1 = no me sirve · 5 = me sirve mucho": "1 = not useful · 5 = very useful",
+  "Mensaje de Salva": "Message from Salva",
+  "Entendido": "Got it",
   /* v5.4: ver otras semanas en modo lectura */
   "solo lectura": "read only",
   "Ver sus sesiones": "See its sessions",
@@ -631,8 +668,6 @@ const EN = {
   "Volver a lo de hoy": "Back to today",
   "← Volver a la semana": "← Back to the week",
   "¿No sabes si lo estás haciendo bien? Grábate haciéndolo": "Not sure you're doing it right? Film yourself",
-  "Clic aquí": "Click here",
-  "para grabar o subir el vídeo": "to record or upload the video",
   "km de toda la sesión": "km for the whole session",
   "45 son 45 min · 45:30 · 1:10:00": "45 means 45 min · 45:30 · 1:10:00",
   "como lo marca el reloj: 55 min 43 s va en min y s": "as your watch shows it: 55 min 43 s goes in min and s",
@@ -641,7 +676,7 @@ const EN = {
   "esfuerzo (1 al 10)": "effort (1 to 10)",
   "1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope": "1 = walking · 5 = full sentences · 8 = short sentences only · 10 = all out",
   "cómo quedaron las piernas": "how your legs felt",
-  "1 = frescas · 5 = destrozadas": "1 = fresh · 5 = very heavy",
+  "1 = destrozadas · 5 = frescas": "1 = very heavy · 5 = fresh",
   "metros totales que marca la cinta al acabar": "total metres on the treadmill at the end",
   "con el kilómetro de calentamiento incluido": "warm-up kilometre included",
   "ritmo o velocidad": "pace or speed",
@@ -856,6 +891,9 @@ function lineaUltima(u, uni){
    significan sus extremos. Antes ponia "piernas 1-5" y nadie sabia si 5
    eran las piernas frescas o destrozadas: ni siquiera coincidian entre si
    la app y el seguimiento. Decision de Salvador: 1 = frescas, 5 = destrozadas.
+   v5.11 (hoja de ruta, 2 oct): se da la vuelta. 5 = lo bueno en TODA la app:
+   1 = destrozadas, 5 = frescas. Lo anotado antes de la v5.11 en PIERNAS va al
+   reves (ver DECISIONES).
    "ayuda" es la linea pequena bajo la casilla; "escala" pinta botones. */
 const CAMPOS = {
   km:      {et:'km de toda la sesión', ph:'5,2', modo:'decimal',
@@ -865,7 +903,7 @@ const CAMPOS = {
   rpe:     {et:'esfuerzo (1 al 10)', ph:'1-10', modo:'numeric',
             ayuda:'1 = paseando · 5 = frases enteras · 8 = frases cortas · 10 = a tope'},
   piernas: {et:'cómo quedaron las piernas', ph:'1-5', modo:'numeric', escala:5,
-            ayuda:'1 = frescas · 5 = destrozadas'},
+            ayuda:'1 = destrozadas · 5 = frescas'},
   carga:   {et:'carga',       ph:'kg',      modo:'decimal'},
   metros:  {et:'metros / reps',ph:'m o reps',modo:'text'},
   vam:     {et:'metros totales que marca la cinta al acabar', ph:'2150', modo:'decimal',
@@ -1375,8 +1413,7 @@ function pinta(){
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
   const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() +
-    (S.toast?`<div class="toast">${esc(S.toast)}</div>`:'');
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav();
 }
 function vErr(){
   return `<div class="top"><div class="rowt"><div class="wm">SALVA</div></div></div>
@@ -1389,14 +1426,22 @@ function cabecera(){
   const s = S.semana;
   return `<div class="top"><div class="rowt">
     <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
-    ${s?`<span class="pill">${/^0+$/.test(String(s.SEMANA).trim()) ? tr('Semana de preparación')
-        : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+(S.d.SEMANAS||[]).filter(w=>!/^0+$/.test(String(w.SEMANA).trim())).length}</span>`:''}
+    ${s?`<span class="pill">${esPrep(s) ? tr('Semana de preparación')
+        : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</span>`:''}
   </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}</div>`;
 }
+/* v5.11: iconos dibujados. Los caracteres de antes (◱ ▤ ✓ ◔) cambiaban segun el movil. */
+const ICO = {
+  hoy: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  plan: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h3M13.5 14h3M7.5 17h3"/>',
+  sesion: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1"/><path d="M8.5 12.5l2.3 2.3 4.7-4.8"/>',
+  progreso: '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M7.5 15.5l3.5-4 3 2.5 5-6.5"/>'
+};
+const icono = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
 function nav(){
-  const it = [['hoy','Hoy','◱'],['plan','Mi plan','▤'],['sesion','Registro','✓'],['progreso','Progreso','◔']];
-  return `<nav>${it.map(([k,n,g])=>
-    `<button onclick="ir('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${g}</span>${tr(n)}</button>`).join('')}</nav>`;
+  const it = [['hoy','Hoy'],['plan','Mi plan'],['sesion','Registro'],['progreso','Progreso']];
+  return `<nav>${it.map(([k,n])=>
+    `<button onclick="ir('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${icono(k)}</span>${tr(n)}</button>`).join('')}</nav>`;
 }
 function ir(v){
   // Los cuatro botones de abajo son "el presente": al tocarlos se sale de la
@@ -1495,6 +1540,30 @@ function bloqueExtra(bl, dia){
   </div>`;
 }
 
+/* ---------- mensaje de la semana (v5.11) ----------
+   Un mensaje de Salva para una semana concreta. Se escribe en la hoja de la
+   clienta, pestana TEXTOS, con CLAVE aviso_s06 (la semana), TITULO y
+   CONTENIDO. Sale en Hoy desde el primer dia de esa semana hasta que toca
+   "Entendido". El texto no vive en la app: cada sesion de clienta lo pone en
+   su hoja, revisado por Salvador. Lo estrena Sergio A (semana 6). */
+const esAvisoSemana = c => /^aviso[_-]?s\d+$/.test(norm(c).replace(/\s+/g,''));
+function avisoSemana(){
+  if(!S.semana) return '';
+  const n = parseInt(String(S.semana.SEMANA).replace(/\D/g,''), 10);
+  if(isNaN(n)) return '';
+  const t = (S.d.TEXTOS||[]).find(x=>esAvisoSemana(x.CLAVE)
+              && parseInt(norm(x.CLAVE).replace(/\D/g,''), 10) === n);
+  if(!t || !String(t.CONTENIDO||'').trim()) return '';
+  const clave = slug(t.CLAVE);
+  if(LS.get('aviso_visto~'+clave, false)) return '';
+  return `<div class="card" style="border-color:var(--verde-s)">
+    <div class="lbl">${tr("Mensaje de Salva")}</div>
+    ${t['TÍTULO']?`<h2 style="margin-top:6px;font-size:19px">${esc(t['TÍTULO'])}</h2>`:''}
+    <p class="mut" style="margin-top:8px;white-space:pre-line">${esc(t.CONTENIDO)}</p>
+    <button class="btn sm2 pri" style="margin-top:12px" onclick="avisoVisto('${clave}')">${tr("Entendido")}</button></div>`;
+}
+function avisoVisto(clave){ LS.set('aviso_visto~'+clave, true); pinta(); }
+
 /* ---------- aviso de seguimiento pendiente ---------- */
 function avisoCheckin(){
   const ant = faltaCheckin();
@@ -1514,7 +1583,7 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return bienvenida() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   if(!d || esDescanso(d)){
@@ -1553,7 +1622,7 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return bienvenida() + avisoFotos() + avisoCheckin() + bloqueHoy + `
+  return bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
@@ -1676,7 +1745,7 @@ function vPlan(){
   ${banderas?`<div class="card"><div class="lbl">${tr("Lo que tenemos en cuenta")}</div><p class="mut" style="margin-top:6px;line-height:1.55">${esc(banderas)}</p></div>`:''}
   ${leyenda?`<div class="card"><div class="lbl">${tr("Cómo leer el semáforo")}</div><p class="mut" style="margin-top:6px">${esc(leyenda)}</p>
     <p class="mut" style="margin-top:8px">${tr("Los días rojos van siempre separados: al menos 48 horas entre uno y otro. Es lo que te deja rendir en los dos y recuperar bien.")}</p></div>`:''}
-  <div class="card flat" style="margin-bottom:10px"><h3>${tr('Las')} ${(S.d.SEMANAS||[]).length} ${tr('semanas')}</h3>
+  <div class="card flat" style="margin-bottom:10px"><h3>${tr('Las')} ${semanasReales().length} ${tr('semanas')}</h3>
     <p class="sm" style="margin-top:4px">${tr("Cada bloque tiene su objetivo. Dentro, las semanas van sumando.")}</p></div>
   ${porBloques().map(g=>{
     const t = introDe(g.b), aqui = g.semanas.some(x=>S.semana && x.SEMANA===S.semana.SEMANA);
@@ -1699,7 +1768,7 @@ function vPlan(){
             ${rep?(act?`<div class="sm" style="margin-top:3px">${tr("estás aquí")}</div>`:'')
                  :`<div class="sm" style="margin-top:3px">${esc(s.FECHAS)}${act?' · '+tr("estás aquí"):''}</div>`}
             ${s['NOTA DE LA SEMANA']?`<div class="sm" style="margin-top:4px">${esc(s['NOTA DE LA SEMANA'])}</div>`:''}
-            <div class="sm" style="margin-top:4px">${act?tr("Ir a lo de hoy"):tr("Ver sus sesiones")} <span class="tocar">${tr('toca aquí')}</span></div></span></button>`;
+            <div class="sm" style="margin-top:4px">${act?tr("Ir a lo de hoy"):tr("Ver sus sesiones")}</div></span></button>`;
         }).join('');
       })()}</div>`;
   }).join('')}
@@ -1724,7 +1793,7 @@ function vSemana(){
   const futura = ini ? (ini > new Date()) : true;
   return `
   <div class="card" style="border-color:var(--verde-s)">
-    <div class="row sp"><div class="lbl">${tr('Semana')} ${esc(w.SEMANA)} ${enIngles()?'of':'de'} ${(S.d.SEMANAS||[]).filter(w=>!/^0+$/.test(String(w.SEMANA).trim())).length}</div>
+    <div class="row sp"><div class="lbl">${esPrep(w) ? tr('Semana de preparación') : tr('Semana')+' '+esc(w.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</div>
       <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
     <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
     ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
@@ -1839,7 +1908,7 @@ function vSesion(){
     ${(function(){
       const vid = idVal(bl,dia), n = (LOG[vid]||{}).val || 0;
       return `<div class="valora"><div class="lbl">${tr("¿Qué tal ha ido la sesión?")}</div>
-        <p class="sm" style="margin-top:5px">${tr("Del 1 al 5. Me sirve para saber qué sesiones te funcionan.")}</p>
+        <p class="sm" style="margin-top:5px">${tr("1 = muy mal · 5 = muy bien. Me sirve para saber qué sesiones te funcionan.")}</p>
         <div class="estrellas">${[1,2,3,4,5].map(i=>
           `<button id="est_${vid}_${i}" class="${i<=n?'on':''}" onclick="valora('${esc(bl)}','${esc(dia)}',${i})"
              aria-label="Valorar con ${i} de 5">★</button>`).join('')}</div></div>`;
@@ -1910,7 +1979,7 @@ function ejercicio(bl,dia,f){
         ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
       ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
       ${!vid2 && (series || camposDe(f).length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
-        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tocar(tr("Ver cómo se hace"))}</a>`
+        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
         : ''}</div>`;
   }
 
@@ -1953,11 +2022,13 @@ function ejercicio(bl,dia,f){
           oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nombre)}">
         <input inputmode="decimal" placeholder="${uni}" value="${esc(v.c||'')}" id="c_${id}"
           oninput="anota('${id}')" aria-label="Carga serie ${i+1} (${uni})">
-        <input inputmode="numeric" placeholder="RIR" value="${esc(v.rir||'')}" id="i_${id}"
-          oninput="anota('${id}')" aria-label="RIR serie ${i+1}">
+        <span class="rirc"><input inputmode="numeric" placeholder="RIR" value="${esc(v.rir||'')}" id="i_${id}"
+          oninput="anota('${id}')" aria-label="RIR serie ${i+1}"><button type="button" class="rq"
+          onclick="ayudaRIR('${id}')" data-obj="${esc(rirObjetivo(f))}" id="rq_${id}"
+          aria-label="${tr('¿Qué pongo en el RIR?')}">${enIngles()?'?':'¿?'}</button></span>
         <button id="b_${id}" onclick="confirmar('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
         <button class="x" onclick="vaciar('${id}')" aria-label="${tr('Vaciar')} ${tr('serie')} ${i+1}" title="${tr('Vaciar')}">✕</button>
-      </div>`;}).join('')}</div>`;
+      </div>${rirRaro(v.rir) && !v.sent ? avisoRIR(id) : ''}`;}).join('')}</div>`;
   }
 
   return `<div class="ej">
@@ -1969,7 +2040,7 @@ function ejercicio(bl,dia,f){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
       return `<div class="notaej">
-        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tocar(tr("¿Algo que contarme de este ejercicio?"))}</button>`}
+        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tr("¿Algo que contarme de este ejercicio?")}</button>`}
         ${bloqueVideo(bl,dia,nombre,f)}${bloqueFoto(bl,dia,nombre,f)}
         ${ab?`<button class="abrir con" onclick="cerrarNota()">💬 ${tr("Tu nota para Salva")}</button>
           <textarea id="n_${idn}" oninput="guardaNota('${idn}',this.value)"
@@ -1981,9 +2052,9 @@ function ejercicio(bl,dia,f){
       ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${esc(vid)}?rel=0&modestbranding=1"
            title="${esc(nombre)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
          <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
-      : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tocar(tr("Ver ejercicio"))}</button>`)
+      : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
       : ((series>0 || campos.length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
-        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tocar(tr("Ver cómo se hace"))}</a>`
+        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
         : '')}
     ${/* v4.8: antes esto se decidia por el TIPO, y solo valia "fuerza" e
          "hibrido". Pero un face pull marcado como "extra" sigue siendo un
@@ -1996,12 +2067,12 @@ function ejercicio(bl,dia,f){
       return sal
         ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
              <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
-        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tocar(tr("No he hecho este ejercicio"))}</button></div>`;
+        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`;
     })()}</div>`;
 }
-/* v5.3: varias clientas no sabian que estas lineas eran botones. Ahora lo
-   dicen al final de la frase, y en verde. */
-const tocar = t => t + ' <span class="tocar">' + tr('toca aquí') + '</span>';
+/* v5.3 ponia "toca aqui" al final de estas lineas porque no se veia que eran
+   botones. v5.11 (hoja de ruta, 2 oct): fuera la coletilla; ahora tienen
+   fondo, borde e icono, como cualquier boton. */
 
 function verVideo(id){ S.video = id; pinta(); }
 
@@ -2066,7 +2137,7 @@ function bloqueFoto(bl, dia, nombre, f){
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando la foto…")}</p>`
       : `<button class="abrir" onclick="document.getElementById('vf_${id}').click()">📸 ${
-          tocar(hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela"))}</button>`}
+          hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela")}</button>`}
     ${hecha && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Foto enviada")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
     ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}`;
 }
@@ -2088,8 +2159,8 @@ function bloqueVideo(bl, dia, nombre, f){
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
       : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${!enviado && pideVideo(f)
-          ? `<span class="tocar">${tr("Clic aquí")}</span> ${tr("para grabar o subir el vídeo")}`
-          : tocar(enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
+          ? tr("Grabar o subir el vídeo")
+          : (enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
          ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
            <div class="stack" style="margin:0 0 10px;gap:8px">
              <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
@@ -2157,6 +2228,46 @@ function duracion(f){
   });
 }
 
+/* ---------- RIR con ayuda (v5.11, hoja de ruta 2 oct) ----------
+   La casilla del RIR sigue igual. El "¿?" abre la pregunta en palabras
+   ("¿Cuántas más podías hacer?") con 0 a 4; al elegir, el numero aparece en
+   la casilla, para que aprenda que ESO es el RIR. Maximo 4.
+   Si escribe mas de 4 (Ben puso 12-20: eran sus repeticiones) no se bloquea
+   nada: sale un aviso debajo de la serie. */
+const rirRaro = x => { const n = parseFloat(String(x||'').replace(',','.')); return !isNaN(n) && n > 4; };
+/* El objetivo del dia, si la hoja lo pone como numero ("1-2", "2"). Un ritmo
+   o una palabra no es un RIR y no se ensena. */
+function rirObjetivo(f){
+  const t = String((f && f['RIR / RPE']) || '').trim();
+  if(!/^\d/.test(t) || /%|:|\/\s*km/i.test(t)) return '';
+  return t.replace(/^rir\s*/i,'');
+}
+function avisoRIR(id){
+  return `<div class="rirmal" id="rm_${id}">${tr('El RIR va de 0 a 4: las repeticiones que te quedaban, no las que hiciste. Toca ¿? si dudas.')}</div>`;
+}
+function ayudaRIR(id){
+  const abierta = document.getElementById('ra_'+id);
+  document.querySelectorAll('.rirayuda').forEach(x=>x.remove());
+  if(abierta) return;
+  const fila = document.getElementById('fila_'+id); if(!fila) return;
+  const q = document.getElementById('rq_'+id), obj = q ? q.getAttribute('data-obj') : '';
+  const ya = (document.getElementById('i_'+id)||{}).value || '';
+  const div = document.createElement('div');
+  div.className = 'rirayuda'; div.id = 'ra_'+id;
+  div.innerHTML = `<b>${tr('¿Cuántas más podías hacer?')}</b>
+    <div class="escala">${[0,1,2,3,4].map(n=>`<button type="button" class="${ya===String(n)?'on':''}"
+      onclick="poneRIR('${id}',${n})">${n}</button>`).join('')}</div>
+    <p>${tr('0 = no podías ni una más · 2 = te quedaban dos · 4 = cuatro o más. Eso es el RIR.')}${
+      obj ? ' ' + tr('Hoy buscamos') + ' ' + esc(obj) + '.' : ''}</p>`;
+  fila.after(div);
+}
+function poneRIR(id, n){
+  const el = document.getElementById('i_'+id);
+  if(el) el.value = String(n);
+  const ra = document.getElementById('ra_'+id); if(ra) ra.remove();
+  anota(id);
+}
+
 /* --- guardado automático: NO redibuja la pantalla --- */
 function anota(id){
   const r=document.getElementById('r_'+id), c=document.getElementById('c_'+id), i=document.getElementById('i_'+id);
@@ -2170,6 +2281,10 @@ function anota(id){
   LS.set('log', LOG);
   const fila = document.getElementById('fila_'+id);
   if(fila && LOG[id].corregido) fila.classList.add('corr');
+  // v5.11: aviso si el RIR pasa de 4 (se quita en cuanto lo corrige)
+  const rm = document.getElementById('rm_'+id);
+  if(rirRaro(LOG[id].rir)){ if(!rm && fila){ fila.insertAdjacentHTML('afterend', avisoRIR(id)); } }
+  else if(rm) rm.remove();
 }
 
 /* --- confirmar / desmarcar una serie, sin tocar el resto --- */
@@ -2193,6 +2308,7 @@ function confirmar(id){
 function vaciar(id){
   const v = LOG[id] || {};
   ['r_','c_','i_'].forEach(p=>{ const el=document.getElementById(p+id); if(el) el.value=''; });
+  const rm = document.getElementById('rm_'+id); if(rm) rm.remove();
   if(v.sent){
     // ya está en la hoja: se envía vacía para que allí quede corregida
     LOG[id] = {r:'', c:'', rir:'', ok:false, sent:true, corregido:true, borrada:true};
@@ -2278,6 +2394,8 @@ function valora(bl,dia,n){
     const b=document.getElementById('est_'+id+'_'+i);
     if(b) b.classList.toggle('on', i<=nuevo);
   }
+  // v5.11: valorar la sesion es darla por terminada: se envia sola
+  if(nuevo > 0) enviar({auto:true});
 }
 function guardaObs(bl,dia,txt){
   const id = idObs(bl,dia);
@@ -2298,10 +2416,29 @@ function desomitir(bl,dia){
   LS.set('log', LOG); pinta();
 }
 /* ================= ENVÍO ================= */
-async function enviar(){
-  if(S.enviando) return;
+/* v5.11: AUTOENVIO. De Carmen no ha llegado nada en cinco semanas: lo mas
+   probable es que anote y no toque nunca "Guardar y enviar". Ahora tambien se
+   envia solo, sin que haga nada:
+     - al valorar la sesion (las estrellas del final), y
+     - al salir de la app (cambiar de app, bloquear el movil) si hay algo
+       anotado sin enviar y hay cobertura.
+   El boton "Guardar y enviar" se queda igual. El autoenvio NO manda el
+   seguimiento semanal: a medio escribir no se da por respondido; eso sigue
+   saliendo con su boton.
+   enviar(opc): opc.auto = sin cambiar de pantalla; opc.salir = la pagina se
+   esta yendo (keepalive, sin avisos). */
+async function enviar(opc){
+  opc = opc || {};
+  // un envio que se quedo colgado (el movil durmio la app a medias) no bloquea para siempre
+  if(S.enviando && Date.now() - (S.enviandoDesde||0) < 45000){ if(opc.auto) S.otraVez = true; return; }
+  if(opc.auto && navigator.onLine === false) return;
   confirmaLoEscrito();      // v5.6: lo escrito cuenta, aunque no lleve "Anotar"
   const reg = [], hoy = new Date().toISOString().slice(0,10);
+  /* v5.11: lo que sale, tal como sale. Al volver la respuesta solo se marca
+     como enviado lo que no ha cambiado mientras tanto: con el autoenvio se
+     sigue escribiendo mientras viaja el envio, y antes eso se daba por enviado
+     sin haber salido nunca. */
+  const foto = {};
 
   Object.keys(LOG).forEach(id=>{
     const v = LOG[id]; if(!v) return;
@@ -2309,6 +2446,7 @@ async function enviar(){
     if(id.endsWith('~fecha')) return;      // marca interna: no es un registro
     if(!v.ok && !v.corregido) return;
     if(v.sent && !v.corregido) return;
+    foto[id] = JSON.stringify(v);
 
     const p = id.split('~');
     const base = {id:id, fecha:(v.ts||'').slice(0,10)||hoy,
@@ -2366,43 +2504,65 @@ async function enviar(){
   // aviso pendiente, es la actual. Tiene que ser la misma en las tres partes:
   // el identificador, el dato que va a la hoja y la marca de "ya respondida".
   const semResp = (faltaCheckin() || S.semana || {}).SEMANA || '0';
-  const chk = Object.keys(CHK).filter(k=>CHK[k] && (String(CHK[k].v||'').trim() || CHK[k].n)).map(k=>({
+  const chk = opc.auto ? [] : Object.keys(CHK).filter(k=>CHK[k] && (String(CHK[k].v||'').trim() || CHK[k].n)).map(k=>({
     id: idChk(semResp, k),
     fecha: hoy, semana: semResp, 'npregunta': k,
     categoria: CHK[k].cat||'',
     respuesta: (CHK[k].n ? CHK[k].n + '/5' + (String(CHK[k].v||'').trim() ? ' · ' : '') : '') + (CHK[k].v||'')
   }));
 
-  if(!reg.length && !chk.length){ toast(tr('No hay nada nuevo que enviar.')); return; }
+  if(!reg.length && !chk.length){ if(!opc.auto) toast(tr('No hay nada nuevo que enviar.')); return; }
 
-  S.enviando = true; toast(tr('Enviando…'));
+  S.enviando = true; S.enviandoDesde = Date.now();
+  if(!opc.auto) toast(tr('Enviando…'));
+  const cuerpo = JSON.stringify({cliente:CID, token:KEY, registro:reg, checkin:chk});
+  const ctrl = new AbortController(), reloj = setTimeout(()=>ctrl.abort(), 40000);
   try{
-    const r = await fetch(API, {method:'POST', redirect:'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({cliente:CID, token:KEY, registro:reg, checkin:chk})});
+    // keepalive deja que el envio termine aunque se cierre la app (hasta 64 KB)
+    const r = await fetch(API, {method:'POST', redirect:'follow', signal:ctrl.signal,
+      keepalive: !!opc.salir && cuerpo.length < 60000,
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, body: cuerpo});
     const d = await r.json();
+    clearTimeout(reloj);
     if(d.error) throw new Error(d.error);
 
     // se conserva todo, marcado como enviado: así se puede corregir después
-    Object.keys(LOG).forEach(id=>{
-      const v = LOG[id]; if(!v) return;
+    Object.keys(foto).forEach(id=>{
+      const v = LOG[id]; if(!v || JSON.stringify(v) !== foto[id]) return;
       if(v.borrada){ delete LOG[id]; return; }
-      if(v.ok || v.corregido){ v.sent = true; delete v.corregido; }
+      v.sent = true; delete v.corregido;
     });
     LS.set('log', LOG);
 
-    if(chk.length && !ENVIADO.includes(String(semResp))){
-      ENVIADO.push(String(semResp)); LS.set('semanas_enviadas', ENVIADO);
+    if(chk.length){
+      // la semana cuenta como respondida si va alguna pregunta, no solo las estrellas o las fotos
+      if(Object.keys(CHK).some(k=>/^p/.test(k)) && !ENVIADO.includes(String(semResp))){
+        ENVIADO.push(String(semResp)); LS.set('semanas_enviadas', ENVIADO);
+      }
+      CHK = {}; LS.set('checkin', CHK);   // el formulario queda limpio para la semana siguiente
     }
-    CHK = {}; LS.set('checkin', CHK);   // el formulario queda limpio para la semana siguiente
-    S.enviando=false; S.vista='hoy'; pinta();
-    const c = d.corregidas||0;
-    toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}` : tr('Enviado. Salvador ya lo tiene.'));
-  }catch(e){
     S.enviando=false;
-    toast(tr('No se ha podido enviar. Sigue guardado en tu móvil; inténtalo luego.'));
+    if(opc.auto){
+      if(!opc.salir && document.visibilityState !== 'hidden') toast(tr('Enviado. Salvador ya lo tiene.'));
+    } else {
+      S.vista='hoy'; pinta();
+      const c = d.corregidas||0;
+      toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}` : tr('Enviado. Salvador ya lo tiene.'));
+    }
+  }catch(e){
+    clearTimeout(reloj);
+    S.enviando=false;
+    if(!opc.auto) toast(tr('No se ha podido enviar. Sigue guardado en tu móvil; inténtalo luego.'));
   }
+  if(S.otraVez){ S.otraVez = false; if(pendientes()) enviar({auto:true}); }
 }
+/* Al salir de la app (otra app, pantalla bloqueada, cerrar): si hay algo sin enviar, sale solo. */
+function enviarAlSalir(){
+  if(!S.d || !CID || !KEY || !pendientes()) return;
+  enviar({auto:true, salir:true});
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') enviarAlSalir(); });
+window.addEventListener('pagehide', enviarAlSalir);
 
 /* ================= PROGRESO ================= */
 function vProgreso(){
@@ -2410,8 +2570,9 @@ function vProgreso(){
   const dias = sesionesContables(bl);
   const hechas = dias.filter(d=>['hecha','parcial'].includes(estadoSesion(bl,d['DÍA']))).length;
   const pct = dias.length ? Math.round(hechas/dias.length*100) : 0;
-  const totalSem = (S.d.SEMANAS||[]).length;
+  const totalSem = semanasReales().length;
   const semN = parseInt(String((S.semana||{}).SEMANA||'0').replace(/\D/g,'')) || 0;
+  const prep = esPrep(S.semana);
   const pctPrg = totalSem ? Math.round(semN/totalSem*100) : 0;
 
   /* v3.14: el historial sale de todas las semanas, no solo de esta.
@@ -2487,7 +2648,7 @@ function vProgreso(){
   <div class="card"><div class="lbl">${tr("Tu objetivo")}</div>
     <p style="margin-top:6px;font-size:15.5px;line-height:1.45">${esc(campo('objetivo')||'')}</p></div>
   ${totalSem?`<div class="card"><div class="row sp"><h3>${tr("Tu programa")}</h3>
-    <b class="mono">${tr('Semana')} ${semN} / ${totalSem}</b></div>
+    <b class="mono">${prep ? tr('Semana de preparación') : tr('Semana')+' '+semN+' / '+totalSem}</b></div>
     <div class="bar"><i style="width:${pctPrg}%"></i></div>
     <p class="sm">${esc(sinRepetir((S.semana||{})['FASE / TÍTULO']||''))}</p></div>`:''}
   <div class="card"><div class="row sp"><h3>${tr("Esta semana")}</h3><b class="mono">${hechas} / ${dias.length}</b></div>
@@ -2548,6 +2709,15 @@ function vSeg(){
         <textarea id="q_${esc(clave)}" oninput="respQ('${esc(clave)}','${esc(cat)}',this.value)"
           placeholder="${tr("Tu respuesta")}">${esc((CHK[clave]||{}).v||'')}</textarea></div>`;
     }).join('')}
+    ${(function(){
+      /* v5.11: para saber a quien le sirve el seguimiento y a quien no */
+      const n = (CHK.valoracion||{}).n || 0;
+      return `<div class="valora"><div class="lbl">${tr("¿Qué te pareció este seguimiento?")}</div>
+        <p class="sm" style="margin-top:5px">${tr("1 = no me sirve · 5 = me sirve mucho")}</p>
+        <div class="estrellas">${[1,2,3,4,5].map(i=>
+          `<button id="estseg_${i}" class="${i<=n?'on':''}" onclick="valoraSeg(${i})"
+             aria-label="${i}/5">★</button>`).join('')}</div></div>`;
+    })()}
     <button class="btn pri big" style="margin-top:14px" onclick="enviar()">${tr("Enviar a Salvador")}</button>
     <p class="sm" style="margin-top:10px">${tr("Se guarda mientras escribes. Si pierdes la conexión, no se borra.")}</p>
   </div>`;
@@ -2705,6 +2875,13 @@ function respQ(clave,cat,v){ CHK[clave]=Object.assign({},CHK[clave],{v:v,cat:cat
    le desaparecian los botones en tres de sus nueve preguntas. */
 const esEscala = t => /\b1\s*(?:[-–—]|\s*(?:al|to|a)\s*)\s*5\b/i.test(String(t||'')) ||
                       /\b1\s*=[^]{1,60}?\b5\s*=/i.test(String(t||''));
+function valoraSeg(n){
+  const a = CHK.valoracion || {}, nuevo = a.n === n ? 0 : n;
+  if(nuevo) CHK.valoracion = {cat:'Valoración del seguimiento', n:nuevo, v:''};
+  else delete CHK.valoracion;
+  LS.set('checkin', CHK);
+  for(let i=1;i<=5;i++){ const b=document.getElementById('estseg_'+i); if(b) b.classList.toggle('on', i<=nuevo); }
+}
 function notaQ(clave,cat,n){
   const a = CHK[clave] || {};
   CHK[clave] = Object.assign({}, a, {cat:cat, n: a.n===n ? 0 : n, v: a.v||''});
@@ -2715,7 +2892,7 @@ function notaQ(clave,cat,n){
 function vGuias(){
   const gs = S.d['GUÍAS']||[], grupos = {};
   gs.forEach(g=>{ (grupos[g.CLAVE] = grupos[g.CLAVE] || {t:g['TÍTULO'], filas:[]}).filas.push(g); });
-  const textos = (S.d.TEXTOS||[]).filter(t=>!norm(t.CLAVE).startsWith('intro'));
+  const textos = (S.d.TEXTOS||[]).filter(t=>!norm(t.CLAVE).startsWith('intro') && !esAvisoSemana(t.CLAVE));
   return `
   <div class="card flat"><button class="btn sm2" onclick="ir('plan')">${tr("← Mi plan")}</button></div>
   ${Object.keys(grupos).map(k=>{
