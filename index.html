@@ -255,7 +255,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.8';
+const VERSION = 'v5.9';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -513,7 +513,13 @@ const EN = {
   "Para que se puedan comparar, las tres, y cada mes, igual:": "So they can be compared, all three, every month, the same way:",
   "Mismo sitio, misma luz y misma distancia cada vez. Luz de frente, nunca a contraluz, y fondo liso si puedes.": "Same place, same light and same distance every time. Light in front of you, never behind, and a plain background if you can.",
   "Móvil en vertical, apoyado a la altura de la cadera y a 2-3 metros, con temporizador o que te la haga alguien. Que se te vea de la cabeza a los pies.": "Phone upright, resting at hip height, 2-3 metres away, with the timer or someone else taking it. Head to feet in the frame.",
-  "Ropa ajustada, y siempre la misma (top y short, o ropa interior).": "Tight clothes, always the same ones (top and shorts, or underwear).",
+  "En traje de baño o ropa interior, y siempre el mismo: es lo que deja ver el cambio.": "In a swimsuit or underwear, always the same one: that's what lets the change show.",
+  "Toca hacerte las fotos de progreso": "Time for your progress photos",
+  "Te falta alguna de las tres. Cuando puedas, termínalas.": "One of the three is still missing. Finish them when you can.",
+  "Tres fotos, frontal, lateral y posterior. Hazlas cuanto antes y no te las vuelvo a pedir hasta dentro de 4 semanas.": "Three photos, front, side and back. Take them as soon as you can and I won't ask again for 4 weeks.",
+  "Tres fotos, frontal, lateral y posterior. Son voluntarias.": "Three photos, front, side and back. They are optional.",
+  "Ya tengo las tres de este mes. Te las vuelvo a pedir dentro de 4 semanas.": "I have all three for this month. I'll ask again in 4 weeks.",
+  "← Volver": "← Back",
   "Antes de entrenar, nunca justo después: el bombeo cambia la foto. Mejor por la mañana, al levantarte.": "Before training, never right after: the pump changes the photo. Best in the morning, when you get up.",
   "Postura natural: brazos relajados a los lados, sin meter tripa, sin apretar y sin posar.": "Natural stance: arms relaxed at your sides, no sucking in, no squeezing, no posing.",
   "Frontal": "Front",
@@ -1304,7 +1310,7 @@ function pinta(){
   try { document.documentElement.lang = enIngles() ? 'en' : 'es'; } catch(e){}
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
-  const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias}[S.vista] || vHoy;
+  const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
   app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() +
     (S.toast?`<div class="toast">${esc(S.toast)}</div>`:'');
 }
@@ -1443,7 +1449,7 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return bienvenida() + avisoCheckin() + avisoFotos() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return bienvenida() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   if(!d || esDescanso(d)){
@@ -1482,7 +1488,7 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return bienvenida() + avisoCheckin() + avisoFotos() + bloqueHoy + `
+  return bienvenida() + avisoFotos() + avisoCheckin() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
@@ -2464,78 +2470,100 @@ function vSeg(){
         <textarea id="q_${esc(clave)}" oninput="respQ('${esc(clave)}','${esc(cat)}',this.value)"
           placeholder="${tr("Tu respuesta")}">${esc((CHK[clave]||{}).v||'')}</textarea></div>`;
     }).join('')}
-    ${bloqueFotosProgreso(semFotos())}
     <button class="btn pri big" style="margin-top:14px" onclick="enviar()">${tr("Enviar a Salvador")}</button>
     <p class="sm" style="margin-top:10px">${tr("Se guarda mientras escribes. Si pierdes la conexión, no se borra.")}</p>
   </div>`;
 }
-/* v5.8: fotos de progreso, una vez al mes. Salen en el seguimiento de las
-   semanas 4, 8 y 12 (cada cuatro seguimientos) y, la primera vez, en el
-   siguiente que responda: sin foto de partida no hay con que comparar.
+/* v5.9 (2 oct): fotos de progreso cada 4 semanas, contadas desde el ultimo
+   envio y no desde la semana del bloque ni desde el seguimiento.
+   - Toca si no ha mandado nunca, o si las ultimas tienen 28 dias o mas.
+   - Un "ciclo" son las tres fotos (frontal, lateral, posterior). Su clave es
+     la fecha de la primera foto del ciclo, asi puede mandarlas en dias
+     distintos y cambiar una sin abrir otro ciclo.
+   - Con las tres mandadas, no se le vuelve a pedir hasta 28 dias despues.
+   - Los envios de antes llevaban "fotos~" y no cuentan: las que llegaron de
+     la app de Alexia el 2 oct eran pruebas de Salvador.
    Lo que pide el metodo (maestro 6988, fuerza.md: fotos cada 4-8 semanas):
    consentimiento aparte, misma distancia, luz y postura, nada de comparar
-   con bombeo o posando, y nunca exigirlas. Por eso hay un "prefiero no",
-   que se recuerda y le llega a Salvador con el seguimiento.
+   con bombeo o posando, y nunca exigirlas. Por eso hay un "prefiero no".
    Criterio nuestro, sin respaldo en el metodo: la hora (por la manana), la
    altura del movil (cadera) y el lado del perfil (derecho). */
+const FOTOS_CLIENTES = ['diana','alexia','ben','carlos','elena','smi','carmen',
+                        'sergio','sergiol','justine','paula','stephanie'];
+const FOTOS_DIAS = 28;
 const POSES = [['frontal','Frontal','de frente al móvil, pies a la anchura de las caderas'],
                ['lateral','Lateral','de perfil, siempre con el lado derecho hacia el móvil'],
                ['posterior','Posterior','de espaldas, en la misma postura que la frontal']];
-const numSem = x => parseInt(String(x||'').replace(/\D/g,''), 10) || 0;
-const idProg = (sem, pose) => `fotos~s${numSem(sem)}~${pose}`;
-const fotoProgEnviada = id => (VID[id]||{}).estado === 'enviado'
-                              || (S.d.MIS_VIDEOS||[]).some(x=>String(x.ID)===id);
-function tocanFotos(sem){
-  const n = numSem(sem && sem.SEMANA);
-  if(!n) return false;
-  if(n % 4 === 0) return true;
-  const alguna = Object.keys(VID).some(k=>k.startsWith('fotos~') && VID[k].estado==='enviado')
-              || (S.d.MIS_VIDEOS||[]).some(x=>String(x.ID).startsWith('fotos~'));
-  return !alguna;
+const fotosActivas = () => FOTOS_CLIENTES.indexOf(String(CID||'').toLowerCase()) > -1
+                           && !!(S.d && S.d.VIDEO);
+const diasDesde = f => Math.floor((new Date(hoyISO()) - new Date(String(f).slice(0,10))) / 86400000);
+/* Todas las fotos de progreso que constan: las del servidor y las que este
+   movil acaba de mandar y el servidor aun no ha devuelto. */
+function fotosProg(){
+  const m = {};
+  (S.d.MIS_VIDEOS||[]).forEach(x=>{ const id = String(x.ID||'');
+    if(id.startsWith('progreso~')) m[id] = String(x.FECHA||'').slice(0,10) || id.split('~')[1]; });
+  Object.keys(VID).forEach(id=>{
+    if(id.startsWith('progreso~') && VID[id].estado==='enviado') m[id] = m[id] || VID[id].fecha || id.split('~')[1]; });
+  return m;
 }
-/* 2 oct: abierto a todas (el piloto con Alexia duro un dia). Sale en la
-   pestana de seguimiento siempre que toque, haya o no un seguimiento
-   pendiente: la semana es la que se responde o, si no hay, la actual. */
-const semFotos = () => faltaCheckin() || S.semana;
-const fotosPendientes = sem => !!(sem && S.d && S.d.VIDEO && tocanFotos(sem) && !LS.get('fotos_no', false)
-                                  && POSES.some(([k])=>!fotoProgEnviada(idProg(sem.SEMANA, k))));
+/* El ciclo abierto: la fecha de la primera foto de los ultimos 28 dias, o hoy
+   si no hay ninguna. Y si ese ciclo ya tiene las tres. */
+function cicloFotos(){
+  const m = fotosProg();
+  const claves = [...new Set(Object.keys(m).map(id=>id.split('~')[1]))].sort();
+  const vivas = claves.filter(c=>diasDesde(c) < FOTOS_DIAS);
+  const clave = vivas.length ? vivas[0] : hoyISO();
+  const hechas = POSES.filter(([k])=>m[`progreso~${clave}~${k}`]).length;
+  return {clave, hechas, completo: hechas === POSES.length};
+}
+const idProg = (clave, pose) => `progreso~${clave}~${pose}`;
+const fotoProgEnviada = id => !!fotosProg()[id];
+const fotosPendientes = () => fotosActivas() && !LS.get('fotos_no', false) && !cicloFotos().completo;
+
 function avisoFotos(){
-  const sem = semFotos();
-  if(!fotosPendientes(sem)) return '';
+  if(!fotosPendientes()) return '';
+  const c = cicloFotos();
   return `<div class="aviso">
-    <b>${tr("Fotos de progreso")}</b>
-    <p class="mut" style="margin-top:6px;font-size:14px">${tr("Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.")}</p>
-    <button class="btn sm2" style="margin-top:10px" onclick="ir('seguimiento')">${tr("Ver cómo hacerlas")}</button>
+    <b>📸 ${tr("Toca hacerte las fotos de progreso")}</b>
+    <p class="mut" style="margin-top:6px;font-size:14px">${c.hechas
+      ? tr("Te falta alguna de las tres. Cuando puedas, termínalas.")
+      : tr("Tres fotos, frontal, lateral y posterior. Hazlas cuanto antes y no te las vuelvo a pedir hasta dentro de 4 semanas.")}</p>
+    <button class="btn sm2" style="margin-top:10px" onclick="ir('fotos')">${tr("Ver cómo hacerlas")}</button>
   </div>`;
 }
-function bloqueFotosProgreso(ant){
-  if(!ant || !S.d || !S.d.VIDEO || !tocanFotos(ant)) return '';
-  const cab = `<div class="q"><div class="t"><span class="tag">${tr("Fotos de progreso")}</span></div>`;
-  if(LS.get('fotos_no', false)) return `${cab}
-      <p class="sm">${tr("Has decidido no mandar fotos de progreso.")}</p>
-      <button class="btn sm2" style="margin-top:8px" onclick="fotosNo(false)">${tr("Cambiar de idea")}</button></div>`;
+function vFotos(){
+  const volver = `<div class="card flat"><button class="btn sm2" onclick="ir('hoy')">${tr("← Volver")}</button></div>`;
+  if(!fotosActivas()) return volver;
+  const cab = `<div class="card"><h2 style="font-size:19px">${tr("Fotos de progreso")}</h2>`;
+  if(LS.get('fotos_no', false)) return volver + `${cab}
+      <p class="mut" style="margin-top:8px">${tr("Has decidido no mandar fotos de progreso.")}</p>
+      <button class="btn sm2" style="margin-top:10px" onclick="fotosNo(false)">${tr("Cambiar de idea")}</button></div>`;
+  const c = cicloFotos();
   const reglas = ["Mismo sitio, misma luz y misma distancia cada vez. Luz de frente, nunca a contraluz, y fondo liso si puedes.",
     "Móvil en vertical, apoyado a la altura de la cadera y a 2-3 metros, con temporizador o que te la haga alguien. Que se te vea de la cabeza a los pies.",
-    "Ropa ajustada, y siempre la misma (top y short, o ropa interior).",
+    "En traje de baño o ropa interior, y siempre el mismo: es lo que deja ver el cambio.",
     "Antes de entrenar, nunca justo después: el bombeo cambia la foto. Mejor por la mañana, al levantarte.",
     "Postura natural: brazos relajados a los lados, sin meter tripa, sin apretar y sin posar."];
-  return `${cab}
-    <div class="t">${tr("Toca este mes: tres fotos, frontal, lateral y posterior. Son voluntarias.")}</div>
-    <p class="sm" style="margin:6px 0">${tr("Son para ver tu cambio con el tiempo, no para juzgarte. Solo las veo yo: se guardan en mi Drive, no se comparten ni se publican.")}</p>
-    <div class="calent" style="margin:8px 0"><b>${tr("Para que se puedan comparar, las tres, y cada mes, igual:")}</b>
+  return volver + `${cab}
+    <p class="mut" style="margin-top:8px">${tr(c.completo
+      ? "Ya tengo las tres de este mes. Te las vuelvo a pedir dentro de 4 semanas."
+      : "Tres fotos, frontal, lateral y posterior. Son voluntarias.")}</p>
+    <p class="sm" style="margin:8px 0">${tr("Son para ver tu cambio con el tiempo, no para juzgarte. Solo las veo yo: se guardan en mi Drive, no se comparten ni se publican.")}</p>
+    <div class="calent" style="margin:10px 0"><b>${tr("Para que se puedan comparar, las tres, y cada mes, igual:")}</b>
       <ul style="margin:6px 0 0 18px;padding:0">${reglas.map(r=>`<li style="margin-bottom:4px">${tr(r)}</li>`).join('')}</ul></div>
     ${POSES.map(([k,et,como])=>{
-      const id = idProg(ant.SEMANA, k), v = VID[id] || {}, hecha = fotoProgEnviada(id);
-      return `<div style="margin:10px 0"><b>${tr(et)}</b> <span class="sm">· ${tr(como)}</span>
+      const id = idProg(c.clave, k), v = VID[id] || {}, hecha = fotoProgEnviada(id);
+      return `<div style="margin:12px 0"><b>${tr(et)}</b> <span class="sm">· ${tr(como)}</span>
         <input type="file" accept="image/*" id="vf_${id}" style="display:none"
-          onchange="subirFotoProgreso('${id}','${esc(ant.SEMANA)}','${k}',this)">
+          onchange="subirFotoProgreso('${id}','${k}',this)">
         ${v.estado === 'enviando'
           ? `<p class="pista">⏳ ${tr("Enviando la foto…")}</p>`
           : `<div><button class="btn sm2${hecha?'':' pri'}" style="margin-top:6px" onclick="document.getElementById('vf_${id}').click()">📸 ${
               tr(hecha ? "Cambiar esta foto" : "Hacer o elegir la foto")}</button>
              ${hecha ? `<span class="sm"> ✅ ${tr("Foto enviada")}</span>` : ''}</div>`}</div>`;
     }).join('')}
-    <button class="btn sm2" style="margin-top:4px" onclick="fotosNo(true)">${tr("Prefiero no mandar fotos")}</button></div>`;
+    ${c.completo ? '' : `<button class="btn sm2" style="margin-top:6px" onclick="fotosNo(true)">${tr("Prefiero no mandar fotos")}</button>`}</div>`;
 }
 function fotosNo(no){
   LS.set('fotos_no', !!no);
@@ -2563,7 +2591,7 @@ function reducirFoto(f){
     img.src = url;
   });
 }
-async function subirFotoProgreso(id, sem, pose, input){
+async function subirFotoProgreso(id, pose, input){
   const f = input.files && input.files[0];
   input.value = '';
   if(!f) return;
@@ -2574,8 +2602,8 @@ async function subirFotoProgreso(id, sem, pose, input){
     const r = await fetch(API, {method:'POST', redirect:'follow',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({cliente:CID, token:KEY, video:{
-        id: id, tipo: 'progreso', fecha: hoyISO(), semana: String(sem), dia: '',
-        sesion: 'Seguimiento', ejercicio: 'FOTO DE PROGRESO · ' + pose, nota: '',
+        id: id, tipo: 'progreso', fecha: hoyISO(), semana: String((S.semana&&S.semana.SEMANA)||''), dia: '',
+        sesion: 'Fotos de progreso', ejercicio: 'FOTO DE PROGRESO · ' + pose, nota: '',
         mime: 'image/jpeg', nombre: 'progreso-' + pose + '.jpg', datos: datos}})});
     const d = await r.json();
     if(d.error) throw new Error(d.error);
