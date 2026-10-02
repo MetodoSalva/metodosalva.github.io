@@ -252,6 +252,7 @@ nav .g svg{width:22px;height:22px;display:block}
   text-align:left;min-height:40px;margin:0 0 8px;width:100%}
 .notaej button.abrir:active{background:var(--verde-b)}
 .notaej button.abrir.con{border-color:var(--verde-s);background:var(--verde-b)}
+.notaej button.abrir .clic{text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .notaej textarea{width:100%;border:1px solid var(--linea2);border-radius:8px;padding:10px;
   font-size:16px;min-height:64px;background:var(--sup);resize:vertical;line-height:1.4;margin-top:4px}
 .notaej .pista{font-size:12px;color:var(--txt3);margin-top:5px}
@@ -301,6 +302,10 @@ nav .g svg{width:22px;height:22px;display:block}
 .cab img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);mix-blend-mode:luminosity;opacity:.55}
 .cab .k{position:absolute;left:16px;bottom:12px;font-family:var(--c);font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
 /* mapa del cuerpo de la sesion */
+ul.mat{list-style:none;margin:6px 0 0;padding:0}
+ul.mat li{font-size:14.5px;color:var(--txt2);padding:5px 0;border-bottom:1px solid var(--linea);line-height:1.35}
+ul.mat li:last-child{border-bottom:0}
+ul.mat li.mas{color:var(--txt3);font-size:13px}
 .mapa{display:flex;gap:14px;align-items:center;margin-top:12px}
 .mapa svg{width:132px;height:auto;flex:none}
 .mapa.peq svg{width:104px}
@@ -310,6 +315,22 @@ nav .g svg{width:22px;height:22px;display:block}
 .mapa .txt{font-size:13px;color:var(--txt2);line-height:1.4}
 .mapa .txt b{display:block;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin-bottom:3px}
 /* selector de aspecto */
+/* v5.13: menu de la esquina (aspecto y lo que vaya llegando) */
+.top .der{display:flex;align-items:center;gap:8px}
+.menu-b{width:38px;height:38px;border-radius:10px;border:1px solid rgba(246,243,238,.28);background:rgba(246,243,238,.12);
+  color:var(--sobre);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.menu-b svg{width:20px;height:20px}
+.menu-fondo{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:45}
+.menu{position:fixed;top:calc(env(safe-area-inset-top) + 64px);right:12px;width:min(320px,calc(100vw - 24px));z-index:46;
+  background:var(--sup);border:1px solid var(--linea);border-radius:14px;box-shadow:0 18px 40px -12px rgba(0,0,0,.45);
+  padding:14px;max-height:calc(100vh - 120px);overflow:auto}
+.menu .sec{padding:10px 2px;border-bottom:1px solid var(--linea)}
+.menu .sec:last-child{border-bottom:0}
+.menu .op{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:none;border:0;
+  padding:12px 2px;font-size:15px;font-weight:600;color:var(--tinta);cursor:pointer;text-align:left;min-height:44px}
+.menu .op::after{content:'';width:7px;height:7px;border-right:2px solid var(--txt3);border-top:2px solid var(--txt3);transform:rotate(45deg)}
+.novedades li{margin:0 0 8px 0;line-height:1.45}
+.novedades ul{margin:10px 0 0 18px;padding:0;color:var(--txt2);font-size:14.5px}
 .tema{display:flex;gap:6px;margin-top:10px}
 .tema button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;padding:10px 4px;
   font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px}
@@ -342,7 +363,7 @@ nav .g svg{width:22px;height:22px;display:block}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.12';
+const VERSION = 'v5.13';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -351,7 +372,7 @@ const CID = (qs.get('c') || '').trim().toLowerCase();
 const KEY = (qs.get('k') || '').trim();
 
 /* ---------- estado ---------- */
-const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null };
+const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, toast:null, enviando:false, cache:null, video:null, nota:null, videoAviso:null, extraAbre:null, extraTmp:null, menu:false };
 const K = k => 'salva_' + CID + '_' + k;
 const LS = {
   get(k,f){ try{ return JSON.parse(localStorage.getItem(K(k))) ?? f; }catch(e){ return f; } },
@@ -722,7 +743,7 @@ const EN = {
   "¿Cuántas más podías hacer?": "How many more could you have done?",
   "0 = no podías ni una más · 2 = te quedaban dos · 4 = cuatro o más. Eso es el RIR.": "0 = not a single one more · 2 = two left · 4 = four or more. That is your RIR.",
   "Hoy buscamos": "Today we're aiming for",
-  "Grabar o subir el vídeo": "Record or upload the video",
+  "Clic aquí": "Click here", "para grabar o subir el vídeo": "to record or upload the video",
   "¿Qué te pareció este seguimiento?": "How useful was this check-in?",
   "1 = no me sirve · 5 = me sirve mucho": "1 = not useful · 5 = very useful",
   "Mensaje de Salva": "Message from Salva",
@@ -736,7 +757,13 @@ const EN = {
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
-  "Tu sesión": "Your session", "ejercicio": "exercise",
+  "Menú": "Menu", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
+  "Elige cómo quieres verla: clara, oscura o automática (sigue a tu móvil). Lo tienes aquí abajo y en el menú ☰ de arriba a la derecha.": "Choose how you want it to look: light, dark or automatic (follows your phone). It's right below, and in the ☰ menu at the top right.",
+  "En cada sesión, una barra arriba te dice cuánto llevas, y un dibujo te enseña qué músculos trabajas.": "In every session a bar at the top shows how far you've got, and a drawing shows which muscles you work.",
+  "¿No sabes qué poner en el RIR? Toca el ¿? junto a la casilla.": "Not sure what to put in RIR? Tap the ? next to the box.",
+  "Ya no hace falta acordarte de enviar: al valorar la sesión con las estrellas, o al salir de la app, se envía sola. El botón «Guardar y enviar» sigue ahí.": "No need to remember to send: when you rate the session with the stars, or when you leave the app, it sends itself. The \"Save and send\" button is still there.",
+  "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
+  "Tu sesión": "Your session", "Tests y medidas": "Tests and measurements", "Movilidad": "Mobility", "y": "and", "más": "more", "ejercicio": "exercise",
   /* v5.4: ver otras semanas en modo lectura */
   "solo lectura": "read only",
   "Ver sus sesiones": "See its sessions",
@@ -1491,8 +1518,8 @@ function pinta(){
   try { document.documentElement.lang = enIngles() ? 'en' : 'es'; } catch(e){}
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
-  const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + (S.vista==='progreso' ? tarjetaTema() : '') + '</main>' + nav();
+  const v = {hoy:vHoy, novedades:vNovedades, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '');
 }
 function vErr(){
   return `<div class="top"><div class="rowt"><div class="wm">SALVA</div></div></div>
@@ -1505,8 +1532,10 @@ function cabecera(){
   const s = S.semana;
   return `<div class="top"><div class="rowt">
     <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
-    ${s?`<span class="pill">${esPrep(s) ? tr('Semana de preparación')
+    <div class="der">${s?`<span class="pill">${esPrep(s) ? tr('Semana de preparación')
         : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</span>`:''}
+      <button class="menu-b" onclick="abreMenu()" aria-label="${tr('Menú')}" aria-expanded="${S.menu}" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
   </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}${barraSesion()}</div>`;
 }
 /* v5.11: iconos dibujados. Los caracteres de antes (◱ ▤ ✓ ◔) cambiaban segun el movil. */
@@ -1553,7 +1582,7 @@ function bienvenida(){
     <button class="btn pri big" style="margin-top:14px" onclick="cierraBienvenida()">${tr("Entendido, vamos")}</button>
   </div>`;
 }
-function cierraBienvenida(){ LS.set('bienvenida_vista', true); pinta(); }
+function cierraBienvenida(){ LS.set('bienvenida_vista', true); LS.set('novedades', NOVEDADES); pinta(); }
 
 /* ---------- otro entrenamiento ---------- */
 function abreExtra(bl, dia){
@@ -1662,7 +1691,7 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   if(!d || esDescanso(d)){
@@ -1682,7 +1711,12 @@ function vHoy(){
     const est = estadoSesion(bl, d['DÍA']);
     const filas = sesionDe(bl, d['DÍA']);
     const cal = filas.find(f=>parseInt(f.ORDEN)===0);
-    const mat = [...new Set(filas.filter(f=>parseInt(f.ORDEN)>0).map(f=>f['EJERCICIO / ELEMENTO']).filter(Boolean))].slice(0,4).join(' · ');
+    /* v5.12.1: en lista, uno por linea. Antes se unian con " · " y hay nombres que
+       ya lo llevan dentro ("Medida 1 · Tu hombro, en vídeo"): parecian dos cosas.
+       Y se cortaba a los cuatro. */
+    const todosMat = [...new Set(filas.filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)).map(f=>f['EJERCICIO / ELEMENTO']).filter(Boolean))];
+    const mat = todosMat.length ? `<ul class="mat">${(todosMat.length > 9 ? todosMat.slice(0,8) : todosMat).map(x=>`<li>${esc(x)}</li>`).join('')}${
+      todosMat.length > 9 ? `<li class="mas">${tr('y')} ${todosMat.length-8} ${tr('más')}</li>` : ''}</ul>` : '';
     bloqueHoy = `<div class="card">${cabeceraSesion(bl, d['DÍA'])}
       <div class="row sp"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
         <span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO']||'')}</span></div>
@@ -1694,7 +1728,7 @@ function vHoy(){
         ${fmtMin(d.MIN)?`<div class="row sp"><span class="sm">${tr("Duración")}</span><b style="font-size:14.5px">${tr('unos')} ${esc(fmtMin(d.MIN))}</b></div>`:''}
         <div class="row sp"><span class="sm">${tr("Estado")}</span>${chipEstado(est)}</div>
       </div>
-      ${mat?`<hr><div class="lbl">${tr("Qué vas a hacer")}</div><p class="mut" style="margin-top:6px">${esc(mat)}</p>`:''}
+      ${mat?`<hr><div class="lbl">${tr("Qué vas a hacer")}</div>${mat}`:''}
       ${mapaCuerpo(bl, d['DÍA'], true)}
       ${cal?`<div class="calent" style="margin-top:12px"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
       <button class="btn pri big" style="margin-top:6px" onclick="abrir('${esc(d['DÍA'])}')">
@@ -1702,7 +1736,7 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + bloqueHoy + `
+  return bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <button class="btn sm2" onclick="ir('plan')">${tr("Ver todo")}</button></div>
@@ -1910,30 +1944,104 @@ function aplicaTema(){
   if(m) m.setAttribute('content', oscuro ? '#1E4A33' : '#2F6B4A');
 }
 function ponTema(t){ LS.set('tema', t); aplicaTema(); pinta(); }
-function tarjetaTema(){
-  const t = LS.get('tema', 'auto');
-  return `<div class="card"><h3>${tr("Aspecto")}</h3>
-    <p class="sm" style="margin-top:4px">${tr("Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.")}</p>
-    <div class="tema">${[['light','Claro'],['dark','Oscuro'],['auto','Automático']].map(([k,n])=>
-      `<button class="${t===k?'on':''}" aria-pressed="${t===k}" onclick="ponTema('${k}')">${tr(n)}</button>`).join('')}</div></div>`;
-}
 if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicaTema); }catch(e){} }
+
+
+/* ---------- menu de la esquina (v5.13) ----------
+   Un sitio fijo para el aspecto y para lo que vayamos anadiendo. */
+function abreMenu(){ S.menu = !S.menu; pinta(); if(S.menu) setTimeout(()=>{ const b=document.querySelector('.menu button'); if(b) b.focus(); }, 30); }
+function cierraMenu(){ if(!S.menu) return; S.menu = false; pinta(); }
+function irMenu(v){ S.menu = false; ir(v); }
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') cierraMenu(); });
+function vMenu(){
+  const t = LS.get('tema', 'auto');
+  return `<div class="menu-fondo" onclick="cierraMenu()"></div>
+  <div class="menu" role="dialog" aria-label="${tr('Menú')}">
+    <div class="sec" style="padding-top:0"><div class="lbl">${tr("Aspecto")}</div>
+      <div class="tema">${[['light','Claro'],['dark','Oscuro'],['auto','Automático']].map(([k,n])=>
+        `<button class="${t===k?'on':''}" aria-pressed="${t===k}" onclick="ponTema('${k}')">${tr(n)}</button>`).join('')}</div>
+      <p class="sm" style="margin-top:8px">${tr("Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.")}</p></div>
+    <div class="sec">
+      <button class="op" onclick="irMenu('novedades')">${tr("Novedades")}</button>
+      <button class="op" onclick="irMenu('seguimiento')">${tr("Seguimiento semanal")}</button>
+      ${fotosActivas() ? `<button class="op" onclick="irMenu('fotos')">${tr("Fotos de progreso")}</button>` : ''}
+      <button class="op" onclick="irMenu('guias')">${tr("Guías y protocolos")}</button></div>
+    <p class="sm" style="text-align:center;margin-top:10px">SALVA ${VERSION}</p>
+  </div>`;
+}
+
+/* ---------- novedades (v5.13) ----------
+   Sale UNA vez en Hoy a quien ya usaba la app. Quien la estrena ve la
+   bienvenida y no esto. Para el proximo aviso, cambiar NOVEDADES y el texto. */
+const NOVEDADES = '2026-10-02';
+const TEXTO_NOVEDADES = [
+  "Elige cómo quieres verla: clara, oscura o automática (sigue a tu móvil). Lo tienes aquí abajo y en el menú ☰ de arriba a la derecha.",
+  "En cada sesión, una barra arriba te dice cuánto llevas, y un dibujo te enseña qué músculos trabajas.",
+  "¿No sabes qué poner en el RIR? Toca el ¿? junto a la casilla.",
+  "Ya no hace falta acordarte de enviar: al valorar la sesión con las estrellas, o al salir de la app, se envía sola. El botón «Guardar y enviar» sigue ahí.",
+  "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno."
+];
+function cuerpoNovedades(){
+  const t = LS.get('tema', 'auto');
+  return `<ul>${TEXTO_NOVEDADES.map(x=>`<li>${esc(tr(x))}</li>`).join('')}</ul>
+    <div class="tema">${[['light','Claro'],['dark','Oscuro'],['auto','Automático']].map(([k,n])=>
+      `<button class="${t===k?'on':''}" aria-pressed="${t===k}" onclick="ponTema('${k}')">${tr(n)}</button>`).join('')}</div>`;
+}
+function novedades(){
+  if(LS.get('novedades', '') === NOVEDADES) return '';
+  if(!LS.get('bienvenida_vista', false) && !Object.keys(LOG).some(k=>LOG[k] && LOG[k].ok)) return '';  // la estrena: ve la bienvenida
+  return `<div class="card novedades" style="border-color:var(--verde-s)">
+    <div class="lbl">${tr("Novedades")}</div>
+    <h2 style="margin-top:6px;font-size:21px">${tr("Tu app se ha renovado")}</h2>
+    ${cuerpoNovedades()}
+    <button class="btn pri big" style="margin-top:14px" onclick="LS.set('novedades', NOVEDADES); pinta()">${tr("Entendido")}</button></div>`;
+}
+function vNovedades(){
+  return `<div class="card flat"><button class="btn sm2" onclick="ir('hoy')">${tr("← Volver")}</button></div>
+  <div class="card novedades"><h2 style="font-size:21px">${tr("Novedades")}</h2>${cuerpoNovedades()}</div>`;
+}
 
 /* ---------- de que va la sesion ----------
    Se mira el TIPO de cada fila de la hoja, nunca solo el nombre: fuerza,
    running, hibrido (carrera + estaciones). El calentamiento (ORDEN 0), las
    filas informativas y los extras no cuentan. */
-const filasTrabajo = (bl, dia) => sesionDe(bl, dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
+/* v5.12.1: los tests y las medidas ("Medida 3a · Sentadilla a caja", "Test A · 5
+   minutos") no son entrenar: ni dan tipo a la sesion ni pintan musculos. Lo vio
+   la sesion de Jorge: su dia de llamada salia como FUERZA, con mapa, y su propio
+   texto dice "hoy no hay entrenamiento". */
+const esTest = f => /^(medida|medidas|test|re-?test|checkpoint|prueba de|las tres medidas)\b/.test(norm(f && f['EJERCICIO / ELEMENTO']))
+                    || /\b(test de|re-test de)\b/.test(norm(f && f['EJERCICIO / ELEMENTO']));
+const filasSesion = (bl, dia) => sesionDe(bl, dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
                                    && ['info','evento','descanso'].indexOf(norm(f.TIPO)) < 0);
+/* Paseo o bici: dice andar/bici y NO dice correr. "Run-walk", "Trote o paseo" o
+   "Trote-andar final" siguen siendo carrera (regla probada por la sesion de
+   Jorge contra las quince hojas: cero fallos). */
+const esPaseo = f => { const t = norm(f && f['EJERCICIO / ELEMENTO']);
+  return /caminar|caminata|paseo|andar|walk|bici|bike/.test(t) && !/run|jog|corr|trot|carrera|fartlek|intervalo/.test(t); };
+const filasTrabajo = (bl, dia) => filasSesion(bl, dia).filter(f=>!esTest(f));
 function tipoSesion(bl, dia){
-  const fs = filasTrabajo(bl, dia); if(!fs.length) return null;
+  let fs = filasTrabajo(bl, dia);
+  const tests = filasSesion(bl, dia).filter(esTest).length;
+  // dia de tests: no hay nada que entrenar, o los tests son la mayor parte (la llamada de Jorge)
+  if(tests && tests >= fs.length) return 'test';
+  if(!fs.length) return null;
+  /* v5.12.1: una fila opcional no decide sola el tipo del dia (el paseo "lo que
+     salga" de Jorge convertia su dia de hombro en "Carrera"). Solo cuenta si
+     todo lo del dia es opcional. */
+  const obligadas = fs.filter(f=>!esOpcional(f));
+  if(obligadas.length) fs = obligadas;
   const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
-  const n = {fuerza:0, running:0, hibrido:0, hyrox:0};
-  fs.forEach(f=>{ const t = norm(f.TIPO); if(n[t] !== undefined) n[t]++; });
+  const n = {fuerza:0, running:0, hibrido:0, hyrox:0, movilidad:0};
+  fs.forEach(f=>{ let t = norm(f.TIPO);
+    // caminar o pasear no es correr: no convierte el dia en "Carrera"
+    if(t === 'running' && esPaseo(f)) return;
+    if(n[t] !== undefined) n[t]++; });
   if(n.hyrox || /hyrox/.test(norm(meta['SESIÓN']))) return 'hyrox';
   if(n.hibrido) return 'hibrido';
   if(n.running > n.fuerza) return 'carrera';
-  return n.fuerza ? 'fuerza' : (n.running ? 'carrera' : null);
+  if(n.fuerza) return 'fuerza';
+  if(n.running) return 'carrera';
+  return n.movilidad ? 'movilidad' : null;
 }
 
 /* ---------- mapa del cuerpo POR SESION ----------
@@ -1965,11 +2073,12 @@ const NOMBRE_MUSCULO = {gluteo:'glúteo', cuadriceps:'cuádriceps', femoral:'fem
 const PIERNAS = ['gluteo','cuadriceps','femoral','gemelo'];
 function musculosSesion(bl, dia){
   const tipo = tipoSesion(bl, dia), m = new Set();
-  if(!tipo) return m;
+  if(!tipo || tipo === 'test' || tipo === 'movilidad') return m;
   const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
   if(tipo === 'hyrox' || /estaciones|stations/.test(norm(meta['SESIÓN']))){ MUSCULOS.forEach(([k])=>m.add(k)); return m; }
   filasTrabajo(bl, dia).forEach(f=>{
     const t = limpiaEj(f['EJERCICIO / ELEMENTO']), tp = norm(f.TIPO);
+    if(tp === 'movilidad' || (tp === 'running' && esPaseo(f))) return;   // movilidad y paseos no pintan musculos
     if(tp === 'running' || (tp === 'hibrido' && CARRERA_SI.test(t))) PIERNAS.forEach(k=>m.add(k));
     MUSCULOS.forEach(([k, re])=>{ if(re.test(t)) m.add(k); });
     if(esCurlBrazo(t)) m.add('brazos');
@@ -2007,14 +2116,16 @@ function mapaCuerpo(bl, dia, peq){
 /* ---------- cabecera por tipo de sesion ----------
    Ilustracion por ahora. Cuando haya fotos propias (las de Instagram), van en
    app/publicar/ y su nombre aqui: salen en blanco y negro con el verde encima. */
-const CABECERA_FOTO = {fuerza:'', carrera:'', hyrox:'', hibrido:''};
+const CABECERA_FOTO = {fuerza:'', carrera:'', hyrox:'', hibrido:'', test:'', movilidad:''};
 const DIBUJO = {
   fuerza: '<path d="M8 50h104" stroke-width="5"/><rect x="16" y="28" width="9" height="44" rx="2"/><rect x="27" y="34" width="7" height="32" rx="2"/><rect x="95" y="28" width="9" height="44" rx="2"/><rect x="86" y="34" width="7" height="32" rx="2"/>',
   carrera: '<path d="M-4 92C40 92 58 30 124 26"/><path d="M-4 78C34 78 52 18 124 12"/><path d="M-4 64C28 64 46 6 124 -2"/><path d="M84 8l10 30" stroke-dasharray="3 4"/>',
   hyrox: '<path d="M48 40a12 12 0 0 1 24 0"/><path d="M44 42h32"/><circle cx="60" cy="66" r="24"/><path d="M8 94h104"/>',
 };
 DIBUJO.hibrido = DIBUJO.hyrox;
-const ETIQ_TIPO = {fuerza:'Fuerza', carrera:'Carrera', hyrox:'HYROX', hibrido:'Híbrido'};
+DIBUJO.test = '<path d="M14 70h92" stroke-width="4"/><path d="M24 70v-12M40 70v-20M56 70v-12M72 70v-20M88 70v-12"/>';
+DIBUJO.movilidad = '<path d="M60 18a32 32 0 1 1-30 21"/><path d="M24 30l6 9 9-5"/><circle cx="60" cy="50" r="6"/>';
+const ETIQ_TIPO = {fuerza:'Fuerza', carrera:'Carrera', hyrox:'HYROX', hibrido:'Híbrido', test:'Tests y medidas', movilidad:'Movilidad'};
 function cabeceraSesion(bl, dia){
   const t = tipoSesion(bl, dia); if(!t) return '';
   const foto = CABECERA_FOTO[t];
@@ -2406,7 +2517,7 @@ function bloqueVideo(bl, dia, nombre, f){
     ${v.estado === 'enviando'
       ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
       : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${!enviado && pideVideo(f)
-          ? tr("Grabar o subir el vídeo")
+          ? `<span class="clic">${tr("Clic aquí")}</span> ${tr("para grabar o subir el vídeo")}`   /* palabras de Salvador (c186e3f): no se tocan */
           : (enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
          ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
            <div class="stack" style="margin:0 0 10px;gap:8px">
