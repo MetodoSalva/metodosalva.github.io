@@ -348,6 +348,12 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .graf .pt.rec{fill:var(--sup);stroke:var(--verde);stroke-width:2.5}
 .graf .bar{fill:var(--verde-c);opacity:.55}
 .graf .bar.hoy{opacity:1;fill:var(--verde)}
+.graf .plan{fill:none;stroke:var(--txt3);stroke-width:1.2;stroke-dasharray:3 2}
+.graf .val.fut{fill:var(--txt3);font-weight:400}
+.graf .leyenda{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt3);margin-top:4px}
+.graf .leyenda span{display:inline-block;width:10px;height:10px;border-radius:2px}
+.graf .leyenda .lb{background:var(--verde-c);opacity:.7}
+.graf .leyenda .lp{border:1.2px dashed var(--txt3);margin-left:8px}
 .graf .val{fill:var(--txt2);font-family:var(--m);font-size:10px;font-weight:600}
 .graf .hit{fill:transparent;cursor:pointer}
 .graf .hit:focus{outline:none}
@@ -433,7 +439,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.17';
+const VERSION = 'v5.18';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -844,7 +850,7 @@ const EN = {
   "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
   "Tu sesión": "Your session",
   "Tu mejor serie de cada semana. Toca un punto para ver el dato.": "Your best set each week. Tap a point to see it.",
-  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week",
+  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
   "Récords de esta semana": "This week's records", "sesión anotada": "session logged", "sesiones anotadas": "sessions logged",
   "kilos movidos": "kilos lifted", "corridos": "run", "Seguimiento enviado": "Check-in sent", "Lo que mejoró": "What improved",
   "Sumar semanas así es lo que hace que el cambio llegue.": "Stacking weeks like this is what makes the change happen.",
@@ -3372,28 +3378,49 @@ function kmPorSemana(){
   });
   return km;
 }
+/* v5.18 (3 oct, peticion de la sesion de Smi con el visto bueno de Salvador): el
+   plan detras de cada barra. Sale de KM PLAN en SEMANAS; quien no lo tenga ve la
+   grafica como antes. Con plan, salen tambien las semanas que faltan (solo el
+   contorno): la forma que queda hasta la carrera. */
+const kmPlan = () => {
+  const p = {};
+  semanasReales().forEach(w=>{
+    const n = parseInt(String(w.SEMANA).replace(/\D/g,''),10);
+    const v = parseFloat(String(w['KM PLAN']||'').replace(',','.'));
+    if(!isNaN(n) && v > 0) p[n] = v;
+  });
+  return p;
+};
 function graficaKm(){
-  const km = kmPorSemana();
+  const km = kmPorSemana(), plan = kmPlan(), hayPlan = Object.keys(plan).length > 0;
   const hoyN = parseInt(String((S.semana||{}).SEMANA||'').replace(/\D/g,''), 10);
-  const sems = semanasReales().map(w=>parseInt(String(w.SEMANA).replace(/\D/g,''),10)).filter(n=>!isNaN(n) && (n <= hoyN || km[n]));
+  const sems = semanasReales().map(w=>parseInt(String(w.SEMANA).replace(/\D/g,''),10))
+                 .filter(n=>!isNaN(n) && (n <= hoyN || km[n] || (hayPlan && plan[n])));
   if(sems.filter(n=>km[n]).length < 2) return '';
   const W = 300, H = 110, L = 6, R = 6, T = 16, B = 18;
-  const max = Math.max(...sems.map(n=>km[n]||0));
+  const max = Math.max(...sems.map(n=>Math.max(km[n]||0, plan[n]||0)));
   const paso = (W-L-R) / sems.length, ancho = Math.max(6, paso - 2);
   const fmt = n => String(Math.round(n*10)/10).replace('.', enIngles()?'.':',');
   const barras = sems.map((n,i)=>{
     const v = km[n]||0, h = max ? (H-T-B) * v / max : 0, x = L + i*paso + (paso-ancho)/2, y = H-B-h;
     const r = Math.min(4, ancho/2, h/2);
     const path = h > 0 ? `M${x},${H-B} V${y+r} Q${x},${y} ${x+r},${y} H${x+ancho-r} Q${x+ancho},${y} ${x+ancho},${y+r} V${H-B} Z` : '';
-    return `${path?`<path class="bar${n===hoyN?' hoy':''}" d="${path}"/>`:''}
-      ${v && (sems.length <= 8 || n === hoyN || v === max) ? `<text class="val" x="${x+ancho/2}" y="${y-4}" text-anchor="middle">${fmt(v)}</text>` : ''}
+    const pl = plan[n] || 0, hp = max ? (H-T-B) * pl / max : 0;
+    const fantasma = pl ? `<rect class="plan" x="${x+.6}" y="${H-B-hp}" width="${Math.max(0,ancho-1.2)}" height="${hp}" rx="${Math.min(4, ancho/2)}"/>` : '';
+    const etq = v ? fmt(v) : (pl && n > hoyN ? fmt(pl) : '');
+    const yEt = v ? y : H-B-hp;
+    const dato = tr('Semana') + ' ' + n + ': ' + (pl ? (v ? fmt(v) + ' ' + tr('de los') + ' ' + fmt(pl) + ' km ' + tr('del plan') : tr('plan') + ' ' + fmt(pl) + ' km')
+                                                     : fmt(v) + ' km');
+    return `${fantasma}${path?`<path class="bar${n===hoyN?' hoy':''}" d="${path}"/>`:''}
+      ${etq && (sems.length <= 8 || n === hoyN || v === max) ? `<text class="val${v?'':' fut'}" x="${x+ancho/2}" y="${yEt-4}" text-anchor="middle">${etq}</text>` : ''}
       <text class="eje" x="${x+ancho/2}" y="${H-4}" text-anchor="middle">${(enIngles()?'W':'S') + n}</text>
       <rect class="hit" x="${L+i*paso}" y="${T-14}" width="${paso}" height="${H-T-B+14}" tabindex="0"
-        data-t="${esc(tr('Semana') + ' ' + n + ': ' + fmt(v) + ' km')}" onclick="tt(this)" onfocus="tt(this)"/>`;
+        data-t="${esc(dato)}" onclick="tt(this)" onfocus="tt(this)"/>`;
   }).join('');
+  const leyenda = hayPlan ? `<div class="leyenda"><span class="lb"></span>${tr('lo que has corrido')}<span class="lp"></span>${tr('el plan')}</div>` : '';
   return `<div class="lbl" style="margin-top:14px">${tr('Km por semana')}</div>
-    <div class="graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('Km por semana') + ': ' + sems.map(n=>'S'+n+' '+fmt(km[n]||0)).join(', '))}">
-      <line class="rej" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>${barras}</svg><div class="tt" aria-live="polite"></div></div>`;
+    <div class="graf"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('Km por semana') + ': ' + sems.map(n=>'S'+n+' '+fmt(km[n]||0) + (plan[n] ? ' / ' + fmt(plan[n]) : '')).join(', '))}">
+      <line class="rej" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>${barras}</svg>${leyenda}<div class="tt" aria-live="polite"></div></div>`;
 }
 /* Los records de esta semana: ejercicios cuya mejor serie de la semana supera
    a todas las anteriores (hace falta haberlo hecho alguna semana antes). */
