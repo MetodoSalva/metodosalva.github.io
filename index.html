@@ -19,17 +19,46 @@
   l.rel = 'manifest'; l.href = 'manifest-' + c + '.json';
   document.head.appendChild(l);
 })();
+/* v5.12: el tema se pone antes de pintar nada, para que no haya destello */
+(function(){
+  try{
+    var c = (new URLSearchParams(location.search).get('c') || '').trim().toLowerCase();
+    var t = JSON.parse(localStorage.getItem('salva_' + c + '_tema'));
+    if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
 <style>
 :root{
   --verde:#2F6B4A; --verde-c:#5E9A72; --verde-s:#C9D9CD; --verde-b:#EFF4F0;
   --papel:#F1EDE6; --sup:#FFFDFA; --sup2:#EDE7DD; --linea:#E2DCD2; --linea2:#D8D1C6;
   --txt:#4A463C; --txt2:#5E574C; --txt3:#8A8272;
-  --rojo:#B03A3A; --rojo-s:#F8E4E1; --ambar:#8A6A1E; --ambar-s:#F6EDD7;
+  --rojo:#B03A3A; --rojo-s:#F8E4E1; --rojo-l:#E2B0AA; --ambar:#8A6A1E; --ambar-s:#F6EDD7; --ambar-l:#E0C588;
+  --portada:#2F6B4A; --sobre:#F6F3EE; --on-verde:#F6F3EE; --tinta:#2F2D27;
   --r:12px; --f:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --m:"IBM Plex Mono",monospace;
+  --c:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  color-scheme:light;
+}
+/* v5.12: modo oscuro con la paleta de metodosalva.com. Lo elige la clienta en
+   Progreso (Claro, Oscuro o Automatico, que sigue al movil). */
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --verde:#7DBF95; --verde-c:#7DBF95; --verde-s:#2F4A3A; --verde-b:#1B2B21;
+  --papel:#111613; --sup:#182019; --sup2:#0F1410; --linea:#27302A; --linea2:#3A463F;
+  --txt:#D2CBBD; --txt2:#B8B1A2; --txt3:#9C9585;
+  --rojo:#E08A7F; --rojo-s:#3A201C; --rojo-l:#6B3A33; --ambar:#D8B35F; --ambar-s:#33291A; --ambar-l:#5C4A22;
+  --portada:#1E4A33; --sobre:#F0EBE1; --on-verde:#111613; --tinta:#F0EBE1;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --verde:#7DBF95; --verde-c:#7DBF95; --verde-s:#2F4A3A; --verde-b:#1B2B21;
+  --papel:#111613; --sup:#182019; --sup2:#0F1410; --linea:#27302A; --linea2:#3A463F;
+  --txt:#D2CBBD; --txt2:#B8B1A2; --txt3:#9C9585;
+  --rojo:#E08A7F; --rojo-s:#3A201C; --rojo-l:#6B3A33; --ambar:#D8B35F; --ambar-s:#33291A; --ambar-l:#5C4A22;
+  --portada:#1E4A33; --sobre:#F0EBE1; --on-verde:#111613; --tinta:#F0EBE1;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
@@ -39,7 +68,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 :focus-visible{outline:2.5px solid var(--verde-c);outline-offset:2px;border-radius:6px}
 
 /* cabecera */
-.top{background:var(--verde);color:#F6F3EE;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+.top{background:var(--portada);color:var(--sobre);padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
   position:sticky;top:0;z-index:20}
 .top .wm{font-weight:700;letter-spacing:.22em;font-size:13px}
 .top .nm{font-size:13px;opacity:.82;margin-top:2px}
@@ -51,8 +80,8 @@ button,input,textarea,select{font:inherit;color:inherit}
 main{padding:16px 14px 96px;max-width:640px;margin:0 auto}
 .card{background:var(--sup);border:1px solid var(--linea);border-radius:var(--r);padding:16px;margin-bottom:12px}
 .card.flat{background:none;border:0;padding:0}
-h2{font-size:21px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
-h3{font-size:16px;font-weight:600}
+h2{font-family:var(--c);font-size:24px;font-weight:700;letter-spacing:-.005em;line-height:1.15;color:var(--tinta)}
+h3{font-family:var(--c);font-size:18px;font-weight:600;line-height:1.25;color:var(--tinta)}
 .lbl{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3)}
 .mut{color:var(--txt2);font-size:14.5px}
 .sm{font-size:13px;color:var(--txt3)}
@@ -67,8 +96,8 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .sem{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;
   border-radius:99px;padding:3px 10px 3px 8px;border:1px solid;white-space:nowrap}
 .sem i{font-style:normal;font-size:9px;line-height:1}
-.sem.rojo{background:var(--rojo-s);border-color:#E2B0AA;color:var(--rojo)}
-.sem.ambar{background:var(--ambar-s);border-color:#E0C588;color:var(--ambar)}
+.sem.rojo{background:var(--rojo-s);border-color:var(--rojo-l);color:var(--rojo)}
+.sem.ambar{background:var(--ambar-s);border-color:var(--ambar-l);color:var(--ambar)}
 .sem.verde{background:var(--verde-b);border-color:var(--verde-s);color:var(--verde)}
 .sem.gris{background:var(--sup2);border-color:var(--linea2);color:var(--txt3)}
 
@@ -77,7 +106,7 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
   border:1px solid var(--linea2);border-radius:10px;padding:10px 16px;font-size:15px;font-weight:600;
   color:var(--txt);cursor:pointer;min-height:44px}
 .btn:active{transform:scale(.985)}
-.btn.pri{background:var(--verde);border-color:var(--verde);color:#F6F3EE}
+.btn.pri{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
 .btn.big{width:100%;padding:15px;font-size:16.5px;border-radius:12px}
 .btn.sm2{padding:6px 12px;font-size:13.5px;min-height:36px;border-radius:8px}
 .btn:disabled{opacity:.45}
@@ -111,13 +140,13 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
   background:var(--sup);text-align:center;min-height:42px}
 .set.ok{background:var(--verde-b);border-radius:8px;padding:3px 2px}
 .set.ok input{border-color:var(--verde-s);background:transparent}
-.set button{border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;border-radius:8px;
+.set button{border:1px solid var(--verde);background:var(--verde);color:var(--on-verde);border-radius:8px;
   padding:9px 4px;font-size:13px;font-weight:600;min-height:42px;cursor:pointer}
 .set.ok button{background:transparent;color:var(--verde);border-color:var(--verde-s)}
 .uni{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 10px 6px;font-size:12px;color:var(--txt3)}
 .uni button{border:1px solid var(--linea2);background:var(--sup);color:var(--txt2);border-radius:8px;
   padding:6px 12px;font-size:13px;font-weight:600;font-family:var(--m);min-height:34px;cursor:pointer}
-.uni button.on{background:var(--verde);border-color:var(--verde);color:#F6F3EE}
+.uni button.on{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
 .calent{background:var(--sup2);border-radius:var(--r);padding:13px 14px;margin-bottom:12px;font-size:14px;color:var(--txt2)}
 .extra-sep{margin:22px 0 12px;padding:13px 14px;border:1px dashed var(--linea2);border-radius:var(--r);background:transparent}
 .extra-sep b{display:block;color:var(--txt);font-size:15px}
@@ -146,7 +175,7 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .reg .escala{margin:0}
 .reg .escala button{padding:9px 0;font-size:15px}
 .reg .ritmo{grid-column:1/-1;font-family:var(--m);font-size:12.5px;color:var(--verde);min-height:16px;white-space:pre-line}
-.reg button{grid-column:1/-1;border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;
+.reg button{grid-column:1/-1;border:1px solid var(--verde);background:var(--verde);color:var(--on-verde);
   border-radius:8px;padding:11px;font-size:14px;font-weight:600}
 .reg.ok{background:var(--verde-b);margin:0 10px 12px;padding:12px;border-radius:10px}
 .reg.ok input{border-color:var(--verde-s);background:transparent}
@@ -160,7 +189,7 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .escala{display:flex;gap:6px;margin:4px 0 2px}
 .escala button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;
   padding:10px 0;font-size:16px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px;font-family:var(--m)}
-.escala button.on{border-color:var(--verde);background:var(--verde);color:#F6F3EE}
+.escala button.on{border-color:var(--verde);background:var(--verde);color:var(--on-verde)}
 
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--sup);border-top:1px solid var(--linea);
@@ -180,7 +209,7 @@ nav .g svg{width:22px;height:22px;display:block}
 .toast{position:fixed;left:14px;right:14px;bottom:78px;background:var(--txt);color:var(--papel);
   padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;z-index:40;text-align:center;
   box-shadow:0 8px 24px -8px rgba(0,0,0,.4)}
-.err{background:var(--rojo-s);border:1px solid #E2B0AA;color:var(--rojo);border-radius:var(--r);padding:14px}
+.err{background:var(--rojo-s);border:1px solid var(--rojo-l);color:var(--rojo);border-radius:var(--r);padding:14px}
 .guia{border-left:3px solid var(--verde-s);padding-left:13px;margin-bottom:12px}
 .guia .p{font-weight:600;font-size:14px}
 .guia .c{font-size:14px;color:var(--txt2);line-height:1.45}
@@ -194,7 +223,7 @@ nav .g svg{width:22px;height:22px;display:block}
 .tag{display:inline-block;font-size:11px;font-weight:600;background:var(--sup2);color:var(--txt2);
   border-radius:6px;padding:2px 7px;margin-right:5px}
 /* --- v3 --- */
-.aviso{background:var(--ambar-s);border:1px solid #E0C588;border-radius:var(--r);padding:14px;margin-bottom:12px}
+.aviso{background:var(--ambar-s);border:1px solid var(--ambar-l);border-radius:var(--r);padding:14px;margin-bottom:12px}
 .aviso b{color:var(--ambar)}
 .vid{position:relative;width:100%;background:#000;border-radius:10px;overflow:hidden;margin:0 14px 12px;width:calc(100% - 28px)}
 .vid iframe{width:100%;aspect-ratio:9/16;max-height:60vh;display:block;border:0}
@@ -247,6 +276,44 @@ nav .g svg{width:22px;height:22px;display:block}
 .ultima{margin:0 14px 11px;font-size:12.5px;color:var(--verde);background:var(--verde-b);
   border:1px solid var(--verde-s);border-radius:8px;padding:6px 10px}
 .ultima b{font-family:var(--m);font-size:12.5px}
+/* ---------- v5.12 · diseno nuevo (fase 2) ---------- */
+.frase,.ej .nm,.top .wm{font-family:var(--c)}
+.ej .nm{font-size:18px;font-weight:600;color:var(--tinta)}
+.top .wm{font-size:15px;letter-spacing:.24em}
+/* numeros grandes en las series */
+.ej .dg{font-family:var(--c);font-size:26px;font-weight:700;line-height:1.1;color:var(--tinta);margin-top:4px;letter-spacing:-.01em}
+.ej .dg small{font-family:var(--f);font-size:13px;font-weight:500;color:var(--txt3);letter-spacing:0}
+.set input{font-family:var(--m);font-size:21px;font-weight:600;min-height:50px;color:var(--tinta)}
+.set input::placeholder{font-family:var(--f);font-size:13px;font-weight:500;color:var(--txt3)}
+.set .i{font-size:14px;font-weight:600}
+.set button:not(.x):not(.rq){min-height:50px}
+/* barra de progreso de la sesion, dentro de la cabecera (siempre a la vista) */
+.top .pg{margin-top:11px}
+.top .pg .t{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;opacity:.9;letter-spacing:.03em}
+.top .pg .b{height:6px;border-radius:99px;background:rgba(246,243,238,.22);margin-top:5px;overflow:hidden}
+.top .pg .b i{display:block;height:100%;width:0;background:var(--sobre);border-radius:99px;transition:width .35s ease}
+@media(prefers-reduced-motion:reduce){.top .pg .b i{transition:none}}
+/* cabecera por tipo de sesion (fuerza, carrera, HYROX). Ilustracion por ahora;
+   cuando haya fotos propias se ponen en CABECERA_FOTO y salen encima */
+.cab{position:relative;margin:-16px -16px 14px;height:118px;border-radius:var(--r) var(--r) 0 0;overflow:hidden;
+  background:linear-gradient(135deg,var(--portada),#173A28);color:var(--sobre)}
+.cab svg{position:absolute;right:-6px;bottom:-8px;height:132px;width:auto;opacity:.32}
+.cab img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);mix-blend-mode:luminosity;opacity:.55}
+.cab .k{position:absolute;left:16px;bottom:12px;font-family:var(--c);font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+/* mapa del cuerpo de la sesion */
+.mapa{display:flex;gap:14px;align-items:center;margin-top:12px}
+.mapa svg{width:132px;height:auto;flex:none}
+.mapa.peq svg{width:104px}
+.mapa .z{fill:var(--sup2);stroke:var(--linea2);stroke-width:.8}
+.mapa .z.on{fill:var(--verde);stroke:var(--verde)}
+.mapa .n{fill:var(--sup2);stroke:var(--linea2);stroke-width:.8}
+.mapa .txt{font-size:13px;color:var(--txt2);line-height:1.4}
+.mapa .txt b{display:block;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin-bottom:3px}
+/* selector de aspecto */
+.tema{display:flex;gap:6px;margin-top:10px}
+.tema button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;padding:10px 4px;
+  font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px}
+.tema button.on{border-color:var(--verde);background:var(--verde);color:var(--on-verde)}
 /* v5.11: RIR con ayuda. La casilla sigue igual; el "?" abre la pregunta en palabras */
 .rirc{position:relative;display:block;min-width:0}
 .rirc input{width:100%}
@@ -275,7 +342,7 @@ nav .g svg{width:22px;height:22px;display:block}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.11';
+const VERSION = 'v5.12';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -288,7 +355,9 @@ const S = { d:null, vista:'hoy', dia:null, semana:null, mirando:null, err:null, 
 const K = k => 'salva_' + CID + '_' + k;
 const LS = {
   get(k,f){ try{ return JSON.parse(localStorage.getItem(K(k))) ?? f; }catch(e){ return f; } },
-  set(k,v){ try{ localStorage.setItem(K(k),JSON.stringify(v)); }catch(e){} }
+  set(k,v){ try{ localStorage.setItem(K(k),JSON.stringify(v)); }catch(e){}
+    // v5.12: todo lo que se anota pasa por aqui; la barra de la sesion se pone al dia sola
+    if(k === 'log' && typeof requestAnimationFrame === 'function') requestAnimationFrame(actualizaBarra); }
 };
 let LOG = LS.get('log', {});          // { id: {r,c,rir,ok,sent,...} }
 let CHK = LS.get('checkin', {});
@@ -658,6 +727,16 @@ const EN = {
   "1 = no me sirve · 5 = me sirve mucho": "1 = not useful · 5 = very useful",
   "Mensaje de Salva": "Message from Salva",
   "Entendido": "Got it",
+  /* v5.12: diseno */
+  "Aspecto": "Appearance",
+  "Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.": "Automatic follows your phone: light, or dark if your phone is in dark mode.",
+  "Claro": "Light", "Oscuro": "Dark", "Automático": "Automatic",
+  "Músculos que trabajas hoy": "Muscles you work today",
+  "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work",
+  "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
+  "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
+  "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
+  "Tu sesión": "Your session", "ejercicio": "exercise",
   /* v5.4: ver otras semanas en modo lectura */
   "solo lectura": "read only",
   "Ver sus sesiones": "See its sessions",
@@ -1413,7 +1492,7 @@ function pinta(){
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
   const v = {hoy:vHoy, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav();
+  app.innerHTML = cabecera() + '<main>' + v() + (S.vista==='progreso' ? tarjetaTema() : '') + '</main>' + nav();
 }
 function vErr(){
   return `<div class="top"><div class="rowt"><div class="wm">SALVA</div></div></div>
@@ -1428,7 +1507,7 @@ function cabecera(){
     <div><div class="wm">SALVA</div><div class="nm">${esc(campo('nombre') || (S.d && S.d.NOMBRE) || '')}</div></div>
     ${s?`<span class="pill">${esPrep(s) ? tr('Semana de preparación')
         : tr('Semana')+' '+esc(s.SEMANA)+' '+(enIngles()?'of':'de')+' '+semanasReales().length}</span>`:''}
-  </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}</div>`;
+  </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}${barraSesion()}</div>`;
 }
 /* v5.11: iconos dibujados. Los caracteres de antes (◱ ▤ ✓ ◔) cambiaban segun el movil. */
 const ICO = {
@@ -1604,7 +1683,7 @@ function vHoy(){
     const filas = sesionDe(bl, d['DÍA']);
     const cal = filas.find(f=>parseInt(f.ORDEN)===0);
     const mat = [...new Set(filas.filter(f=>parseInt(f.ORDEN)>0).map(f=>f['EJERCICIO / ELEMENTO']).filter(Boolean))].slice(0,4).join(' · ');
-    bloqueHoy = `<div class="card">
+    bloqueHoy = `<div class="card">${cabeceraSesion(bl, d['DÍA'])}
       <div class="row sp"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
         <span class="sem ${semColor(d['SEMÁFORO'])}"><i>${semForma(d['SEMÁFORO'])}</i>${esc(d['SEMÁFORO']||'')}</span></div>
       <h2 style="margin-top:8px">${esc(partir(d['SESIÓN']).t)}</h2>
@@ -1616,6 +1695,7 @@ function vHoy(){
         <div class="row sp"><span class="sm">${tr("Estado")}</span>${chipEstado(est)}</div>
       </div>
       ${mat?`<hr><div class="lbl">${tr("Qué vas a hacer")}</div><p class="mut" style="margin-top:6px">${esc(mat)}</p>`:''}
+      ${mapaCuerpo(bl, d['DÍA'], true)}
       ${cal?`<div class="calent" style="margin-top:12px"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
       <button class="btn pri big" style="margin-top:6px" onclick="abrir('${esc(d['DÍA'])}')">
         ${est==='sin'?tr('Empezar sesión'):tr('Continuar sesión')}</button></div>`;
@@ -1818,6 +1898,166 @@ function vSemana(){
   <div class="card flat"><button class="btn big" onclick="ir('hoy')">${tr("Volver a lo de hoy")}</button></div>`;
 }
 
+
+/* ================= DISENO v5.12 (fase 2 de la hoja de ruta) ================= */
+
+/* ---------- aspecto: claro, oscuro o automatico ---------- */
+function aplicaTema(){
+  const t = LS.get('tema', 'auto'), r = document.documentElement;
+  if(t === 'light' || t === 'dark') r.setAttribute('data-theme', t); else r.removeAttribute('data-theme');
+  const oscuro = t === 'dark' || (t !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', oscuro ? '#1E4A33' : '#2F6B4A');
+}
+function ponTema(t){ LS.set('tema', t); aplicaTema(); pinta(); }
+function tarjetaTema(){
+  const t = LS.get('tema', 'auto');
+  return `<div class="card"><h3>${tr("Aspecto")}</h3>
+    <p class="sm" style="margin-top:4px">${tr("Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.")}</p>
+    <div class="tema">${[['light','Claro'],['dark','Oscuro'],['auto','Automático']].map(([k,n])=>
+      `<button class="${t===k?'on':''}" aria-pressed="${t===k}" onclick="ponTema('${k}')">${tr(n)}</button>`).join('')}</div></div>`;
+}
+if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicaTema); }catch(e){} }
+
+/* ---------- de que va la sesion ----------
+   Se mira el TIPO de cada fila de la hoja, nunca solo el nombre: fuerza,
+   running, hibrido (carrera + estaciones). El calentamiento (ORDEN 0), las
+   filas informativas y los extras no cuentan. */
+const filasTrabajo = (bl, dia) => sesionDe(bl, dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
+                                   && ['info','evento','descanso'].indexOf(norm(f.TIPO)) < 0);
+function tipoSesion(bl, dia){
+  const fs = filasTrabajo(bl, dia); if(!fs.length) return null;
+  const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
+  const n = {fuerza:0, running:0, hibrido:0, hyrox:0};
+  fs.forEach(f=>{ const t = norm(f.TIPO); if(n[t] !== undefined) n[t]++; });
+  if(n.hyrox || /hyrox/.test(norm(meta['SESIÓN']))) return 'hyrox';
+  if(n.hibrido) return 'hibrido';
+  if(n.running > n.fuerza) return 'carrera';
+  return n.fuerza ? 'fuerza' : (n.running ? 'carrera' : null);
+}
+
+/* ---------- mapa del cuerpo POR SESION ----------
+   CRITERIO NUESTRO, sin respaldo en el metodo: que musculos trabaja cada
+   ejercicio se deduce de su nombre (en espanol o en ingles), con la lista de
+   abajo. Es orientativo, para que la clienta vea de un vistazo el dia que toca.
+   Carrera: tren inferior entero. HYROX: cuerpo entero.
+   Revisado el 2 oct contra los 502 ejercicios de las quince hojas: lo que no
+   casa es carrera, movilidad, cuello o tests, y ahi no se pinta nada. */
+const MUSCULOS = [
+  ['gluteo', /hip thrust|gluteo|glute|puente|bridge|abduc|kickback|patada|monster|clamshell|almeja|peso muerto|deadlift|rdl|rumano|romanian|sentadilla|squat|zancada|lunge|bulgar|split|step.?up|subida|prensa|leg press|swing|extension de cadera|hip extension|sled|trineo|good morning|hiperextension|frog/],
+  ['cuadriceps', /sentadilla|squat|zancada|lunge|bulgar|split|step.?up|subida|prensa|leg press|extension de rodilla|leg extension|extension de cuadriceps|wall ?ball|sled push|thruster|escalon|pistol|sissy|wall sit|salto|jump|pogo|box/],
+  ['femoral', /femoral|hamstring|leg curl|nordico|nordic|peso muerto|deadlift|rdl|rumano|romanian|good morning|swing|extension de cadera|hip extension|sled pull/],
+  ['gemelo', /talon|calf|gemelo|soleo|tibial|pogo|salto|jump|comba|skipping/],
+  ['pecho', /press de banca|banca|bench(?!.supported)|pecho|chest(?!.supported)|flexiones|flexion de brazos|push.?up|aperturas|fly|fondos|\bdip|burpee|press inclinado|incline.{0,12}press|press en maquina|press de suelo/],
+  ['hombro', /hombro|shoulder|militar|overhead press|press overhead|elevaci\w* lateral|lateral raise|arnold|face pull|pajaro|reverse pec|rotacion externa|rotacion interna|external rotation|\bt e y\b|\by boca abajo|wall ?ball|landmine|pike|handstand|banda|press por encima|serrato/],
+  ['espalda', /remo|row|jalon|pulldown|dominada|pull.?up|chin.?up|face pull|pullover|retraccion|escapular|reverse pec|pajaro|sled pull|farmer|granjero|encogimiento|shrug|skierg|\bski\b|colgarse|\bt e y\b|\by boca abajo/],
+  ['brazos', /biceps|triceps|pushdown|fondos|\bdip|press frances|skull|martillo|hammer|farmer|granjero|colgarse/],
+  ['core', /core|plancha|plank|dead ?bug|bicho|pallof|crunch|hollow|\boso\b|bear|abdominal|ab wheel|rueda|rollout|bird ?dog|transverso|antirrotacion|anti.?rot|lenador|woodchop|russian|copenhag|v-up|elevacion de piernas|leg raise|farmer|suitcase|maleta|carry|sit.?up|serrato/],
+  ['lumbar', /peso muerto|deadlift|rdl|rumano|romanian|good morning|hiperextension|back extension|extension lumbar|superman|bird ?dog|swing/]
+];
+/* Lo que va detras de "paired with", "inside", "junto con"... habla de OTRO
+   ejercicio ("Push-ups · paired with the row"): no cuenta para este. */
+const limpiaEj = t => norm(t).replace(/\b(paired with|inside|opens|alternando con|alternado con|junto con|emparejad[oa] con|en los descansos)\b[^·]*/g, '')
+  .replace(/al pecho|apoyo de pecho|pecho apoyado|apoyad[oa] en (el )?pecho|con apoyo en banco/g, '');   // el remo "al pecho" no es pecho
+const esCurlBrazo = t => /\bcurl\b/.test(t) && !/femoral|\bleg\b|hamstring|nordic|nordico|isquio/.test(t);
+const NOMBRE_MUSCULO = {gluteo:'glúteo', cuadriceps:'cuádriceps', femoral:'femoral', gemelo:'gemelos',
+  pecho:'pecho', hombro:'hombros', espalda:'espalda', brazos:'brazos', core:'core', lumbar:'lumbar'};
+const PIERNAS = ['gluteo','cuadriceps','femoral','gemelo'];
+function musculosSesion(bl, dia){
+  const tipo = tipoSesion(bl, dia), m = new Set();
+  if(!tipo) return m;
+  const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
+  if(tipo === 'hyrox' || /estaciones|stations/.test(norm(meta['SESIÓN']))){ MUSCULOS.forEach(([k])=>m.add(k)); return m; }
+  filasTrabajo(bl, dia).forEach(f=>{
+    const t = limpiaEj(f['EJERCICIO / ELEMENTO']), tp = norm(f.TIPO);
+    if(tp === 'running' || (tp === 'hibrido' && CARRERA_SI.test(t))) PIERNAS.forEach(k=>m.add(k));
+    MUSCULOS.forEach(([k, re])=>{ if(re.test(t)) m.add(k); });
+    if(esCurlBrazo(t)) m.add('brazos');
+  });
+  return m;
+}
+/* Dos siluetas, delante y detras. Cada zona lleva su musculo en data-m. */
+function svgCuerpo(m){
+  const E = (k, cx, cy, rx, ry) => `<ellipse class="z${m.has(k)?' on':''}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`;
+  const R = (k, x, y, w, h, r) => `<rect class="z${m.has(k)?' on':''}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}"/>`;
+  const comun = `<circle class="n" cx="25" cy="7" r="6"/><rect class="n" x="22.5" y="12.5" width="5" height="4.5" rx="1.5"/>`
+    + E('hombro',13.5,20.5,5,4.2) + E('hombro',36.5,20.5,5,4.2)
+    + E('brazos',10,33,3.2,8) + E('brazos',40,33,3.2,8) + E('brazos',8.6,47,2.6,6.5) + E('brazos',41.4,47,2.6,6.5);
+  const delante = comun + R('pecho',15.5,17.5,8.8,11,3) + R('pecho',25.7,17.5,8.8,11,3)
+    + R('core',17,30,16,16.5,4) + `<rect class="n" x="16.5" y="47" width="17" height="6.5" rx="3"/>`
+    + E('cuadriceps',19.6,63,4.6,10) + E('cuadriceps',30.4,63,4.6,10)
+    + E('gemelo',19.6,85,3.2,8.5) + E('gemelo',30.4,85,3.2,8.5);
+  const detras = comun + R('espalda',15.5,16.5,19,9,3) + R('espalda',15.5,26.5,8.8,11.5,3) + R('espalda',25.7,26.5,8.8,11.5,3)
+    + R('lumbar',18.5,38.8,13,7.5,3)
+    + E('gluteo',20,51,5,5) + E('gluteo',30,51,5,5)
+    + E('femoral',19.6,66,4.6,9) + E('femoral',30.4,66,4.6,9)
+    + E('gemelo',19.6,85,3.6,8) + E('gemelo',30.4,85,3.6,8);
+  return `<svg viewBox="0 0 110 96" role="img" aria-label="${esc(tr('Músculos que trabajas hoy'))}">
+    <g>${delante}</g><g transform="translate(60 0)">${detras}</g></svg>`;
+}
+function mapaCuerpo(bl, dia, peq){
+  const m = musculosSesion(bl, dia); if(!m.size) return '';
+  const lista = MUSCULOS.map(([k])=>k).filter(k=>m.has(k));
+  const txt = lista.length >= MUSCULOS.length - 1 ? tr('Cuerpo entero')
+            : lista.map(k=>tr(NOMBRE_MUSCULO[k])).join(' · ');
+  return `<div class="mapa${peq?' peq':''}">${svgCuerpo(m)}
+    <div class="txt"><b>${tr('Hoy trabajas')}</b>${esc(txt)}</div></div>`;
+}
+
+/* ---------- cabecera por tipo de sesion ----------
+   Ilustracion por ahora. Cuando haya fotos propias (las de Instagram), van en
+   app/publicar/ y su nombre aqui: salen en blanco y negro con el verde encima. */
+const CABECERA_FOTO = {fuerza:'', carrera:'', hyrox:'', hibrido:''};
+const DIBUJO = {
+  fuerza: '<path d="M8 50h104" stroke-width="5"/><rect x="16" y="28" width="9" height="44" rx="2"/><rect x="27" y="34" width="7" height="32" rx="2"/><rect x="95" y="28" width="9" height="44" rx="2"/><rect x="86" y="34" width="7" height="32" rx="2"/>',
+  carrera: '<path d="M-4 92C40 92 58 30 124 26"/><path d="M-4 78C34 78 52 18 124 12"/><path d="M-4 64C28 64 46 6 124 -2"/><path d="M84 8l10 30" stroke-dasharray="3 4"/>',
+  hyrox: '<path d="M48 40a12 12 0 0 1 24 0"/><path d="M44 42h32"/><circle cx="60" cy="66" r="24"/><path d="M8 94h104"/>',
+};
+DIBUJO.hibrido = DIBUJO.hyrox;
+const ETIQ_TIPO = {fuerza:'Fuerza', carrera:'Carrera', hyrox:'HYROX', hibrido:'Híbrido'};
+function cabeceraSesion(bl, dia){
+  const t = tipoSesion(bl, dia); if(!t) return '';
+  const foto = CABECERA_FOTO[t];
+  return `<div class="cab">${foto ? `<img src="${esc(foto)}" alt="">` : ''}
+    <svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">${DIBUJO[t]}</svg>
+    <span class="k">${tr(ETIQ_TIPO[t])}</span></div>`;
+}
+
+/* ---------- barra de progreso de la sesion (en la cabecera) ----------
+   Cuenta ejercicios con algo anotado, aunque no lleven "Anotar": es lo que se
+   enviara. Lo que se marca como no hecho cuenta como resuelto. */
+function progresoSesion(bl, dia){
+  let total = 0, hechos = 0;
+  sesionDe(bl, dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)).forEach(f=>{
+    const nombre = f['EJERCICIO / ELEMENTO'], n = parseInt(f.SERIES)||0, cs = camposDe(f);
+    if(!cs.length && !n) return;
+    total++;
+    if(saltado(bl, dia, nombre)){ hechos++; return; }
+    const vale = v => v && !v.borrada && (v.ok || tieneAlgo(v));
+    if(cs.length){ if(vale(LOG[idReg(bl,dia,nombre)])) { hechos++; return; } }
+    for(let i=0;i<n;i++){ if(vale(LOG[idSerie(bl,dia,nombre,i)])){ hechos++; return; } }
+  });
+  return {total, hechos};
+}
+function barraSesion(){
+  if(S.vista !== 'sesion' || soloLectura() || !S.d) return '';
+  const bl = bloqueDe(semanaVista()), dia = S.dia || (diaDeHoy(bl)||{})['DÍA'];
+  if(!dia) return '';
+  const p = progresoSesion(bl, dia); if(!p.total) return '';
+  return `<div class="pg" aria-live="polite"><div class="t"><span>${tr('Tu sesión')}</span>
+      <span id="pg_t">${textoBarra(p)}</span></div>
+    <div class="b"><i id="pg_i" style="width:${Math.round(p.hechos/p.total*100)}%"></i></div></div>`;
+}
+const textoBarra = p => `${p.hechos} ${enIngles()?'of':'de'} ${p.total} ${tr(p.total === 1 ? 'ejercicio' : 'ejercicios')}`;
+function actualizaBarra(){
+  const t = document.getElementById('pg_t'), i = document.getElementById('pg_i');
+  if(!t || !i || S.vista !== 'sesion') return;
+  const bl = bloqueDe(semanaVista()), dia = S.dia || (diaDeHoy(bl)||{})['DÍA'];
+  const p = progresoSesion(bl, dia); if(!p.total) return;
+  t.textContent = textoBarra(p);
+  i.style.width = Math.round(p.hechos/p.total*100) + '%';
+}
+
 /* ================= SESIÓN Y REGISTRO =================
    Regla de oro de esta pantalla: lo que se escribe NO se pierde nunca.
    Se guarda al teclear y la pantalla no se redibuja al confirmar una
@@ -1862,11 +2102,12 @@ function vSesion(){
   if(soloLectura()){
     const w = semanaVista();
     return `
-    <div class="card" style="border-color:var(--verde-s)">
+    <div class="card" style="border-color:var(--verde-s)">${cabeceraSesion(bl, dia)}
       <div class="row sp"><div class="lbl">${esc(dia)} · ${tr('Semana')} ${esc(w.SEMANA)}</div>
         <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
       <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
       ${meta.MIN?`<p class="sm" style="margin-top:4px">${tr("Duración")} · ${esc(meta.MIN)} min</p>`:''}
+      ${mapaCuerpo(bl, dia)}
       <p class="mut" style="margin-top:10px">${tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")}</p>
     </div>
     ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
@@ -1878,12 +2119,13 @@ function vSesion(){
   }
 
   return `
-  <div class="card"><div class="row sp">
+  <div class="card">${cabeceraSesion(bl, dia)}<div class="row sp">
       <div><div class="lbl">${esc(dia)}${modoLibre(bl)&&fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}</div>
         <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
         ${partir(meta['SESIÓN']||'').sub?`<p class="sm" style="margin-top:3px">${esc(partir(meta['SESIÓN']||'').sub)}</p>`:''}</div>
       ${chipEstado(est)}</div>
     ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
+    ${mapaCuerpo(bl, dia)}
     ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
       ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Al terminar, ")}<b>${tr("Guardar y enviar")}</b>${tr(" lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.")}</p>`
       : `<p class="sm" style="margin-top:12px">${tr("Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.")}</p>`}
@@ -1963,9 +2205,14 @@ function ejercicio(bl,dia,f){
   const extra = [f.KM?'KM '+f.KM:'', mismo?'':main,
     etiqueta(f['PACE / RPE'], esRitmo(f['PACE / RPE'])?tr('Ritmo'):''),
     f.FUEL?'Fuel: '+f.FUEL:''].filter(Boolean).join(' · ');
-  const ds = [series?series+' × '+dosis:dosis,
+  /* v5.12: numeros grandes. En fuerza, "3 × 8-10" va en grande y el resto
+     (RIR, tempo, descanso) en pequeno debajo. */
+  const cabDosis = series ? series+' × '+dosis : dosis;
+  const grande = series > 0 && !camposDe(f).length && cabDosis.length <= 24 ? cabDosis : '';
+  const ds = [grande ? '' : cabDosis,
     etiqueta(f['RIR / RPE'], esRitmo(f['RIR / RPE'])?tr('Ritmo'):'RIR'),
     etiqueta(f.TEMPO, 'Tempo'), etiqueta(f.DESCANSO, tr('Descanso'))].filter(Boolean).join(' · ');
+  const dg = grande ? `<div class="dg">${esc(grande)}</div>` : '';
   const eid = slug(nombre);
   recordarNombre(idNota(bl,dia,nombre), nombre);
 
@@ -1975,7 +2222,7 @@ function ejercicio(bl,dia,f){
   if(soloLectura()){
     const vid2 = ficha ? idYoutube(ficha['VÍDEO']) : null;
     return `<div class="ej">
-      <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(conVAM(ds))}</div>`:''}
+      <div class="h"><div><div class="nm">${esc(nombre)}</div>${dg}${ds?`<div class="ds">${esc(conVAM(ds))}</div>`:''}
         ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
       ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
       ${!vid2 && (series || camposDe(f).length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
@@ -2032,7 +2279,7 @@ function ejercicio(bl,dia,f){
   }
 
   return `<div class="ej">
-    <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
+    <div class="h"><div><div class="nm">${esc(nombre)}</div>${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
       ${extra?`<div class="ds">${esc(conLb(extra,uni))}</div>`:''}</div></div>
     ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni)}
     ${cues?`<div class="cue">${pintaCue(conLb(conVAM(cues),uni))}</div>`:''}
@@ -2905,6 +3152,7 @@ function vGuias(){
     <p class="mut" style="margin-top:8px">${esc(t.CONTENIDO)}</p></div>`).join('')}`;
 }
 
+aplicaTema();
 cargar();
 
 /* Sin cobertura la app tiene que abrir igual: el service worker guarda
