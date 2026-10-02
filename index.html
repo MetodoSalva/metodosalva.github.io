@@ -255,7 +255,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.9.1';
+const VERSION = 'v5.9.2';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -2488,15 +2488,23 @@ function vSeg(){
    con bombeo o posando, y nunca exigirlas. Por eso hay un "prefiero no".
    Criterio nuestro, sin respaldo en el metodo: la hora (por la manana), la
    altura del movil (cadera) y el lado del perfil (derecho). */
-/* Elena fuera por ahora (Salvador, 2 oct). */
-const FOTOS_CLIENTES = ['diana','alexia','ben','carlos','smi','carmen',
-                        'sergio','sergiol','justine','paula','stephanie'];
+/* 2 oct: para todas menos Ignacio, que nunca empezo. Una clienta nueva las
+   tiene sin tocar nada. Y nadie las ve antes de que empiece su plan (Ana
+   empieza el 19 oct): cuenta la fecha de inicio de su primera semana. */
+const FOTOS_SIN = ['ignacio'];
+function planEmpezado(){
+  const ss = (S.d && S.d.SEMANAS) || [];
+  const i = ss.length ? fechaIni(ss[0].FECHAS) : null;
+  if(!i) return true;                         // sin fecha legible, no se bloquea
+  const h = new Date(); h.setHours(0,0,0,0);
+  return h >= i;
+}
 const FOTOS_DIAS = 28;
 const POSES = [['frontal','Frontal','de frente al móvil, pies a la anchura de las caderas'],
                ['lateral','Lateral','de perfil, siempre con el lado derecho hacia el móvil'],
                ['posterior','Posterior','de espaldas, en la misma postura que la frontal']];
-const fotosActivas = () => FOTOS_CLIENTES.indexOf(String(CID||'').toLowerCase()) > -1
-                           && !!(S.d && S.d.VIDEO);
+const fotosActivas = () => FOTOS_SIN.indexOf(String(CID||'').toLowerCase()) < 0
+                           && !!(S.d && S.d.VIDEO) && planEmpezado();
 const diasDesde = f => Math.floor((new Date(hoyISO()) - new Date(String(f).slice(0,10))) / 86400000);
 /* Todas las fotos de progreso que constan: las del servidor y las que este
    movil acaba de mandar y el servidor aun no ha devuelto. */
