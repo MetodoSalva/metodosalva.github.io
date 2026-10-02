@@ -103,6 +103,7 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .ej .sets{padding:0 10px 10px;display:flex;flex-direction:column;gap:6px}
 .set{display:grid;grid-template-columns:22px 1fr 1fr 52px 78px;gap:6px;align-items:center}
 .set .i{font-family:var(--m);font-size:12px;color:var(--txt3);text-align:center}
+.set .i small{display:block;font-size:9.5px;line-height:1}
 .set input{border:1px solid var(--linea2);border-radius:8px;padding:9px 8px;font-size:16px;width:100%;
   background:var(--sup);text-align:center;min-height:42px}
 .set.ok{background:var(--verde-b);border-radius:8px;padding:3px 2px}
@@ -110,6 +111,10 @@ hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
 .set button{border:1px solid var(--verde);background:var(--verde);color:#F6F3EE;border-radius:8px;
   padding:9px 4px;font-size:13px;font-weight:600;min-height:42px;cursor:pointer}
 .set.ok button{background:transparent;color:var(--verde);border-color:var(--verde-s)}
+.uni{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 10px 6px;font-size:12px;color:var(--txt3)}
+.uni button{border:1px solid var(--linea2);background:var(--sup);color:var(--txt2);border-radius:8px;
+  padding:6px 12px;font-size:13px;font-weight:600;font-family:var(--m);min-height:34px;cursor:pointer}
+.uni button.on{background:var(--verde);border-color:var(--verde);color:#F6F3EE}
 .calent{background:var(--sup2);border-radius:var(--r);padding:13px 14px;margin-bottom:12px;font-size:14px;color:var(--txt2)}
 .extra-sep{margin:22px 0 12px;padding:13px 14px;border:1px dashed var(--linea2);border-radius:var(--r);background:transparent}
 .extra-sep b{display:block;color:var(--txt);font-size:15px}
@@ -255,7 +260,7 @@ nav .g{font-size:17px;line-height:1}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.9.3';
+const VERSION = 'v5.10';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -458,6 +463,7 @@ const EN = {
   "Series anotadas": "Sets logged",
   "Vídeos enviados": "Videos sent",
   "Tus cargas": "Your loads",
+  "Pesos en": "Weights in",
   "De la primera vez que lo anotaste a tu mejor serie.": "From the first time you logged it to your best set.",
   "series anotadas": "sets logged",
   "serie anotada": "set logged",
@@ -754,6 +760,51 @@ const idVal   = (b,d)    => `${SEM()}~${slug(b)}~${slug(d)}~valoracion`;
    anterior, o en otro dia de esta, y devuelve la serie mas pesada de la
    ultima sesion en la que se anoto. Si nunca se ha hecho, no devuelve nada
    y debajo del ejercicio no aparece ninguna linea. */
+/* 2 oct: KILOS O LIBRAS. Ben entrena en gimnasios de EEUU y segun el dia
+   las mancuernas estan en libras o en kilos. Lo activa la FICHA:
+     unidades = kg-lb  -> boton kg / lb en cada ejercicio, empieza en kg
+     unidades = lb-kg  -> igual, pero empieza en libras
+     unidades = kg     -> solo kilos (lo de siempre)
+   Sin el campo: solo kilos, salvo quien tiene el plan en ingles.
+   Cada ejercicio recuerda la ultima unidad que se eligio en el: la maquina
+   de jalon puede estar en kilos y las mancuernas en libras.
+   A la hoja va SIEMPRE en kilos (CARGA), y lo que escribio en libras va en
+   NOTAS ("53 lb"): Salvador lee una sola unidad y nada se pierde. */
+const LB = 0.45359237;
+function hayLibras(){
+  const u = ajuste('unidades');
+  return u ? u.includes('lb') : enIngles();
+}
+const uniPorDefecto = () => /^lb/.test(ajuste('unidades')) ? 'lb' : 'kg';
+const unidadDe = ej => hayLibras() ? LS.get('unidad~'+ej, uniPorDefecto()) : 'kg';
+const num = x => parseFloat(String(x||'').replace(',','.')) || 0;
+const aKg = (c, u) => u === 'lb' ? num(c) * LB : num(c);
+const redondea = x => String(Math.round(x * 10) / 10);
+/* "24 kg" escrito en el plan -> "24 kg (53 lb)" para quien esta en libras */
+const conLb = (t, uni) => uni !== 'lb' ? t : String(t||'').replace(/(\d+(?:[.,]\d+)?)\s*kg\b/gi,
+  (m, n) => m + ' (' + Math.round(num(n) / LB) + ' lb)');
+/* Una carga como se escribio, y si se mira en la otra unidad, su equivalente */
+function textoCarga(c, u, uni){
+  u = u || 'kg';
+  const t = c + ' ' + u;
+  if(!uni || uni === u || !num(c)) return t;
+  const otra = uni === 'lb' ? Math.round(aKg(c,u) / LB) : redondea(aKg(c,u));
+  return t + ' (' + otra + ' ' + uni + ')';
+}
+function cambiaUnidad(bl, dia, nombre, uni){
+  const ej = slug(nombre), pre = SEM()+'~'+slug(bl)+'~'+slug(dia)+'~'+ej+'~s';
+  LS.set('unidad~'+ej, uni);
+  /* lo escrito hoy y TODAVIA SIN ENVIAR pasa a la unidad nueva: el numero
+     es el que marca la maquina, lo que estaba mal era la unidad. Lo ya
+     enviado se queda como estaba: eso si se sabe en que unidad iba. */
+  Object.keys(LOG).forEach(k=>{
+    const v = LOG[k];
+    if(k.indexOf(pre) !== 0 || !v || !v.c || v.sent || (v.u||'kg') === uni) return;
+    v.u = uni;
+  });
+  LS.set('log', LOG); pinta();
+}
+
 function ultimaVez(bl, dia, nombre){
   const ej = slug(nombre), hoy = SEM()+'~'+slug(bl)+'~'+slug(dia), cand = [];
   Object.keys(LOG).forEach(k=>{
@@ -763,14 +814,14 @@ function ultimaVez(bl, dia, nombre){
     if(!v || !v.ok || v.borrada || (!v.r && !v.c)) return;
     if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;          // la sesion de hoy no es "la ultima vez"
     cand.push({ses:p[0]+'~'+p[1]+'~'+p[2], sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'',
-               c:parseFloat(String(v.c||'').replace(',','.'))||0, carga:v.c||'', reps:v.r||'', rir:v.rir||''});
+               c:aKg(v.c, v.u), carga:v.c||'', u:v.u||'kg', reps:v.r||'', rir:v.rir||''});
   });
   if(!cand.length) return null;
   cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
   const ses = cand[0].ses;
   const mismas = cand.filter(x=>x.ses===ses)
     .sort((a,b)=> b.c-a.c || (parseFloat(b.reps)||0)-(parseFloat(a.reps)||0));
-  return {sem:mismas[0].sem, carga:mismas[0].carga, reps:mismas[0].reps, rir:mismas[0].rir};
+  return {sem:mismas[0].sem, carga:mismas[0].carga, u:mismas[0].u, reps:mismas[0].reps, rir:mismas[0].rir};
 }
 /* Lo mismo para lo que no son series: carrera, remo, trineo... */
 function ultimaVezReg(bl, dia, nombre){
@@ -790,10 +841,10 @@ function ultimaVezReg(bl, dia, nombre){
                   d.rpe?'RPE '+d.rpe:''].filter(Boolean);
   return partes.length ? {sem:cand[0].sem, txt:partes.join(' · ')} : null;
 }
-function lineaUltima(u){
+function lineaUltima(u, uni){
   if(!u) return '';
   const txt = u.txt ? u.txt
-    : (u.carga ? u.carga+' kg × '+u.reps : u.reps+' '+tr('reps')) + (u.rir?' · RIR '+u.rir:'');
+    : (u.carga ? textoCarga(u.carga, u.u, uni)+' × '+u.reps : u.reps+' '+tr('reps')) + (u.rir?' · RIR '+u.rir:'');
   return `<div class="ultima">${tr("La última vez")}${u.sem?' · '+tr('semana')+' '+u.sem:''}: <b>${esc(txt)}</b></div>`;
 }
 
@@ -1305,6 +1356,9 @@ function fusionarRegistros(filas){
       } else {
         LOG[id] = {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', ok:true, sent:true, ts:f.FECHA||'',
                    est:f.ESTADO||'', obs:f.NOTAS||'', nota:f.NOTAS||''};
+        // anotada en libras: se le vuelve a ensenar lo que el escribio
+        const lb = /^\s*(\d+(?:[.,]\d+)?)\s*lb\s*$/i.exec(String(f.NOTAS||''));
+        if(lb) Object.assign(LOG[id], {c:lb[1], u:'lb', obs:'', nota:''});
       }
       cambios = true;
     }
@@ -1859,6 +1913,7 @@ function ejercicio(bl,dia,f){
   }
 
   const campos = camposDe(f);
+  const uni = unidadDe(eid);
   let registro = '';
   if(campos.length && !saltado(bl,dia,nombre)){
     const rid = idReg(bl,dia,nombre);
@@ -1883,16 +1938,19 @@ function ejercicio(bl,dia,f){
     sets = setsCorre(bl, dia, nombre, series, campos.length>0);
   }
   else if(series>0 && !campos.length){
-    sets = `<div class="sets">${Array.from({length:series},(_,i)=>{
+    sets = `${hayLibras() ? `<div class="uni">${tr('Pesos en')}
+        ${['kg','lb'].map(x=>`<button class="${x===uni?'on':''}" aria-pressed="${x===uni}"
+          onclick="cambiaUnidad('${esc(bl)}','${esc(dia)}','${esc(nombre)}','${x}')">${x}</button>`).join('')}</div>` : ''}
+      <div class="sets">${Array.from({length:series},(_,i)=>{
       const id = idSerie(bl,dia,nombre,i);
       recordarNombre(id, nombre);
       const v = LOG[id] || {};
       return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
-        <span class="i">${i+1}</span>
+        <span class="i">${i+1}${v.c && hayLibras() && (v.u||'kg') !== uni ? `<small>${v.u||'kg'}</small>` : ''}</span>
         <input inputmode="numeric" placeholder="reps" value="${esc(v.r||'')}" id="r_${id}"
           oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nombre)}">
-        <input inputmode="decimal" placeholder="kg" value="${esc(v.c||'')}" id="c_${id}"
-          oninput="anota('${id}')" aria-label="Carga serie ${i+1}">
+        <input inputmode="decimal" placeholder="${uni}" value="${esc(v.c||'')}" id="c_${id}"
+          oninput="anota('${id}')" aria-label="Carga serie ${i+1} (${uni})">
         <input inputmode="numeric" placeholder="RIR" value="${esc(v.rir||'')}" id="i_${id}"
           oninput="anota('${id}')" aria-label="RIR serie ${i+1}">
         <button id="b_${id}" onclick="confirmar('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
@@ -1901,10 +1959,10 @@ function ejercicio(bl,dia,f){
   }
 
   return `<div class="ej">
-    <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(conVAM(ds))}</div>`:''}
-      ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
-    ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null))}
-    ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
+    <div class="h"><div><div class="nm">${esc(nombre)}</div>${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
+      ${extra?`<div class="ds">${esc(conLb(extra,uni))}</div>`:''}</div></div>
+    ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni)}
+    ${cues?`<div class="cue">${pintaCue(conLb(conVAM(cues),uni))}</div>`:''}
     ${(series || campos.length || pideVideo(f)) ? (function(){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
@@ -2101,7 +2159,11 @@ function duracion(f){
 function anota(id){
   const r=document.getElementById('r_'+id), c=document.getElementById('c_'+id), i=document.getElementById('i_'+id);
   const prev = LOG[id] || {};
-  LOG[id] = Object.assign({}, prev, {r:r.value.trim(), c:c.value.trim(), rir:i.value.trim()});
+  // si la carga no se ha tocado, conserva su unidad (corregir las reps de
+  // una serie en kilos con el boton en lb no la convierte en libras)
+  const cv = c.value.trim();
+  LOG[id] = Object.assign({}, prev, {r:r.value.trim(), c:cv, rir:i.value.trim(),
+    u: prev.c && prev.c === cv ? (prev.u||'kg') : unidadDe(id.split('~')[3])});
   if(prev.sent) LOG[id].corregido = true;      // ya estaba en la hoja: al enviar se actualizará
   LS.set('log', LOG);
   const fila = document.getElementById('fila_'+id);
@@ -2291,7 +2353,10 @@ async function enviar(){
 
     const serie = (p[4]||'').replace('s','');
     // Una serie de fuerza trae reps, kilos y RIR; una de carrera, tiempo y esfuerzo.
-    reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', serie:serie, reps:v.r||'', carga:v.c||'',
+    // en libras: a CARGA van los kilos y lo que escribio, a NOTAS
+    const enLb = v.u === 'lb' && num(v.c) > 0;
+    reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', serie:serie, reps:v.r||'',
+      carga: enLb ? redondea(aKg(v.c,'lb')) : (v.c||''), notas: enLb ? v.c + ' lb' : '',
       rir:v.rir||'', tiempo:v.t||'', rpe:v.e||'', estado: v.borrada ? '' : (v.ok?'realizada':'')}));
   });
 
@@ -2358,8 +2423,8 @@ function vProgreso(){
     series++;
     sesiones[p[0]+'~'+p[1]+'~'+p[2]] = true;
     if(!v.r && !v.c) return;                 // serie de carrera: cuenta, pero no es una carga
-    const it = {sem:parseInt(p[0].replace(/^s/,''))||0, c:parseFloat(String(v.c||'').replace(',','.'))||0,
-                carga:v.c||'', reps:v.r||''};
+    const it = {sem:parseInt(p[0].replace(/^s/,''))||0, c:aKg(v.c, v.u),
+                carga:v.c||'', u:v.u||'kg', reps:v.r||''};
     const e = porEj[p[3]] = porEj[p[3]] || {n:0, prim:null, mejor:null};
     e.n++;
     if(!e.prim || it.sem < e.prim.sem) e.prim = it;
@@ -2445,8 +2510,8 @@ function vProgreso(){
     <p class="sm" style="margin-bottom:8px">${tr("De la primera vez que lo anotaste a tu mejor serie.")}</p>
     ${ejs.map(e=>{
       const x = porEj[e], sube = x.mejor.c - (x.prim.c||0);
-      const ini2 = x.prim.carga ? x.prim.carga+' kg × '+x.prim.reps : x.prim.reps+' '+tr('reps');
-      const top = x.mejor.carga ? x.mejor.carga+' kg × '+x.mejor.reps : x.mejor.reps+' '+tr('reps');
+      const ini2 = x.prim.carga ? x.prim.carga+' '+x.prim.u+' × '+x.prim.reps : x.prim.reps+' '+tr('reps');
+      const top = x.mejor.carga ? x.mejor.carga+' '+x.mejor.u+' × '+x.mejor.reps : x.mejor.reps+' '+tr('reps');
       const mov = x.prim.sem !== x.mejor.sem && ini2 !== top;
       return `<div class="q"><div class="t"${nombres[e]?'':' style="text-transform:capitalize"'}>${esc(nombres[e] || e.replace(/-/g,' '))}</div>
         <p class="sm mono">${mov?esc(ini2)+' → ':''}<b>${esc(top)}</b>${sube>0&&mov?' · +'+(Math.round(sube*10)/10)+' kg':''}</p>
