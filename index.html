@@ -458,7 +458,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.20';
+const VERSION = 'v5.21';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1762,6 +1762,10 @@ function migrarSemana(){
 
 /* Trae de la hoja lo ya enviado, para que se pueda repasar y corregir
    aunque la clienta haya cambiado de móvil o vaciado el navegador. */
+/* v5.21: una fila anulada en la hoja. El puente v4.5 solo deja pasar
+   "realizada" y "omitida" en ESTADO, asi que tambien vale una NOTA que empiece
+   por "Anulada" (la de Alexia, 3 oct). */
+const anulada = f => String(f.ESTADO||'').toLowerCase() === 'anulada' || /^\s*anulada\b/i.test(String(f.NOTAS||''));
 function fusionarRegistros(filas){
   let cambios = false;
   filas.forEach(f=>{
@@ -1791,6 +1795,7 @@ function fusionarRegistros(filas){
         const lb = /^\s*(\d+(?:[.,]\d+)?)\s*lb\s*$/i.exec(String(f.NOTAS||''));
         if(lb) Object.assign(LOG[id], {c:lb[1], u:'lb', obs:'', nota:''});
       }
+      if(LOG[id] && anulada(f) && /~(s\d+|reg|e\d+)$/.test(id)) LOG[id].borrada = true;
       cambios = true;
     } else {
       /* v5.20: lo que ya estaba enviado y no se ha tocado en el movil lo manda
@@ -1801,7 +1806,7 @@ function fusionarRegistros(filas){
          Alexia que paso a la prensa). */
       const v = LOG[id];
       if(!v.sent || v.corregido || !/~(s\d+|reg|e\d+)$/.test(id)) return;
-      const anu = String(f.ESTADO||'').toLowerCase() === 'anulada';
+      const anu = anulada(f);
       const nuevo = id.endsWith('~reg')
         ? Object.assign({}, v, {d:Object.assign({}, v.d, {km:f.KM||'', tiempo:f.TIEMPO||'', rpe:f.RPE||'', piernas:f.PIERNAS||'',
                                 carga:f.CARGA||''})})
