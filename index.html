@@ -397,6 +397,10 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .cambio .cf.co i{position:absolute;inset:0;background:#8FD0A6;mix-blend-mode:multiply}
 .cambio b{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B8D9C3}
 .cambio span{display:block;font-family:var(--c);font-size:19px;font-weight:700;color:var(--sobre);margin-top:3px}
+.sug{margin:0 14px 11px;border:1px solid var(--verde-s);background:var(--verde-b);border-radius:10px;padding:8px 11px}
+.sug .u{display:block;font-family:var(--m);font-size:11.5px;color:var(--txt3)}
+.sug b{display:block;font-family:var(--c);font-size:16px;font-weight:700;color:var(--verde);margin-top:2px}
+.sug small{display:block;font-size:12px;color:var(--txt2);margin-top:2px;line-height:1.35}
 .tema{display:flex;gap:6px;margin-top:10px}
 .tema button{flex:1;border:1px solid var(--linea2);background:var(--sup);border-radius:9px;padding:10px 4px;
   font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;min-height:44px}
@@ -429,7 +433,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.16';
+const VERSION = 'v5.17';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -819,7 +823,14 @@ const EN = {
   "Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.": "Automatic follows your phone: light, or dark if your phone is in dark mode.",
   "Claro": "Light", "Oscuro": "Dark", "Automático": "Automatic",
   "Músculos que trabajas hoy": "Muscles you work today",
-  "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work", "Ayudan": "Helping", "Ahora toca correr": "Now it's time to run", "Ahora toca fuerza": "Now it's strength time", "Cada estación": "Each station", "Peso de cada estación": "Weight for each station",
+  "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work", "Ayudan": "Helping", "Hoy intenta": "Today try", "mantén": "keep", "mismas repeticiones": "same reps",
+  "La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.": "Last time you went to failure: before going up, leave a rep or two in the tank.",
+  "Techo conseguido": "Top of the range reached", "cuando te resulte fácil, añade lastre": "when it feels easy, add weight",
+  "la siguiente kettlebell": "the next kettlebell up", "o hasta": "or up to", "si te ves fuerte": "if you feel strong",
+  "Intenta las mismas repeticiones con el peso nuevo; si no salen, quédate en el rango y ve subiendo.": "Try the same reps with the new weight; if they don't come, stay in the range and build back up.",
+  "el menor salto de peso que tengas": "the smallest weight jump you have", "Hasta llegar a": "Until you reach",
+  "en todas las series.": "in every set.", "una repetición más": "one more rep",
+  "Con el mismo RIR. Cuando hagas el techo en todas, sube.": "Same RIR. When you hit the top in every set, go up.", "Ahora toca correr": "Now it's time to run", "Ahora toca fuerza": "Now it's strength time", "Cada estación": "Each station", "Peso de cada estación": "Weight for each station",
   "Opcional. El tiempo va arriba, en el total.": "Optional. The time goes above, in the total.",
   "Opcional: el tiempo de cada una y el peso donde lo haya.": "Optional: the time for each one, and the weight where there is one.", "aductores": "adductors",
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
@@ -1057,6 +1068,84 @@ function ultimaVezReg(bl, dia, nombre){
                   d.rpe?'RPE '+d.rpe:''].filter(Boolean);
   return partes.length ? {sem:cand[0].sem, txt:partes.join(' · ')} : null;
 }
+/* ================= v5.17 · PROGRESIONES, FASE 1: SOLO MOSTRAR =================
+   La doble progresion del metodo (fuerza.md §6; maestro 3290 y 6180, "regla E3
+   sencilla y automatizable"): con el rango (8-10), se mantiene la carga hasta
+   hacer el techo en todas las series con el RIR previsto; entonces sube el menor
+   incremento practico y se vuelve a la parte baja.
+   Incrementos: CRITERIO NUESTRO, aprobado por Salvador (hoja de ruta, 2 oct).
+   La app solo SUGIERE: no escribe la carga, no anade series y nunca baja peso
+   sola (eso lo ve Salvador). Sin datos de antes, no dice nada. */
+function ultimaSesionSeries(bl, dia, nombre){
+  const ej = slug(nombre), hoy = SEM()+'~'+slug(bl)+'~'+slug(dia), ses = {};
+  Object.keys(LOG).forEach(k=>{
+    const p = k.split('~');
+    if(p.length !== 5 || p[3] !== ej || !/^s\d+$/.test(p[4])) return;
+    const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.r) return;
+    const key = p[0]+'~'+p[1]+'~'+p[2]; if(key === hoy) return;
+    const x = ses[key] = ses[key] || {sem: parseInt(p[0].replace(/^s/,''))||0, ts:'', sets:[]};
+    if((v.ts||'') > x.ts) x.ts = v.ts||'';
+    x.sets.push({i: parseInt(p[4].slice(1))||0, r: parseFloat(String(v.r).replace(',','.'))||0,
+                 c: num(v.c), carga: v.c||'', u: v.u||'kg', rir: v.rir});
+  });
+  const ult = Object.values(ses).sort((a,b)=> b.sem-a.sem || b.ts.localeCompare(a.ts))[0];
+  if(!ult) return null;
+  ult.sets.sort((a,b)=>a.i-b.i);
+  return ult;
+}
+const fmtKg = x => String(Math.round(x*100)/100).replace('.', enIngles() ? '.' : ',');
+function sugerencia(bl, dia, f){
+  const nombre = f['EJERCICIO / ELEMENTO'] || '', dosis = String(f['REPS / DOSIS'] || '');
+  const m = dosis.match(/(\d+)\s*[-–]\s*(\d+)(?!\s*(m|metros|s|seg|sec|min|km|''|"|%)\b)(?![\d.,])/); if(!m) return '';   // rango de repeticiones (no de metros ni segundos)
+  const lo = parseInt(m[1]), hi = parseInt(m[2]); if(!(hi > lo)) return '';
+  const u = ultimaSesionSeries(bl, dia, nombre); if(!u || !u.sets.length) return '';
+  const sets = u.sets, cargas = sets.map(x=>x.c), carga = Math.max(...cargas);
+  const mismas = sets.filter(x=>x.c === carga);
+  const reps = mismas.map(x=>x.r), minR = Math.min(...reps);
+  const lb = (mismas[0] || {}).u === 'lb', uni = lb ? 'lb' : 'kg';
+  // RIR fiable: 0-4 (los "12-20" de Ben no cuentan)
+  const rirs = mismas.map(x=>parseFloat(String(x.rir||'').replace(',','.'))).filter(x=>!isNaN(x) && x>=0 && x<=4);
+  const objetivo = parseFloat(String(rirObjetivo(f)||'').replace(',','.'));
+  const fallo = rirs.length && !isNaN(objetivo) && objetivo >= 1 && rirs.some(x=>x===0);
+  const n = norm(nombre + ' ' + dosis);
+  const MANC = /mancuerna|dumbbell|\bdb\b/, BARRA = /barra|barbell|smith|trap bar|hexagonal/,
+        MAQ = /maquina|machine|polea|cable|prensa|press de piernas|leg press|jalon|pulldown|pec deck|extension de|curl femoral|leg curl|leg extension/,
+        KB = /kettlebell|\bkb\b|pesa rusa/,
+        INF = /sentadilla|squat|peso muerto|deadlift|hip thrust|zancada|lunge|bulgar|rdl|rumano|romanian|buenos dias|good morning|step|prensa/;
+  const ult = `${tr('La última vez')}: ${carga ? fmtKg(carga)+' '+uni+' × ' : ''}${reps.map(x=>fmtKg(x)).join(' / ')}`;
+  let hoy = '', por = '';
+  if(fallo){
+    hoy = carga ? `${tr('mantén')} ${fmtKg(carga)} ${uni}` : tr('mismas repeticiones');
+    por = tr('La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.');
+  } else if(minR >= hi){
+    /* v5.17.1 (Salvador, 2 oct): siempre en PESO, nunca en placas (en su gym las
+       maquinas Technogym son digitales). Subida de alrededor del 2,5-5 %, al
+       menor salto practico, y abierta: "o hasta X si te ves fuerte". En
+       mancuernas da igual si anota una o las dos: la subida vale igual.
+       Despues, intentar las mismas repeticiones (el metodo: "volver quiza" a la
+       parte baja, no obligatorio). */
+    por = `${tr('Techo conseguido')} (${hi}).`;
+    if(!carga) hoy = tr('cuando te resulte fácil, añade lastre');
+    else if(KB.test(n)) hoy = tr('la siguiente kettlebell');
+    else {
+      const barra = BARRA.test(n), paso = barra ? (lb ? 5 : 2.5) : (lb ? 2 : 1);
+      const minimo = barra ? (INF.test(n) ? (lb ? 10 : 5) : (lb ? 5 : 2.5)) : paso;
+      const redondea = x => Math.round(x / paso) * paso;
+      const bajo = carga + Math.max(minimo, redondea(carga * 0.025));
+      const alto = Math.max(bajo, carga + Math.max(minimo, redondea(carga * 0.05)));
+      hoy = `${fmtKg(bajo)} ${uni}` + (alto > bajo ? ` (${tr('o hasta')} ${fmtKg(alto)} ${tr('si te ves fuerte')})` : '');
+    }
+    por += ' ' + tr('Intenta las mismas repeticiones con el peso nuevo; si no salen, quédate en el rango y ve subiendo.');
+  } else if(minR < lo){
+    hoy = carga ? `${tr('mantén')} ${fmtKg(carga)} ${uni}` : tr('mismas repeticiones');
+    por = `${tr('Hasta llegar a')} ${lo} ${tr('en todas las series.')}`;
+  } else {
+    hoy = `${carga ? fmtKg(carga)+' '+uni+' · ' : ''}${tr('una repetición más')} (${fmtKg(minR)} → ${fmtKg(Math.min(hi, minR+1))})`;
+    por = tr('Con el mismo RIR. Cuando hagas el techo en todas, sube.');
+  }
+  return `<div class="sug"><span class="u">${esc(ult)}</span><b>${tr('Hoy intenta')}: ${esc(hoy)}</b>${por ? `<small>${esc(por)}</small>` : ''}</div>`;
+}
+
 function lineaUltima(u, uni){
   if(!u) return '';
   const txt = u.txt ? u.txt
@@ -2662,7 +2751,8 @@ function ejercicio(bl,dia,f){
   return `<div class="ej">
     <div class="h"><div><div class="nm">${esc(nombre)}</div>${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
       ${extra?`<div class="ds">${esc(conLb(extra,uni))}</div>`:''}</div></div>
-    ${lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni)}
+    ${(function(){ const sg = (!campos.length && series>0 && !aguantePorTiempo(f)) ? sugerencia(bl,dia,f) : '';
+        return sg || lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni); })()}
     ${cues?`<div class="cue">${pintaCue(conLb(conVAM(cues),uni))}</div>`:''}
     ${(series || campos.length || pideVideo(f)) ? (function(){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
