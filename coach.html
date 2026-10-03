@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>SALVA · Entrenador</title>
+<style>
+:root{--fondo:#F6F3EE;--sup:#FFFFFF;--sup2:#EFEAE2;--tinta:#1F2A24;--txt2:#4A564F;--txt3:#7C867F;--linea:#E3DDD3;
+  --verde:#2F6B4A;--verde-c:#7DBE95;--verde-s:#BFDCC9;--rojo:#C2463F;--ambar:#B7811F}
+@media (prefers-color-scheme: dark){:root{--fondo:#121815;--sup:#1A221E;--sup2:#222C27;--tinta:#E9EEEA;--txt2:#B9C3BC;
+  --txt3:#86918A;--linea:#2C3731;--verde:#7DBE95;--verde-c:#4E8F68;--verde-s:#2F5A41;--rojo:#E5736C;--ambar:#E0AE4F}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+.top{background:#2F6B4A;color:#F6F3EE;padding:calc(env(safe-area-inset-top) + 16px) 16px 14px}
+.top .wm{font-weight:700;letter-spacing:.22em;font-size:13px}
+.top .nm{font-size:13px;opacity:.85;margin-top:2px}
+main{max-width:720px;margin:0 auto;padding:14px 16px 60px}
+.card{background:var(--sup);border:1px solid var(--linea);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:20px;margin:0 0 4px}
+.sm{font-size:13px;color:var(--txt3)}
+.mut{color:var(--txt2)}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--linea);background:var(--sup);color:var(--tinta);border-radius:10px;padding:9px 14px;font-weight:600}
+.btn.pri{background:var(--verde);border-color:var(--verde);color:#fff}
+.btn:disabled{opacity:.5}
+input,textarea{font:inherit;width:100%;border:1px solid var(--linea);border-radius:10px;padding:10px;background:var(--sup);color:var(--tinta)}
+textarea{min-height:76px;margin-top:8px}
+.cli{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:var(--sup);
+  border:1px solid var(--linea);border-radius:12px;padding:13px 14px;margin-bottom:8px;color:var(--tinta)}
+.badge{background:var(--rojo);color:#fff;border-radius:99px;font-size:12.5px;padding:2px 9px;font-weight:700}
+.badge.ok{background:var(--sup2);color:var(--txt3);font-weight:500}
+.it .tipo{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3)}
+.it .que{font-weight:600;margin-top:2px}
+.it .tx{margin-top:6px;white-space:pre-line}
+.it.hecho{opacity:.72}
+.resp{margin-top:10px;border-left:3px solid var(--verde-c);padding-left:10px;color:var(--txt2);white-space:pre-line}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fil{display:flex;gap:6px;margin:4px 0 12px}
+.fil button{border:1px solid var(--linea);background:var(--sup);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--txt2)}
+.fil button.on{background:var(--verde-s);color:var(--tinta);border-color:var(--verde)}
+.msj{border:1px solid var(--linea);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--sup)}
+.msj.cliente{background:var(--sup2)}
+.msj .cita{font-size:12.5px;color:var(--txt3);border-left:3px solid var(--linea);padding-left:8px;margin-bottom:6px;white-space:pre-line}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--fondo);
+  padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw}
+a{color:var(--verde)}
+</style>
+</head>
+<body>
+<div class="top"><div class="wm">SALVA</div><div class="nm">Entrenador · lo que te cuentan tus clientas</div></div>
+<main id="app"></main>
+<script>
+/* SALVA · app del entrenador (3 oct, D-147).
+   Lee la bandeja del puente (v4.8): notas de ejercicio, comentarios de sesion,
+   respuestas de texto del seguimiento, videos y mensajes de cada clienta, y
+   cuales tienen ya respuesta. Escribir aqui deja un mensaje en la pestana
+   MENSAJES de su hoja: ella lo ve en «Mensajes» del menu de su app.
+   La clave de Salvador NO va en este fichero: se escribe una vez y se queda
+   en este movil. */
+const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
+const LS = { get(k, d){ try{ const v = localStorage.getItem('coach_' + k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+             set(k, v){ try{ localStorage.setItem('coach_' + k, JSON.stringify(v)); }catch(e){} } };
+const S = { k: LS.get('k', ''), datos: null, cliente: null, cargando: false, filtro: 'pend', err: '' };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TIPO = {nota:'Nota del ejercicio', sesion:'Comentario de la sesión', seguimiento:'Seguimiento', video:'Vídeo', mensaje:'Mensaje', extra:'Entreno extra'};
+const TIPO_CITA = {nota:'Tu nota', sesion:'Tu comentario de la sesión', seguimiento:'Tu seguimiento', video:'Tu vídeo', mensaje:'Tu mensaje', extra:'Tu entreno extra'};
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fecha = f => { const m = String(f||'').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? (+m[3]) + ' ' + MESES[+m[2]-1] : String(f||''); };
+function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
+
+async function cargar(){
+  S.cargando = true; S.err = ''; pinta();
+  try{
+    const r = await fetch(API + '?bandeja=1&dias=30&k=' + encodeURIComponent(S.k));
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    // fuera las fotos de progreso (privadas, no se responden) y las filas de prueba
+    j.BANDEJA.forEach(c => { c.items = (c.items || []).filter(i => !/^fotos~/.test(i.id) && !/prueba/i.test(i.id)); });
+    S.datos = j.BANDEJA; LS.set('cache', {t: Date.now(), d: j.BANDEJA});
+  }catch(e){ S.err = String(e.message || e); }
+  S.cargando = false; pinta();
+}
+/* «Ya está»: visto sin escribirle (lo trataste por WhatsApp, o no pide respuesta). Se guarda en este movil. */
+const vistos = () => LS.get('vistos', {});
+const pendItems = c => (c.items || []).filter(i => !i.respondido && !(i.tipo === 'video' && i.respuesta) && !vistos()[c.cliente + '|' + i.id]);
+function pendientes(c){ return pendItems(c).length; }
+function yaEsta(n){ const c = (S.datos || []).find(x => x.cliente === S.cliente); const it = pendItems(c)[n]; if(!it) return;
+  const v = vistos(); v[c.cliente + '|' + it.id] = 1; LS.set('vistos', v); pinta(); }
+function todoVisto(){ const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
+  if(!confirm('¿Dar por vistas las ' + pendientes(c) + ' cosas sin responder de ' + (c.nombre || c.cliente) + '? No se le escribe nada.')) return;
+  const v = vistos(); pendItems(c).forEach(i => { v[c.cliente + '|' + i.id] = 1; }); LS.set('vistos', v); pinta(); }
+
+function vClave(){
+  return `<div class="card"><h2>Tu clave</h2><p class="sm">La de entrenador. Se queda guardada en este móvil.</p>
+    <input id="k" type="password" autocomplete="current-password" placeholder="clave">
+    <button class="btn pri" style="margin-top:10px" onclick="S.k=document.getElementById('k').value.trim(); LS.set('k', S.k); cargar()">Entrar</button></div>`;
+}
+function vLista(){
+  const ds = (S.datos || []).slice().sort((a,b)=>pendientes(b)-pendientes(a));
+  const total = ds.reduce((n,c)=>n+pendientes(c), 0);
+  return `<div class="card"><div class="row" style="justify-content:space-between">
+      <div><h2>Bandeja</h2><p class="sm">${total ? total + ' cosas sin responder' : 'Todo respondido'} · últimos 30 días</p></div>
+      <button class="btn" onclick="cargar()">Actualizar</button></div></div>
+    ${ds.map((c,i)=>`<button class="cli" onclick="S.cliente='${esc(c.cliente)}'; S.filtro='pend'; pinta(); scrollTo(0,0)">
+      <span><b>${esc(c.nombre || c.cliente)}</b>${c.error ? `<br><span class="sm">No se pudo leer: ${esc(c.error)}</span>` : ''}</span>
+      <span class="badge ${pendientes(c) ? '' : 'ok'}">${pendientes(c) || '✓'}</span></button>`).join('')}`;
+}
+function vCliente(){
+  const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return vLista();
+  const resp = {}; (c.mensajes || []).forEach(m => { if(m.DE === 'salva' && m.PARA) resp[m.PARA] = m; });
+  const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
+  const hist = (c.mensajes || []).slice().sort((a,b)=>String(b.FECHA).localeCompare(String(a.FECHA)));
+  return `<div class="row" style="margin-bottom:10px"><button class="btn" onclick="S.cliente=null; pinta()">← Bandeja</button>
+      <h2 style="margin:0 0 0 6px">${esc(c.nombre || c.cliente)}</h2></div>
+    <div class="card"><b>Aviso suelto</b><p class="sm">Le aparece en su app como mensaje tuyo, sin cita.</p>
+      <textarea id="suelto" placeholder="Por ejemplo: estás anotando mal el RIR…"></textarea>
+      <button class="btn pri" style="margin-top:8px" onclick="responder(null)">Enviar</button></div>
+    <div class="fil"><button class="${S.filtro==='pend'?'on':''}" onclick="S.filtro='pend'; pinta()">Sin responder</button>
+      <button class="${S.filtro==='todo'?'on':''}" onclick="S.filtro='todo'; pinta()">Todo</button>
+      <button class="${S.filtro==='hist'?'on':''}" onclick="S.filtro='hist'; pinta()">Conversación</button></div>
+    ${S.filtro === 'pend' && pendientes(c) > 3 ? `<p class="sm" style="margin:-4px 0 10px">«Ya está» lo quita sin escribirle. <a href="#" onclick="todoVisto(); return false">Dar todo por visto</a></p>` : ''}
+    ${S.filtro === 'hist'
+      ? (hist.length ? hist.map(m => `<div class="msj ${m.DE === 'cliente' ? 'cliente' : ''}">
+          ${m.CITA ? `<div class="cita">${esc(m.CITA)}</div>` : ''}<div style="white-space:pre-line">${esc(m.TEXTO)}</div>
+          <div class="sm" style="margin-top:4px">${m.DE === 'cliente' ? esc(c.nombre || 'Ella') : 'Tú'} · ${esc(m.FECHA)}${m.DE === 'salva' ? (m.LEIDO ? ' · leído ' + esc(m.LEIDO) : ' · sin leer') : ''}</div></div>`).join('')
+        : '<div class="card"><p class="mut">Todavía no hay mensajes.</p></div>')
+      : (items.length ? items.map((it, n) => `<div class="card it ${it.respondido ? 'hecho' : ''}">
+          <div class="tipo">${esc(TIPO[it.tipo] || it.tipo)} · ${esc(fecha(it.fecha))}</div>
+          ${it.que ? `<div class="que">${esc(it.que)}</div>` : ''}
+          <div class="tx">${esc(it.texto || '(sin texto)')}</div>
+          ${it.enlace ? `<p style="margin:6px 0 0"><a href="${esc(it.enlace)}" target="_blank" rel="noopener">Ver el vídeo</a></p>` : ''}
+          ${resp[it.id] ? `<div class="resp">${esc(resp[it.id].TEXTO)}<div class="sm">${resp[it.id].LEIDO ? 'leído ' + esc(resp[it.id].LEIDO) : 'sin leer'}</div></div>`
+            : (it.respuesta ? `<div class="resp">${esc(it.respuesta)}</div>` : '')}
+          ${it.respondido ? '' : `<textarea id="r_${n}" placeholder="Tu respuesta"></textarea>
+            <div class="row" style="margin-top:8px"><button class="btn pri" onclick="responder(${n})">Responder</button>
+            ${S.filtro === 'pend' ? `<button class="btn" onclick="yaEsta(${n})">Ya está</button>` : ''}</div>`}
+        </div>`).join('') : '<div class="card"><p class="mut">Nada sin responder.</p></div>')}`;
+}
+async function responder(n){
+  const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
+  const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
+  const it = n === null ? null : items[n];
+  const el = document.getElementById(n === null ? 'suelto' : 'r_' + n);
+  const tx = el ? el.value.trim() : ''; if(!tx){ toast('Escribe algo primero'); return; }
+  const d = new Date(), p = x => String(x).padStart(2,'0');
+  const m = { id: 'ms~' + d.getTime(), fecha: d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),
+              de: 'salva', para: it ? it.id : '', texto: tx,
+              cita: it ? (TIPO_CITA[it.tipo] || '') + (it.que ? ' · ' + it.que : '') + ' · ' + fecha(it.fecha) + '\n«' + String(it.texto || '').slice(0, 280) + '»' : '' };
+  el.disabled = true;
+  try{
+    const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente: c.cliente, token: S.k, mensajes: [m]})});
+    const j = await r.json(); if(j.error) throw new Error(j.error);
+    (c.mensajes = c.mensajes || []).push({ID: m.id, FECHA: m.fecha, DE: 'salva', PARA: m.para, CITA: m.cita, TEXTO: m.texto});
+    if(it) it.respondido = true;
+    toast('Enviado. Lo verá en «Mensajes».'); pinta();
+  }catch(e){ el.disabled = false; toast('No se ha podido enviar: ' + (e.message || e)); }
+}
+function pinta(){
+  const app = document.getElementById('app');
+  if(!S.k){ app.innerHTML = vClave(); return; }
+  if(S.cargando && !S.datos){ app.innerHTML = '<div class="card"><p class="mut">Leyendo las hojas de todas… tarda unos segundos.</p></div>'; return; }
+  if(S.err && !S.datos){ app.innerHTML = `<div class="card"><p>No se ha podido leer: ${esc(S.err)}</p>
+    <div class="row"><button class="btn pri" onclick="cargar()">Reintentar</button>
+    <button class="btn" onclick="S.k=''; LS.set('k',''); pinta()">Cambiar la clave</button></div></div>`; return; }
+  app.innerHTML = (S.cargando ? '<p class="sm">Actualizando…</p>' : '') + (S.cliente ? vCliente() : vLista());
+}
+const cache = LS.get('cache', null);
+if(cache && cache.d) S.datos = cache.d;
+pinta();
+if(S.k) cargar();
+</script>
+</body>
+</html>
