@@ -471,7 +471,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.22';
+const VERSION = 'v5.23';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -2543,10 +2543,15 @@ function curva(pts){
   }
   return CURVAS[pts] = d + 'Z';
 }
-/* Los chicos se conocen por su enlace (como FOTOS_SIN), asi no hay que tocar
-   sus hojas. La ficha manda si lo dice: figura = hombre | mujer. */
-const FIGURA_H = ['ben','carlos','jorge','sergio','sergiol','ignacio'];
-const figuraDe = () => { const f = ajuste('figura');
+/* v5.23 (4 oct, D-151): manda la columna SEXO de SALVA - Clientes, que trae el
+   puente v4.10. Antes solo habia esta lista: a Juan Pablo, que nadie apunto,
+   le salieron la chica y la silueta de mujer. Despues, la ficha (figura) y,
+   por si el puente es viejo, la lista de siempre. */
+const FIGURA_H = ['ben','carlos','jorge','sergio','sergiol','ignacio','juanpablo'];
+const figuraDe = () => { const sx = norm((S.d && S.d.SEXO) || '');
+  if(sx === 'hombre') return 'h';
+  if(sx === 'mujer') return 'm';
+  const f = ajuste('figura');
   if(/^(hombre|chico|man|male|h)$/.test(f)) return 'h';
   if(/^(mujer|chica|woman|female|m)$/.test(f)) return 'm';
   return FIGURA_H.indexOf(String(CID||'').toLowerCase()) > -1 ? 'h' : 'm'; };
@@ -2647,7 +2652,9 @@ function cabeceraSesion(bl, dia){
 }
 /* El cambio a mitad de sesion: de fuerza a carrera, o de carrera a fuerza */
 function cambioDeParte(clase){
-  if(clase === 'c') return `<div class="cambio"><div class="cf co"><img src="img/corredor.jpg" alt=""><i></i></div>
+  /* v5.23: corredor.jpg es un hombre; a ellas, su foto de carrera (D-151) */
+  if(clase === 'c') return `<div class="cambio">${generoFoto() === 'hombre' ? '<div class="cf co"><img src="img/corredor.jpg" alt=""><i></i></div>'
+      : '<div class="cf"><img src="img/correr-mujer-suave.jpg" alt=""></div>'}
     <div><b>${tr('Carrera')}</b><span>${tr('Ahora toca correr')}</span></div></div>`;
   return `<div class="cambio"><div class="cf"><img src="img/fuerza-${generoFoto()}.jpg" alt=""></div>
     <div><b>${tr('Fuerza')}</b><span>${tr('Ahora toca fuerza')}</span></div></div>`;
