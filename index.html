@@ -474,7 +474,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.24';
+const VERSION = 'v5.25';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -932,6 +932,14 @@ const EN = {
   "Tiempo corriendo en el bloque": "Time running in this block",
   "Tu ritmo medio": "Your average pace",
   "Tu tirada más larga": "Your longest run",
+  "En todo el programa": "In the whole programme",
+  "Tiempo corriendo en el programa": "Time running in the programme",
+  "Tu ritmo más rápido en lo rápido": "Your fastest pace in your quality work",
+  "Lo rápido de las últimas semanas": "Your quality work, last weeks",
+  "más rápido que el plan": "faster than the plan",
+  "en el plan": "on plan",
+  "más lento que el plan": "slower than the plan",
+  "Sólo los tramos rápidos (series, tempo, ritmo de maratón), no los rodajes: si un tramo no tiene tiempo anotado, no sale.": "Only the fast parts (intervals, tempo, marathon pace), not the easy running: a part without a logged time doesn't show.",
   "Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.": "It comes from what you log in each run. A run you don't log doesn't count."
 };
 /* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
@@ -3642,6 +3650,53 @@ const kmPlan = () => {
   });
   return p;
 };
+/* v5.25 (4 oct): Smi, por Salvador: «"in this block" es lo mismo que "this week"»
+   (sus bloques duran una semana) y «el ritmo medio no me aporta: es lentisimo
+   porque cuenta todos los entrenamientos; mejor si comparas las sesiones
+   importantes, por ejemplo las series, con el ritmo que me pusiste».
+   Lo rapido es la fila de carrera cuyo nombre o sesion es de calidad (series,
+   tempo, ritmo de maraton, bloque) y que no es suave ni la sesion entera con su
+   calentamiento. Su ritmo plan sale de PACE / RPE ("5:18-5:22/km"). Si la fila
+   no lleva km, se saca del MAIN SET de la sesion ("7 km easy + 5 km marathon
+   pace + ..."), por orden, cuando los tramos cuadran uno a uno con sus filas. */
+const ES_CALIDAD = /marathon pace|ritmo (de )?maraton|tempo|interval|series|quality|calidad|umbral|threshold|block|bloque|30\/30|repeat|repeticion/;
+const ES_SUAVE = /easy|suave|recovery|recupera|warm|calenta|cool|calma|long run|tirada|rodaje/;
+const KM_TXT = /(\d+(?:[.,]\d+)?)\s*km\b/g;
+function ritmoPlan(t){
+  const m = String(t||'').match(/(\d{1,2}):(\d\d)\s*(?:[-\u2013]|to|a)\s*(\d{1,2}):(\d\d)/); if(!m) return null;
+  const a = +m[1]*60 + +m[2], b = +m[3]*60 + +m[4];
+  return {min:Math.min(a,b), max:Math.max(a,b), txt:m[1]+':'+m[2]+'-'+m[3]+':'+m[4]};
+}
+function kmDeTramo(f, ses){
+  const n = String(f['EJERCICIO / ELEMENTO']||'').match(/(\d+(?:[.,]\d+)?)\s*km\b/);
+  if(n) return parseFloat(n[1].replace(',','.'));
+  const padre = ses.find(x=>x !== f && x['MAIN SET'] && norm(x.TIPO) === 'running');
+  if(!padre) return 0;
+  const tramos = [...String(padre['MAIN SET']).matchAll(KM_TXT)].map(m=>parseFloat(m[1].replace(',','.')));
+  const hijas = ses.filter(x=>x !== padre && norm(x.TIPO) === 'running' && !x['MAIN SET'])
+                   .sort((a,b)=>(parseFloat(a.ORDEN)||0)-(parseFloat(b.ORDEN)||0));
+  const i = hijas.indexOf(f);
+  return tramos.length === hijas.length && i > -1 ? tramos[i] : 0;
+}
+function ritmosRapidos(semanas){
+  const hoyN = parseInt(String((S.semana||{}).SEMANA||'').replace(/\D/g,''),10) || 0, out = [];
+  Object.keys(LOG).forEach(k=>{
+    const v = LOG[k]; if(!v || !v.ok || v.borrada || !k.endsWith('~reg') || !v.d) return;
+    const p = k.split('~'), sem = parseInt(p[0].replace(/\D/g,''),10) || 0;
+    if(hoyN && sem <= hoyN - semanas) return;
+    const ses = (S.d.SESIONES||[]).filter(f=>slug(f.BLOQUE||'') === p[1] && slug(f['DÍA']||'') === p[2]);
+    const f = ses.find(f=>slug(f['EJERCICIO / ELEMENTO']||'') === p[3]); if(!f) return;
+    const nom = norm(f['EJERCICIO / ELEMENTO']), plan = ritmoPlan(f['PACE / RPE']);
+    if(!plan || ES_SUAVE.test(nom) || /warm|calenta/.test(norm(f['MAIN SET']))) return;
+    if(!ES_CALIDAD.test(nom + ' ' + norm(f['SESIÓN']))) return;
+    const sg = aSegundos(v.d.tiempo), km = parseFloat(String(v.d.km||'').replace(',','.')) || kmDeTramo(f, ses);
+    if(!sg || !km) return;
+    const s = Math.round(sg/km); if(s < 150 || s > 900) return;
+    out.push({sem, nom:f['EJERCICIO / ELEMENTO'], s, plan, km,
+              cmp: s < plan.min - 2 ? 'rapido' : s > plan.max + 2 ? 'lento' : 'plan'});
+  });
+  return out.sort((a,b)=>b.sem-a.sem || a.s-b.s);
+}
 function graficaKm(){
   const km = kmPorSemana(), plan = kmPlan(), hayPlan = Object.keys(plan).length > 0;
   const hoyN = parseInt(String((S.semana||{}).SEMANA||'').replace(/\D/g,''), 10);
@@ -3774,7 +3829,7 @@ function vProgreso(){
   /* v5.2: quien solo corre no veia nada suyo aqui. Su progreso no son las
      cargas: son los kilometros, el tiempo en pie y el ritmo que le sale. */
   const blSlug = slug(bl||'');
-  let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0;
+  let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0, kmTot=0, sgTot=0;
   Object.keys(LOG).forEach(k=>{
     const v = LOG[k];
     if(!v || !v.ok || v.borrada || !k.endsWith('~reg')) return;
@@ -3787,6 +3842,7 @@ function vProgreso(){
     if(!km && !sg) return;
     const p = k.split('~');
     if(km > masLarga) masLarga = km;
+    kmTot+=km; sgTot+=sg;
     if(p[1] === blSlug){ kmBl+=km; sgBl+=sg; carrBl++; }
     if(p[0] === SEM()){ kmSem+=km; sgSem+=sg; carrSem++; }
   });
@@ -3796,17 +3852,28 @@ function vProgreso(){
   const ritmoMedio = (km, sg) => { if(!km || !sg) return ''; const s=Math.round(sg/km);
     return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' '+tr('min/km'); };
   const hayCarrera = kmBl>0 || sgBl>0;
+  // v5.25: si el bloque es esta misma semana, repetirlo no dice nada: va el programa entero.
+  const blIgual = Math.abs(kmBl-kmSem) < 0.05 && sgBl === sgSem;
+  const kmB = blIgual ? kmTot : kmBl, sgB = blIgual ? sgTot : sgBl;
+  const rap = ritmosRapidos(4), masRap = rap.length ? rap.reduce((a,b)=>b.s<a.s?b:a) : null;
+  const mmss = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  const CMP = {rapido:'más rápido que el plan', plan:'en el plan', lento:'más lento que el plan'};
   const tarjetaKm = hayCarrera ? `<div class="card"><h3 style="margin-bottom:10px">${tr("Tus kilómetros")}</h3>
     <div class="row sp"><span class="sm">${tr("Esta semana")}</span>
       <b class="mono">${kmSem?unKm(kmSem)+' km':enHoras(sgSem)}</b></div>
-    <div class="row sp" style="margin-top:6px"><span class="sm">${tr("En este bloque")}</span>
-      <b class="mono">${kmBl?unKm(kmBl)+' km':enHoras(sgBl)}</b></div>
-    ${sgBl?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tiempo corriendo en el bloque")}</span>
-      <b class="mono">${enHoras(sgBl)}</b></div>`:''}
-    ${ritmoMedio(kmBl,sgBl)?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu ritmo medio")}</span>
+    <div class="row sp" style="margin-top:6px"><span class="sm">${tr(blIgual ? "En todo el programa" : "En este bloque")}</span>
+      <b class="mono">${kmB?unKm(kmB)+' km':enHoras(sgB)}</b></div>
+    ${sgB?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr(blIgual ? "Tiempo corriendo en el programa" : "Tiempo corriendo en el bloque")}</span>
+      <b class="mono">${enHoras(sgB)}</b></div>`:''}
+    ${masRap?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu ritmo más rápido en lo rápido")}</span>
+      <b class="mono">${mmss(masRap.s)} ${tr('min/km')}</b></div>`
+      : ritmoMedio(kmBl,sgBl)?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu ritmo medio")}</span>
       <b class="mono">${ritmoMedio(kmBl,sgBl)}</b></div>`:''}
     ${masLarga?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu tirada más larga")}</span>
       <b class="mono">${unKm(masLarga)} km</b></div>`:''}
+    ${rap.length?`<div class="lbl" style="margin-top:14px">${tr("Lo rápido de las últimas semanas")}</div>
+    <ul class="rec-l">${rap.slice(0,5).map(r=>`<li><span>${enIngles()?'W':'S'}${r.sem} · ${esc(r.nom)}<br><small class="sm">${tr('plan')} ${r.plan.txt} · ${tr(CMP[r.cmp])}</small></span><b class="mono">${mmss(r.s)}</b></li>`).join('')}</ul>
+    <p class="sm" style="margin-top:6px">${tr("Sólo los tramos rápidos (series, tempo, ritmo de maratón), no los rodajes: si un tramo no tiene tiempo anotado, no sale.")}</p>`:''}
     ${graficaKm()}
     <p class="sm" style="margin-top:8px">${tr("Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.")}</p></div>` : '';
 
