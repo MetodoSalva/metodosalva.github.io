@@ -474,7 +474,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.26';
+const VERSION = 'v5.27';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -933,6 +933,11 @@ const EN = {
   "Tu ritmo medio": "Your average pace",
   "Tu tirada más larga": "Your longest run",
   "En todo el programa": "In the whole programme",
+  "Hoy sin cardio: lo importante eran las pesas.": "No cardio today: the weights were what mattered.",
+  "¿Te da tiempo de hacer": "Do you have time for", "de cardio?": "of cardio?", "Sí": "Yes", "No": "No",
+  "Qué cardio haces": "Which cardio you do", "¿Cuál haces?": "Which one?", "Al final no me da tiempo": "No time after all",
+  "Running": "Running", "Bici": "Bike", "Elíptica": "Cross-trainer", "Bici y elíptica": "Bike and cross-trainer", "en total": "in total",
+  "Tu cardio": "Your cardio", "La bici y la elíptica van en minutos: no suman kilómetros ni cambian tu ritmo de carrera.": "Bike and cross-trainer count in minutes: they don't add kilometres or change your running pace.",
   "Tiempo corriendo en el programa": "Time running in the programme",
   "Tu ritmo más rápido en lo rápido": "Your fastest pace in your quality work",
   "Lo rápido de las últimas semanas": "Your quality work, last weeks",
@@ -1311,6 +1316,7 @@ const aguantePorTiempo = f => (parseInt(f && f.SERIES)||0) > 0 && !camposHoja(f)
 function camposDe(f){
   let c = camposHoja(f);
   const nom = norm(f && f['EJERCICIO / ELEMENTO']);
+  if(norm(f && f.TIPO) === 'cardio' && /^cardio . /.test(nom)) return ES_CARDIO_CORRER.test(nom) ? ['km','tiempo','rpe'] : ['tiempo','rpe'];
   if(estacionesDe(f).length){ c = c.filter(k=>k!=='carga'); return c; }
   if(tipoHyrox(f) && c.length && EST_HYROX.test(nom)){        // una estacion sola
     const peso = EST_PESO.test(nom);
@@ -1626,7 +1632,8 @@ function idYoutube(url){
 function estadoSesion(b,d){
   if(LOG[idOmit(b,d)]) return 'omitida';
   const todas = sesionDe(b,d).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
-                                        && !saltado(b,d,f['EJERCICIO / ELEMENTO']));
+                                        && !saltado(b,d,f['EJERCICIO / ELEMENTO'])
+                                        && !(cardioOpciones(f) && !cardioElegido(b,d,f)));   // v5.27: opcional
   /* v4.8: si un elemento trae SERIES y ademas casillas de carrera, manda la
      carrera. Un "5 x 250 m de SkiErg" se mide en tiempo y RPE, no en kilos:
      las filas de reps/kg/RIR ahi no pintan nada. Antes salian las dos cosas y,
@@ -1656,7 +1663,7 @@ function estadoSesion(b,d){
   });
   conReg.forEach(f=>{
     ejercicios++;
-    const v = LOG[idReg(b,d,f['EJERCICIO / ELEMENTO'])];
+    const v = LOG[idReg(b,d,cardioOpciones(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO'])];
     if(v && v.ok){ anotadas++; conAlgo++; }
   });
   if(!anotadas) return 'sin';
@@ -2864,7 +2871,34 @@ function pintaCue(t){
    hay kilos que separar. */
 const MATERIAL = /^(con |en )?(la |el )?(barra|multipower|m[aá]quina|mancuernas?|polea|disco|kettlebell|machine|dumbbells?|cable|barbell|banda|goma|band)$/i;
 const may = t => t.charAt(0).toUpperCase() + t.slice(1);
+/* v5.27 (5 oct, peticion de Salvador por la sesion de Juan Pablo,
+   app/PETICION-cardio-a-elegir.md): el cardio opcional a elegir. Una fila con
+   TIPO "cardio" y en EXTRA las opciones separadas por "|" ("running|bici|eliptica").
+   Al llegar pregunta si da tiempo; con "No" queda omitida a proposito (no baja la
+   adherencia), con "Si" se elige el tipo, como las alternativas de fuerza, y se
+   guarda con su nombre ("Cardio · Bici"). Solo el running pide km y solo el
+   running suma en los km y el ritmo; bici y eliptica van aparte, en minutos. */
+const cardioOpciones = f => (f && norm(f.TIPO) === 'cardio' && /\|/.test(String(f.EXTRA||'')))
+  ? String(f.EXTRA).split('|').map(s=>s.trim()).filter(Boolean) : null;
+const ES_CARDIO_CORRER = /^cardio . (running|correr|carrera|cinta)/;
+const esCardioNoCorrer = slugEj => /^cardio-/.test(slugEj) && !/^cardio-(running|correr|carrera|cinta)/.test(slugEj);
+function cardioElegido(bl, dia, f){
+  const al = alternativasDe(f); if(!al) return false;
+  const v = LOG[idAlt(bl,dia,al[0].id)];
+  return !!(v && typeof v.alt === 'number') || al.some(x=>{ const r = LOG[idReg(bl,dia,x.id)]; return r && r.ok; });
+}
+function cardioSi(bl, dia, f){
+  const al = alternativasDe(f); if(!al) return false;
+  const v = LOG[idAlt(bl,dia,al[0].id)];
+  return !!(v && v.si) || cardioElegido(bl,dia,f);
+}
+function cardioSiNo(bl, dia, id0, orig, si){
+  if(si){ LOG[idAlt(bl,dia,id0)] = {si:1}; LS.set('log', LOG); pinta(); }
+  else salta(bl, dia, orig);
+}
 function alternativasDe(f){
+  const ops = cardioOpciones(f);
+  if(ops) return ops.map(o=>({id: 'Cardio · ' + may(o), txt: may(o)}));
   const n = String((f && f['EJERCICIO / ELEMENTO']) || '').trim();
   if(!f || ['fuerza','hibrido'].indexOf(norm(f.TIPO)) < 0 || !(parseInt(f.SERIES) > 0)) return null;
   if(/^(calentamiento|warm-?up|si tienes)/i.test(n) || /\((potencia|power)\)/i.test(n)) return null;
@@ -2890,6 +2924,7 @@ function altElegida(bl, dia, f){
   const alts = alternativasDe(f); if(!alts) return 0;
   const v = LOG[idAlt(bl,dia,alts[0].id)];
   if(v && typeof v.alt === 'number') return v.alt;
+  if(cardioOpciones(f)){ const i = alts.findIndex(x=>{ const r = LOG[idReg(bl,dia,x.id)]; return r && r.ok; }); return i > 0 ? i : 0; }
   // sin eleccion guardada: si ya hay series de la alternativa, es la alternativa
   return [0,1,2,3,4,5].some(i=>{ const x = LOG[idSerie(bl,dia,alts[1].id,i)]; return x && (x.ok || x.r || x.c); }) ? 1 : 0;
 }
@@ -2898,6 +2933,23 @@ const nombreEf = (bl, dia, f) => { const a = alternativasDe(f); return a ? a[alt
 function eligeAlt(bl, dia, n, i){ LOG[idAlt(bl,dia,n)] = {alt:i}; LS.set('log', LOG); pinta(); }
 
 function ejercicio(bl,dia,f){
+  const ops = cardioOpciones(f), origNom = f['EJERCICIO / ELEMENTO'] || '';
+  if(ops && !soloLectura()){
+    const orig = f['EJERCICIO / ELEMENTO'] || '', al = alternativasDe(f), A = `'${esc(bl)}','${esc(dia)}'`;
+    const cab = `<div class="h"><div><div class="nm">${esc(orig)}</div>${f['REPS / DOSIS']?`<div class="ds">${esc(f['REPS / DOSIS'])}${f['RIR / RPE']?' · '+esc(f['RIR / RPE']):''}</div>`:''}</div></div>`;
+    if(saltado(bl,dia,orig)) return `<div class="ej">${cab}
+      <div class="saltado">⊘ ${tr("Hoy sin cardio: lo importante eran las pesas.")}
+        <button onclick="quitaSalto(${A},'${esc(orig)}')">${tr("Deshacer")}</button></div></div>`;
+    if(!cardioSi(bl,dia,f)) return `<div class="ej">${cab}
+      <div class="calent" style="margin:8px 0"><b>${tr("¿Te da tiempo de hacer")} ${esc(f['REPS / DOSIS'] || '20 min')} ${tr("de cardio?")}</b></div>
+      <div class="alt" role="group"><button onclick="cardioSiNo(${A},'${esc(al[0].id)}','${esc(orig)}',1)">${tr("Sí")}</button>
+        <button onclick="cardioSiNo(${A},'${esc(al[0].id)}','${esc(orig)}',0)">${tr("No")}</button></div></div>`;
+    if(!cardioElegido(bl,dia,f)) return `<div class="ej">${cab}
+      <div class="alt" role="group" aria-label="${tr('Qué cardio haces')}"><span class="sm">${tr('¿Cuál haces?')}</span>${al.map((x,i)=>`<button
+        onclick="eligeAlt(${A},'${esc(al[0].id)}',${i})">${esc(tr(x.txt))}</button>`).join('')}</div>
+      ${f.CUES?`<div class="cue">${pintaCue(f.CUES)}</div>`:''}
+      <div class="nohecho"><button onclick="salta(${A},'${esc(orig)}')">⊘ ${tr("Al final no me da tiempo")}</button></div></div>`;
+  }
   const alts = soloLectura() ? null : alternativasDe(f), elegida = alts ? altElegida(bl,dia,f) : 0;
   const botonesAlt = alts ? `<div class="alt" role="group" aria-label="${tr('Qué ejercicio haces')}">
       <span class="sm">${tr('Hoy haces')}</span>${alts.map((x,i)=>`<button class="${i===elegida?'on':''}" aria-pressed="${i===elegida}"
@@ -3036,7 +3088,7 @@ function ejercicio(bl,dia,f){
            title="${esc(nombre)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
          <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
       : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
-      : ((series>0 || campos.length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
+      : ((series>0 || campos.length) && ['running','evento','descanso','info','cardio'].indexOf(norm(f.TIPO))<0
         ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
         : '')}
     ${/* v4.8: antes esto se decidia por el TIPO, y solo valia "fuerza" e
@@ -3050,7 +3102,7 @@ function ejercicio(bl,dia,f){
       return sal
         ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
              <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
-        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`;
+        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(ops ? origNom : nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`;
     })()}</div>`;
 }
 /* v5.3 ponia "toca aqui" al final de estas lineas porque no se veia que eran
@@ -3130,7 +3182,7 @@ function bloqueVideo(bl, dia, nombre, f){
   /* v4.7: en una sesion de carrera no se pide video. Nadie se graba a si mismo
      en mitad de una tirada de 22 km, y ahi lo util es la foto del reloj, que va
      aparte. El video es para la tecnica de los ejercicios. */
-  if(norm(f.TIPO) === 'running') return '';
+  if(['running','cardio'].indexOf(norm(f.TIPO)) > -1) return '';
   if(esCalentamiento(f) && !pideVideo(f)) return '';
   const id = idVideo(bl, dia, nombre);
   const v = VID[id] || {};
@@ -3827,7 +3879,7 @@ function vProgreso(){
   // El nombre bonito lo tiene la hoja; el identificador va sin acentos.
   const nombres = {};
   (S.d.SESIONES||[]).forEach(f=>{ const n=f['EJERCICIO / ELEMENTO']; if(n) nombres[slug(n)] = n;
-    const a = alternativasDe(f); if(a) nombres[slug(a[1].id)] = a[1].id; });
+    const a = alternativasDe(f); if(a) a.forEach(x=>{ nombres[slug(x.id)] = x.id; }); });
   const nSes = Object.keys(sesiones).length;
   const vids = (S.d.MIS_VIDEOS||[]).length;
   const hayAlgo = series > 0 || nSes > 0;
@@ -3835,7 +3887,7 @@ function vProgreso(){
   /* v5.2: quien solo corre no veia nada suyo aqui. Su progreso no son las
      cargas: son los kilometros, el tiempo en pie y el ritmo que le sale. */
   const blSlug = slug(bl||'');
-  let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0, kmTot=0, sgTot=0;
+  let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0, kmTot=0, sgTot=0, sgOtro=0, sgOtroSem=0;
   Object.keys(LOG).forEach(k=>{
     const v = LOG[k];
     if(!v || !v.ok || v.borrada || !k.endsWith('~reg')) return;
@@ -3847,6 +3899,7 @@ function vProgreso(){
     const sg = (km && aSegundos(d.tiempo) && !ritmoCreible(d)) ? 0 : aSegundos(d.tiempo);
     if(!km && !sg) return;
     const p = k.split('~');
+    if(esCardioNoCorrer(p[3] || '')){ sgOtro += sg; if(p[0] === SEM()) sgOtroSem += sg; return; }   // v5.27
     if(km > masLarga) masLarga = km;
     kmTot+=km; sgTot+=sg;
     if(p[1] === blSlug){ kmBl+=km; sgBl+=sg; carrBl++; }
@@ -3857,16 +3910,20 @@ function vProgreso(){
                                  : Math.round(sg/60)+' min';
   const ritmoMedio = (km, sg) => { if(!km || !sg) return ''; const s=Math.round(sg/km);
     return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' '+tr('min/km'); };
-  const hayCarrera = kmBl>0 || sgBl>0;
+  const hayCarrera = kmTot>0 || sgTot>0;   // v5.27: al empezar semana sin nada anotado, la tarjeta seguia vacia
   // v5.25: si el bloque es esta misma semana, repetirlo no dice nada: va el programa entero.
   const blIgual = Math.abs(kmBl-kmSem) < 0.05 && sgBl === sgSem;
   const kmB = blIgual ? kmTot : kmBl, sgB = blIgual ? sgTot : sgBl;
   const rap = ritmosRapidos(4), masRap = rap.length ? rap.reduce((a,b)=>b.s<a.s?b:a) : null;
   const mmss = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
   const CMP = {rapido:'más rápido que el plan', plan:'en el plan', lento:'más lento que el plan'};
-  const tarjetaKm = hayCarrera ? `<div class="card"><h3 style="margin-bottom:10px">${tr("Tus kilómetros")}</h3>
+  const filaOtro = sgOtro ? `<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Bici y elíptica")}</span>
+      <b class="mono">${sgOtroSem && sgOtroSem !== sgOtro ? enHoras(sgOtroSem) + ' · ' + enHoras(sgOtro) + ' ' + tr("en total") : enHoras(sgOtro)}</b></div>` : '';
+  const tarjetaKm = !hayCarrera && sgOtro ? `<div class="card"><h3 style="margin-bottom:10px">${tr("Tu cardio")}</h3>${filaOtro}
+    <p class="sm" style="margin-top:8px">${tr("La bici y la elíptica van en minutos: no suman kilómetros ni cambian tu ritmo de carrera.")}</p></div>`
+    : hayCarrera ? `<div class="card"><h3 style="margin-bottom:10px">${tr("Tus kilómetros")}</h3>
     <div class="row sp"><span class="sm">${tr("Esta semana")}</span>
-      <b class="mono">${kmSem?unKm(kmSem)+' km':enHoras(sgSem)}</b></div>
+      <b class="mono">${kmSem?unKm(kmSem)+' km':sgSem?enHoras(sgSem):'0 km'}</b></div>
     <div class="row sp" style="margin-top:6px"><span class="sm">${tr(blIgual ? "En todo el programa" : "En este bloque")}</span>
       <b class="mono">${kmB?unKm(kmB)+' km':enHoras(sgB)}</b></div>
     ${sgB?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr(blIgual ? "Tiempo corriendo en el programa" : "Tiempo corriendo en el bloque")}</span>
@@ -3877,6 +3934,7 @@ function vProgreso(){
       <b class="mono">${ritmoMedio(kmBl,sgBl)}</b></div>`:''}
     ${masLarga?`<div class="row sp" style="margin-top:6px"><span class="sm">${tr("Tu tirada más larga")}</span>
       <b class="mono">${unKm(masLarga)} km</b></div>`:''}
+    ${filaOtro}
     ${rap.length?`<div class="lbl" style="margin-top:14px">${tr("Lo rápido de las últimas semanas")}</div>
     <ul class="rec-l">${rap.slice(0,5).map(r=>`<li><span>${enIngles()?'W':'S'}${r.sem} · ${esc(r.nom)}<br><small class="sm">${tr('plan')} ${r.plan.txt} · ${tr(CMP[r.cmp])}</small></span><b class="mono">${mmss(r.s)}</b></li>`).join('')}</ul>
     <p class="sm" style="margin-top:6px">${tr("Sólo los tramos rápidos (series, tempo, ritmo de maratón), no los rodajes: si un tramo no tiene tiempo anotado, no sale.")}</p>`:''}
