@@ -474,7 +474,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.25';
+const VERSION = 'v5.26';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1301,6 +1301,10 @@ function estacionesDe(f){
 }
 const esPorTiempo = d => /^\s*\d+([.,]\d+)?(\s*[-–]\s*\d+([.,]\d+)?)?\s*(''|"|s|seg|segundos|sec|min|minutos)\b/i.test(String(d||''));
 const esMovilidad = f => /movilidad|respiraci|estiramiento|mobility|stretch|breath|opener/.test(norm(f && f['EJERCICIO / ELEMENTO']));
+/* v5.26 (5 oct, Salvador): en las tarjetas de calentamiento y movilidad sobran el
+   «grabate» y el «esfuerzo X de 10». Se queda «Ver como se hace». */
+const esCalentamiento = f => esMovilidad(f) || ['movilidad','calentamiento'].indexOf(norm(f && f.TIPO)) > -1
+  || /calentamiento|warm-?up|activacion|activation/.test(norm(f && f['EJERCICIO / ELEMENTO']));
 /* una serie que se aguanta (plancha) en vez de contarse en repeticiones */
 const aguantePorTiempo = f => (parseInt(f && f.SERIES)||0) > 0 && !camposHoja(f).length
                               && !esCorrer(f) && esPorTiempo(f && f['REPS / DOSIS']) && !esMovilidad(f);
@@ -2930,10 +2934,11 @@ function ejercicio(bl,dia,f){
     f.FUEL?'Fuel: '+f.FUEL:''].filter(Boolean).join(' · ');
   /* v5.12: numeros grandes. En fuerza, "3 × 8-10" va en grande y el resto
      (RIR, tempo, descanso) en pequeno debajo. */
-  const cabDosis = series ? series+' × '+dosis : dosis;
+  const cabDosis = (series ? series+' × '+dosis : dosis)
+    .replace(esCalentamiento(f) ? /\s*·?\s*(esfuerzo|effort)\s+[\d\-–]+\s*(de|of)\s*10\b/gi : /$^/, '');
   const grande = series > 0 && !camposDe(f).length && cabDosis.length <= 24 ? cabDosis : '';
   const ds = [grande ? '' : cabDosis,
-    etiqueta(f['RIR / RPE'], esRitmo(f['RIR / RPE'])?tr('Ritmo'):'RIR'),
+    esCalentamiento(f) && /esfuerzo|effort|rpe/i.test(String(f['RIR / RPE']||'')) ? '' : etiqueta(f['RIR / RPE'], esRitmo(f['RIR / RPE'])?tr('Ritmo'):'RIR'),
     etiqueta(f.TEMPO, 'Tempo'), etiqueta(f.DESCANSO, tr('Descanso'))].filter(Boolean).join(' · ');
   const dg = grande ? `<div class="dg">${esc(grande)}</div>` : '';
   const eid = slug(nombre);
@@ -3126,6 +3131,7 @@ function bloqueVideo(bl, dia, nombre, f){
      en mitad de una tirada de 22 km, y ahi lo util es la foto del reloj, que va
      aparte. El video es para la tecnica de los ejercicios. */
   if(norm(f.TIPO) === 'running') return '';
+  if(esCalentamiento(f) && !pideVideo(f)) return '';
   const id = idVideo(bl, dia, nombre);
   const v = VID[id] || {};
   const serv = (S.d.MIS_VIDEOS||[]).find(x=>String(x.ID)===id) || {};
