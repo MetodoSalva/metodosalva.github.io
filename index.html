@@ -474,7 +474,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.27';
+const VERSION = 'v5.27.1';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1317,6 +1317,7 @@ function camposDe(f){
   let c = camposHoja(f);
   const nom = norm(f && f['EJERCICIO / ELEMENTO']);
   if(norm(f && f.TIPO) === 'cardio' && /^cardio . /.test(nom)) return ES_CARDIO_CORRER.test(nom) ? ['km','tiempo','rpe'] : ['tiempo','rpe'];
+  if(cardioOpciones(f)) return ['tiempo','rpe'];   // la fila sin elegir: se anota como registro, no como series ("elige")
   if(estacionesDe(f).length){ c = c.filter(k=>k!=='carga'); return c; }
   if(tipoHyrox(f) && c.length && EST_HYROX.test(nom)){        // una estacion sola
     const peso = EST_PESO.test(nom);
