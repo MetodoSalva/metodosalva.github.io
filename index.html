@@ -81,6 +81,13 @@ button,input,textarea,select{font:inherit;color:inherit}
 
 /* estructura */
 main{padding:16px 14px 96px;max-width:640px;margin:0 auto}
+/* v5.28: al deslizar, la pantalla entra por el lado que toca */
+@keyframes desdeIzq{from{transform:translateX(-28px);opacity:.35}to{transform:none;opacity:1}}
+@keyframes desdeDer{from{transform:translateX(28px);opacity:.35}to{transform:none;opacity:1}}
+main.desde-izq{animation:desdeIzq .2s ease-out}
+.atras-b{background:none;border:0;padding:4px 2px 10px;font:inherit;font-size:14.5px;font-weight:600;color:var(--verde);cursor:pointer}
+main.desde-der{animation:desdeDer .2s ease-out}
+@media(prefers-reduced-motion:reduce){main.desde-izq,main.desde-der{animation:none}}
 .card{background:var(--sup);border:1px solid var(--linea);border-radius:var(--r);padding:16px;margin-bottom:12px}
 .card.flat{background:none;border:0;padding:0}
 h2{font-family:var(--c);font-size:24px;font-weight:700;letter-spacing:-.005em;line-height:1.15;color:var(--tinta)}
@@ -474,7 +481,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.27.1';
+const VERSION = 'v5.28';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1905,11 +1912,81 @@ const icono = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 function nav(){
   const it = [['hoy','Hoy'],['plan','Mi plan'],['sesion','Registro'],['progreso','Progreso']];
   return `<nav>${it.map(([k,n])=>
-    `<button onclick="ir('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${icono(k)}</span>${tr(n)}</button>`).join('')}</nav>`;
+    `<button onclick="irTab('${k}')" ${S.vista===k?'aria-current="page"':''}><span class="g">${icono(k)}</span>${tr(n)}</button>`).join('')}</nav>`;
 }
+/* ---------- v5.28 (8 oct, Salvador): moverse con el dedo y volver a donde estabas ----------
+   «Dentro de un entreno, para volver a la semana tengo que ir a Hoy y bajar otra vez
+   hasta donde estaba; quiero deslizar de un lado a otro y volver a la misma altura.»
+   - Al entrar en algo (una sesión, una semana, Mensajes, Guías…) se guarda de dónde
+     se venía y a qué altura: S.pila. «Volver», deslizar hacia la derecha o el botón
+     atrás del móvil devuelven ahí, a la misma altura.
+   - En las cuatro pestañas de abajo, deslizar cambia de pestaña, y cada pestaña
+     recuerda su altura. Volver a tocar la pestaña en la que ya estás sube arriba. */
+const PESTANAS_NAV = ['hoy','plan','sesion','progreso'];
+S.pila = []; S.altura = {}; S.conHist = false;
+function entra(){
+  S.pila.push({vista:S.vista, mirando:S.mirando, dia:S.dia, y:window.scrollY});
+  if(S.pila.length > 30) S.pila.shift();
+  try{ history.pushState({salva:S.pila.length}, ''); S.conHist = true; }catch(e){ S.conHist = false; }
+}
+function deshaz(){
+  const e = S.pila.pop(); if(!e) return false;
+  S.vista = e.vista; S.mirando = e.mirando; S.dia = e.dia; S.video = null; S.listaSem = false; S.menu = false;
+  pinta(); anima('der'); window.scrollTo(0, e.y); requestAnimationFrame(()=>window.scrollTo(0, e.y));
+  return true;
+}
+window.addEventListener('popstate', ()=>{ deshaz(); });
+function atras(fb){
+  if(S.pila.length){ if(S.conHist) history.back(); else deshaz(); return; }
+  ir(fb || 'hoy');
+}
+// v5.28: arriba de una sesión abierta desde otra pantalla, para volver a donde estabas.
+const botonAtras = () => S.pila.length ? `<button class="atras-b" onclick="atras()">${tr('← Volver')}</button>` : '';
+function irTab(v){
+  if(S.vista === v && !S.pila.length && !S.mirando){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+  if(PESTANAS_NAV.indexOf(S.vista) > -1 && !S.pila.length) S.altura[S.vista] = window.scrollY;
+  S.pila = []; S.mirando = null; S.listaSem = false; S.menu = false;
+  S.vista = v; if(v!=='sesion') S.dia = null; S.video = null;
+  pinta(); const y = S.altura[v] || 0; window.scrollTo(0, y); requestAnimationFrame(()=>window.scrollTo(0, y));
+}
+function anima(dir){
+  const m = document.querySelector('main'); if(!m) return;
+  m.classList.remove('desde-izq','desde-der'); void m.offsetWidth;
+  m.classList.add(dir === 'der' ? 'desde-izq' : 'desde-der');
+}
+function desliza(dir){
+  if(S.menu || S.listaSem) return;
+  if(S.pila.length){ if(dir === 'der') atras(); return; }          // dentro de algo: a la derecha, volver
+  const i = PESTANAS_NAV.indexOf(S.vista);
+  if(i < 0){ if(dir === 'der') atras('hoy'); return; }
+  const j = i + (dir === 'izq' ? 1 : -1);
+  if(j < 0 || j >= PESTANAS_NAV.length) return;
+  irTab(PESTANAS_NAV[j]); anima(dir);
+}
+(function(){
+  let x0 = 0, y0 = 0, t0 = 0, vale = false;
+  const solo = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+  document.addEventListener('touchstart', e=>{
+    vale = false; if(e.touches.length !== 1) return;
+    const t = e.touches[0];
+    // Desde el borde, en el navegador, el móvil ya hace su «atrás»: no se pisa.
+    if(!solo() && (t.clientX < 24 || t.clientX > window.innerWidth - 24)) return;
+    if(e.target.closest && e.target.closest('input,textarea,select,.graf,.alt,.lista-sem,.menu,[data-sin-deslizar]')) return;
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); vale = true;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(!vale) return; vale = false;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    if(Date.now() - t0 > 700 || Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.55) return;
+    const sel = window.getSelection && String(window.getSelection()); if(sel) return;
+    desliza(dx > 0 ? 'der' : 'izq');
+  }, {passive:true});
+})();
 function ir(v){
   // Los cuatro botones de abajo son "el presente": al tocarlos se sale de la
   // semana que se estaba mirando.
+  if(PESTANAS_NAV.indexOf(v) > -1) S.pila = [];
+  else if(v !== 'semana' && v !== 'resumen' && S.vista !== v) entra();   // Mensajes, Guías…: se puede volver
   if(v!=='semana') S.mirando = null;
   S.listaSem = false;
   S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta();
@@ -1919,6 +1996,7 @@ function verSemana(num){
   const w = (S.d.SEMANAS||[]).find(x=>String(x.SEMANA)===String(num));
   if(!w) return;
   if(S.semana && String(w.SEMANA)===String(S.semana.SEMANA)){ ir('hoy'); return; }
+  if(S.vista !== 'semana') entra();                     // las flechas entre semanas no apilan
   S.mirando = w; S.dia = null; S.vista = 'semana'; S.video = null;
   window.scrollTo(0,0); pinta();
 }
@@ -2274,7 +2352,7 @@ function vSemana(){
     ${w['NOTA DE LA SEMANA']?`<div class="calent" style="margin-top:12px">${esc(w['NOTA DE LA SEMANA'])}</div>`:''}
   </div>
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Sus sesiones")}</h3>
-    <button class="btn sm2" onclick="ir('plan')">${tr("← Mi plan")}</button></div>
+    <button class="btn sm2" onclick="atras('plan')">${tr("← Mi plan")}</button></div>
     ${dias.map(x=>{
       const vacio = esDescanso(x) || !sesionDe(bl,x['DÍA']).length;
       return `<button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
@@ -2451,7 +2529,7 @@ function novedades(){
     <button class="btn pri big" style="margin-top:14px" onclick="LS.set('novedades', NOVEDADES); pinta()">${tr("Entendido")}</button></div>`;
 }
 function vNovedades(){
-  return `<div class="card flat"><button class="btn sm2" onclick="ir('hoy')">${tr("← Volver")}</button></div>
+  return `<div class="card flat"><button class="btn sm2" onclick="atras('hoy')">${tr("← Volver")}</button></div>
   <div class="card novedades"><h2 style="font-size:21px">${tr("Novedades")}</h2>${cuerpoNovedades()}</div>`;
 }
 
@@ -2740,6 +2818,7 @@ function actualizaBarra(){
    serie, para no arrastrar lo escrito en las demás.
    ===================================================== */
 function abrir(dia){
+  entra();
   S.dia=dia; S.vista='sesion'; S.video=null;
   const bl=bloqueDe(semanaVista());
   // En modo lectura no se marca nada: mirar una semana futura no es hacerla.
@@ -2761,7 +2840,7 @@ function vSesion(){
       <h2 style="margin-top:6px">${esc(partir(meta['SESIÓN']||'Descanso').t)}</h2>
       <p class="mut" style="margin-top:8px">${tr("No hay nada que registrar hoy.")}</p></div>
       ${soloLectura()?'':bloqueExtra(bl, dia)}
-      <div class="card flat"><button class="btn big" onclick="ir('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`;
+      <div class="card flat"><button class="btn big" onclick="atras('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`;
   }
 
   const cal = filas.find(f=>parseInt(f.ORDEN)===0);
@@ -2777,7 +2856,7 @@ function vSesion(){
      siempre: ejercicio() se encarga de quitar lo que no toca. */
   if(soloLectura()){
     const w = semanaVista();
-    return `
+    return `${botonAtras()}
     <div class="card" style="border-color:var(--verde-s)">${cabeceraSesion(bl, dia)}
       <div class="row sp"><div class="lbl">${esc(dia)} · ${tr('Semana')} ${esc(w.SEMANA)}</div>
         <span class="sem verde"><i>◔</i>${tr("solo lectura")}</span></div>
@@ -2791,10 +2870,10 @@ function vSesion(){
     ${extras.length?`<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
       <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.</p></div>
       ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
-    <div class="card flat"><button class="btn big" onclick="ir('semana')">${tr("← Volver a la semana")}</button></div>`;
+    <div class="card flat"><button class="btn big" onclick="atras('semana')">${tr("← Volver a la semana")}</button></div>`;
   }
 
-  return `${corrigiendo() ? `<div class="aviso corrige"><b>${tr('Estás en la semana')} ${esc(numSem(S.mirando))}, ${tr('que ya pasó.')}</b>
+  return `${botonAtras()}${corrigiendo() ? `<div class="aviso corrige"><b>${tr('Estás en la semana')} ${esc(numSem(S.mirando))}, ${tr('que ya pasó.')}</b>
     <p class="sm" style="margin-top:4px">${tr('Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.')}</p></div>` : ''}
   <div class="card">${cabeceraSesion(bl, dia)}<div class="row sp">
       <div><div class="lbl">${esc(dia)}${modoLibre(bl)&&fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}</div>
@@ -2810,7 +2889,7 @@ function vSesion(){
   ${est==='hecha'&&!omitida?`<div class="yahecha">
     <b>${tr("Esta sesión ya está registrada")}${fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}.</b>
     <p class="mut" style="margin-top:6px;font-size:14px">${tr("No hace falta que la repitas. Si te equivocaste al anotar algo, corrígelo aquí y vuelve a enviar.")}</p>
-    <button class="btn sm2" style="margin-top:10px" onclick="ir('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`:''}
+    <button class="btn sm2" style="margin-top:10px" onclick="atras('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`:''}
   ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
     <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
   ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
@@ -3589,7 +3668,7 @@ async function enviar(opc){
     if(opc.auto){
       if(!opc.salir && document.visibilityState !== 'hidden') toast(tr('Enviado. Salvador ya lo tiene.'));
     } else {
-      S.vista = S.resumen ? 'resumen' : 'hoy'; window.scrollTo(0,0); pinta();
+      S.pila = []; S.vista = S.resumen ? 'resumen' : 'hoy'; window.scrollTo(0,0); pinta();
       const c = d.corregidas||0;
       toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}` : tr('Enviado. Salvador ya lo tiene.'));
     }
@@ -4085,7 +4164,7 @@ function avisoFotos(){
   </div>`;
 }
 function vFotos(){
-  const volver = `<div class="card flat"><button class="btn sm2" onclick="ir('hoy')">${tr("← Volver")}</button></div>`;
+  const volver = `<div class="card flat"><button class="btn sm2" onclick="atras('hoy')">${tr("← Volver")}</button></div>`;
   if(!fotosActivas()) return volver;
   const cab = `<div class="card"><h2 style="font-size:19px">${tr("Fotos de progreso")}</h2>`;
   if(LS.get('fotos_no', false)) return volver + `${cab}
@@ -4196,7 +4275,7 @@ function vGuias(){
   gs.forEach(g=>{ (grupos[g.CLAVE] = grupos[g.CLAVE] || {t:g['TÍTULO'], filas:[]}).filas.push(g); });
   const textos = (S.d.TEXTOS||[]).filter(t=>!norm(t.CLAVE).startsWith('intro') && !esAvisoSemana(t.CLAVE));
   return `
-  <div class="card flat"><button class="btn sm2" onclick="ir('plan')">${tr("← Mi plan")}</button></div>
+  <div class="card flat"><button class="btn sm2" onclick="atras('plan')">${tr("← Mi plan")}</button></div>
   ${Object.keys(grupos).map(k=>{
     const g = grupos[k];
     return `<div class="card"><h3 style="margin-bottom:12px">${esc(g.t)}</h3>
