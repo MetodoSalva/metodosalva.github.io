@@ -34,6 +34,9 @@ textarea{min-height:76px;margin-top:8px}
 .it .que{font-weight:600;margin-top:2px}
 .it .tx{margin-top:6px;white-space:pre-line}
 .it.hecho{opacity:.72}
+.reac{display:flex;gap:8px;margin-top:10px}
+.reac button{flex:1;font-size:22px;padding:8px 0;border:1px solid var(--linea);border-radius:12px;background:var(--sup2);cursor:pointer}
+.resp.emo{font-size:26px}
 .resp{margin-top:10px;border-left:3px solid var(--verde-c);padding-left:10px;color:var(--txt2);white-space:pre-line}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .fil{display:flex;gap:6px;margin:4px 0 12px}
@@ -130,32 +133,37 @@ function vCliente(){
           ${it.que ? `<div class="que">${esc(it.que)}</div>` : ''}
           <div class="tx">${esc(it.texto || '(sin texto)')}</div>
           ${it.enlace ? `<p style="margin:6px 0 0"><a href="${esc(it.enlace)}" target="_blank" rel="noopener">Ver el vídeo</a></p>` : ''}
-          ${resp[it.id] ? `<div class="resp">${esc(resp[it.id].TEXTO)}<div class="sm">${resp[it.id].LEIDO ? 'leído ' + esc(resp[it.id].LEIDO) : 'sin leer'}</div></div>`
+          ${resp[it.id] ? `<div class="resp ${REACCIONES.indexOf(String(resp[it.id].TEXTO).trim()) > -1 ? 'emo' : ''}">${esc(resp[it.id].TEXTO)}<div class="sm">${resp[it.id].LEIDO ? 'leído ' + esc(resp[it.id].LEIDO) : 'sin leer'}</div></div>`
             : (it.respuesta ? `<div class="resp">${esc(it.respuesta)}</div>` : '')}
-          ${it.respondido ? '' : `<textarea id="r_${n}" placeholder="Tu respuesta"></textarea>
+          ${it.respondido ? '' : `<div class="reac">${REACCIONES.map(e => `<button onclick="responder(${n}, '${e}')" aria-label="Reaccionar ${e}">${e}</button>`).join('')}</div>
+            <textarea id="r_${n}" placeholder="O escríbele"></textarea>
             <div class="row" style="margin-top:8px"><button class="btn pri" onclick="responder(${n})">Responder</button>
             ${S.filtro === 'pend' ? `<button class="btn" onclick="yaEsta(${n})">Ya está</button>` : ''}</div>`}
         </div>`).join('') : '<div class="card"><p class="mut">Nada sin responder.</p></div>')}`;
 }
-async function responder(n){
+/* 8 oct (Salvador): reaccionar con un toque en vez de escribir «¡sigue así!».
+   Se guarda como un mensaje de un solo emoji con su cita: la app de ella lo pinta
+   pequeno («Salva reacciono con 💪 a tu nota de…») y aqui cuenta como respondido. */
+const REACCIONES = ['❤️', '💪', '🔥'];
+async function responder(n, emo){
   const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
   const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
   const it = n === null ? null : items[n];
   const el = document.getElementById(n === null ? 'suelto' : 'r_' + n);
-  const tx = el ? el.value.trim() : ''; if(!tx){ toast('Escribe algo primero'); return; }
+  const tx = emo || (el ? el.value.trim() : ''); if(!tx){ toast('Escribe algo primero'); return; }
   const d = new Date(), p = x => String(x).padStart(2,'0');
   const m = { id: 'ms~' + d.getTime(), fecha: d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),
               de: 'salva', para: it ? it.id : '', texto: tx,
               cita: it ? (TIPO_CITA[it.tipo] || '') + (it.que ? ' · ' + it.que : '') + ' · ' + fecha(it.fecha) + '\n«' + String(it.texto || '').slice(0, 280) + '»' : '' };
-  el.disabled = true;
+  if(el) el.disabled = true;
   try{
     const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({cliente: c.cliente, token: S.k, mensajes: [m]})});
     const j = await r.json(); if(j.error) throw new Error(j.error);
     (c.mensajes = c.mensajes || []).push({ID: m.id, FECHA: m.fecha, DE: 'salva', PARA: m.para, CITA: m.cita, TEXTO: m.texto});
     if(it) it.respondido = true;
-    toast('Enviado. Lo verá en «Mensajes».'); pinta();
-  }catch(e){ el.disabled = false; toast('No se ha podido enviar: ' + (e.message || e)); }
+    toast(emo ? 'Reacción enviada ' + emo : 'Enviado. Lo verá en «Mensajes».'); pinta();
+  }catch(e){ if(el) el.disabled = false; toast('No se ha podido enviar: ' + (e.message || e)); }
 }
 function pinta(){
   const app = document.getElementById('app');

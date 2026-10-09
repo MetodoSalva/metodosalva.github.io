@@ -369,6 +369,11 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .msj .tx{font-size:15px;line-height:1.5}
 .msj .f{font-size:11.5px;color:var(--txt3);margin-top:6px}
 .aviso-msj{border-color:var(--verde-s)}
+.msj-reac{align-self:flex-start;display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--txt2);padding:2px 4px}
+.msj-reac .e{font-size:20px}
+.msj-reac .f{color:var(--txt3)}
+.reacs{margin:2px 0 6px}
+.reac-chip{display:inline-block;font-size:12.5px;padding:3px 9px;border-radius:999px;background:var(--verde-b);border:1px solid var(--verde-s);margin-right:6px}
 .menu .op .cuenta{margin-left:auto;margin-right:6px;background:var(--verde);color:#fff;border-radius:99px;font-size:12px;padding:1px 8px}
 .menu-b{position:relative}
 .menu-b .punto{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#E5484D;border:2px solid var(--verde)}
@@ -481,7 +486,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.28';
+const VERSION = 'v5.29';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -898,7 +903,7 @@ const EN = {
   "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
   "Tu sesión": "Your session",
   "Tu mejor serie de cada semana. Toca un punto para ver el dato.": "Your best set each week. Tap a point to see it.",
-  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Hoy haces": "Today you do", "de ayuda": "of assistance", "una banda más fina": "a lighter band", "sin ayuda": "no assistance", "En la asistida, menos ayuda es más difícil.": "On the assisted version, less assistance is harder.", "ayuda": "assist", "Con banda, deja el peso vacío y di en la nota qué banda usaste.": "With a band, leave the weight empty and say which band in the note.", "En la máquina asistida anota los kilos de AYUDA: cuantos menos, mejor.": "On the assisted machine, log the ASSISTANCE: the less, the better.", "Mensajes": "Messages", "Mensajes sin leer": "Unread messages", "Tienes un mensaje de Salva": "You have a message from Salva", "Tienes mensajes de Salva": "You have messages from Salva", "Leer": "Read", "Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.": "This is where I answer what you tell me in your exercise notes, your session comments and your check-in, and where I leave you notes. You can write to me too.", "Tú": "You", "enviando…": "sending…", "Todavía no hay mensajes.": "No messages yet.", "Escribir a Salva": "Write to Salva", "Una duda, cómo te ha ido, lo que quieras": "A question, how it went, anything", "Enviar": "Send", "Escribe algo primero.": "Write something first.", "Enviado. Salva lo verá.": "Sent. Salva will see it.", "No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.": "Could not send. It is saved: try again later.", "ene":"Jan","feb":"Feb","mar":"Mar","abr":"Apr","may":"May","jun":"Jun","jul":"Jul","ago":"Aug","sep":"Sep","oct":"Oct","nov":"Nov","dic":"Dec", "Con mancuernas, anota la suma de las dos: 2 × 10 kg son 20 kg.": "With dumbbells, log both added together: 2 × 10 kg is 20 kg.", "Qué ejercicio haces": "Which exercise you do", "se puede corregir": "can be corrected", "Estás en la semana": "You are in week", "que ya pasó.": "which has passed.", "Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.": "What you change here is corrected in that week. Tap Save and send when you finish.", "Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.": "This week has passed. If you logged something wrong or forgot a session, open it and fix it: it is saved in this week.", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
+  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Hoy haces": "Today you do", "de ayuda": "of assistance", "una banda más fina": "a lighter band", "sin ayuda": "no assistance", "En la asistida, menos ayuda es más difícil.": "On the assisted version, less assistance is harder.", "ayuda": "assist", "Con banda, deja el peso vacío y di en la nota qué banda usaste.": "With a band, leave the weight empty and say which band in the note.", "En la máquina asistida anota los kilos de AYUDA: cuantos menos, mejor.": "On the assisted machine, log the ASSISTANCE: the less, the better.", "Mensajes": "Messages", "Le gustó": "Liked it", "¡Bien hecho!": "Well done!", "¡Brutal!": "Brilliant!", "Salva reaccionó con": "Salva reacted with", "a tu nota de": "to your note on", "a lo que le contaste": "to what you told him", "Mensajes sin leer": "Unread messages", "Tienes un mensaje de Salva": "You have a message from Salva", "Tienes mensajes de Salva": "You have messages from Salva", "Leer": "Read", "Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.": "This is where I answer what you tell me in your exercise notes, your session comments and your check-in, and where I leave you notes. You can write to me too.", "Tú": "You", "enviando…": "sending…", "Todavía no hay mensajes.": "No messages yet.", "Escribir a Salva": "Write to Salva", "Una duda, cómo te ha ido, lo que quieras": "A question, how it went, anything", "Enviar": "Send", "Escribe algo primero.": "Write something first.", "Enviado. Salva lo verá.": "Sent. Salva will see it.", "No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.": "Could not send. It is saved: try again later.", "ene":"Jan","feb":"Feb","mar":"Mar","abr":"Apr","may":"May","jun":"Jun","jul":"Jul","ago":"Aug","sep":"Sep","oct":"Oct","nov":"Nov","dic":"Dec", "Con mancuernas, anota la suma de las dos: 2 × 10 kg son 20 kg.": "With dumbbells, log both added together: 2 × 10 kg is 20 kg.", "Qué ejercicio haces": "Which exercise you do", "se puede corregir": "can be corrected", "Estás en la semana": "You are in week", "que ya pasó.": "which has passed.", "Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.": "What you change here is corrected in that week. Tap Save and send when you finish.", "Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.": "This week has passed. If you logged something wrong or forgot a session, open it and fix it: it is saved in this week.", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
   "Récords de esta semana": "This week's records", "sesión anotada": "session logged", "sesiones anotadas": "sessions logged",
   "kilos movidos": "kilos lifted", "corridos": "run", "Seguimiento enviado": "Check-in sent", "Lo que mejoró": "What improved",
   "Sumar semanas así es lo que hace que el cambio llegue.": "Stacking weeks like this is what makes the change happen.",
@@ -2428,13 +2433,28 @@ function misMensajes(){
   const loc = LS.get('msj_mios', []).filter(m=>!srv.some(x=>x.ID===m.ID));
   return srv.concat(loc).sort((a,b)=>String(a.FECHA).localeCompare(String(b.FECHA)));
 }
+/* v5.29 (8 oct, Salvador): reacciones. En vez de contestar «¡sigue así!» a todo,
+   Salva toca ❤️ 💪 o 🔥 en su app (coach.html). Llega como un mensaje de un solo
+   emoji con su cita, y aqui se pinta pequeno: «Salva reaccionó con 💪 a tu nota
+   de Sentadilla búlgara», y debajo de la nota del propio ejercicio. */
+const REAC = {'❤️':'Le gustó', '💪':'¡Bien hecho!', '🔥':'¡Brutal!'};
+const esReac = m => !!m && m.DE === 'salva' && !!REAC[String(m.TEXTO||'').trim()];
+const sobreReac = m => { const l = String(m.CITA||'').split('\n')[0].split(' · ');
+  return l.length > 2 ? l[1] : ''; };
+const textoReac = m => { const e = String(m.TEXTO).trim(), s = sobreReac(m);
+  return `${tr('Salva reaccionó con')} ${e} ${s ? tr('a tu nota de') + ' ' + s : tr('a lo que le contaste')}`; };
+const reacDe = id => misMensajes().filter(m=>esReac(m) && m.PARA === id).map(m=>
+  `<span class="reac-chip" title="${esc(tr(REAC[String(m.TEXTO).trim()]))}">${esc(String(m.TEXTO).trim())} Salva</span>`).join('');
 const noLeidos = () => { const l = LS.get('msj_leidos', {});
   return misMensajes().filter(m=>m.DE==='salva' && !m.LEIDO && !l[m.ID]); };
 function avisoMensajes(){
   const n = noLeidos().length; if(!n) return '';
   return `<div class="card aviso-msj"><div class="row sp" style="gap:10px;align-items:center">
-    <div><b>${tr(n === 1 ? 'Tienes un mensaje de Salva' : 'Tienes mensajes de Salva')}</b>
-      <p class="sm" style="margin-top:3px">${esc(String(noLeidos()[n-1].TEXTO||'').slice(0,90))}${String(noLeidos()[n-1].TEXTO||'').length>90?'…':''}</p></div>
+    <div>${noLeidos().every(esReac)
+        ? `<b>${esc(noLeidos().map(m=>String(m.TEXTO).trim()).join(' '))} ${tr(REAC[String(noLeidos()[n-1].TEXTO).trim()])}</b>
+           <p class="sm" style="margin-top:3px">${esc(textoReac(noLeidos()[n-1]))}</p>`
+        : `<b>${tr(n === 1 ? 'Tienes un mensaje de Salva' : 'Tienes mensajes de Salva')}</b>
+      <p class="sm" style="margin-top:3px">${esc(String(noLeidos()[n-1].TEXTO||'').slice(0,90))}${String(noLeidos()[n-1].TEXTO||'').length>90?'…':''}</p>`}</div>
     <button class="btn sm2" onclick="ir('mensajes')">${tr('Leer')}</button></div></div>`;
 }
 const fechaMsj = f => { const m = String(f||'').match(/^(\d{4})-(\d\d)-(\d\d)(?:\s+(\d\d:\d\d))?/);
@@ -2444,7 +2464,8 @@ function vMensajes(){
   setTimeout(marcaLeidos, 400);
   return `<div class="card flat"><h2 style="font-size:20px">${tr('Mensajes')}</h2>
     <p class="sm" style="margin-top:4px">${tr('Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.')}</p></div>
-  ${ms.length ? `<div class="msjs">${ms.map(m=>`<div class="msj ${m.DE==='salva'?'salva':'mio'}">
+  ${ms.length ? `<div class="msjs">${ms.map(m=> esReac(m) ? `<div class="msj-reac"><span class="e">${esc(String(m.TEXTO).trim())}</span>
+      <span>${esc(textoReac(m))}<span class="f"> · ${esc(fechaMsj(m.FECHA))}</span></span></div>` : `<div class="msj ${m.DE==='salva'?'salva':'mio'}">
       ${m.CITA ? `<div class="cita">${esc(m.CITA)}</div>` : ''}
       <div class="tx">${esc(m.TEXTO||'').replace(/\n/g,'<br>')}</div>
       <div class="f">${m.DE==='salva' ? 'Salva' : tr('Tú')} · ${esc(fechaMsj(m.FECHA))}${m.pendiente ? ' · ' + tr('enviando…') : ''}</div></div>`).join('')}</div>`
@@ -3155,6 +3176,7 @@ function ejercicio(bl,dia,f){
       const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
       return `<div class="notaej">
+        ${reacDe(idn) ? `<div class="reacs">${reacDe(idn)}</div>` : ''}
         ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tr("¿Algo que contarme de este ejercicio?")}</button>`}
         ${bloqueVideo(bl,dia,nombre,f)}${bloqueFoto(bl,dia,nombre,f)}
         ${ab?`<button class="abrir con" onclick="cerrarNota()">💬 ${tr("Tu nota para Salva")}</button>
