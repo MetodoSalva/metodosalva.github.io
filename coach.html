@@ -144,7 +144,7 @@ function vCliente(){
 /* 8 oct (Salvador): reaccionar con un toque en vez de escribir «¡sigue así!».
    Se guarda como un mensaje de un solo emoji con su cita: la app de ella lo pinta
    pequeno («Salva reacciono con 💪 a tu nota de…») y aqui cuenta como respondido. */
-const REACCIONES = ['❤️', '💪', '🔥'];
+const REACCIONES = ['❤️', '💪', '🔥', '😂'];
 async function responder(n, emo){
   const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
   const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
