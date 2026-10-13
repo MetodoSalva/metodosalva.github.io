@@ -238,6 +238,8 @@ nav .g svg{width:22px;height:22px;display:block}
 .vid{position:relative;width:100%;background:#000;border-radius:10px;overflow:hidden;margin:0 14px 12px;width:calc(100% - 28px)}
 .vid iframe{width:100%;aspect-ratio:9/16;max-height:60vh;display:block;border:0}
 .vid.h iframe{aspect-ratio:16/9}
+.verejs{display:flex;flex-direction:column;align-items:flex-start}
+.verejs .verej{margin-bottom:8px}
 .verej{background:none;border:1px solid var(--linea2);border-radius:8px;padding:7px 12px;font-size:13px;
   font-weight:600;color:var(--verde);cursor:pointer;margin:0 14px 12px;display:inline-flex;gap:6px;
   align-items:center;text-decoration:none}
@@ -490,7 +492,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.30';
+const VERSION = 'v5.31';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -3111,7 +3113,7 @@ function ejercicio(bl,dia,f){
         ${extra?`<div class="ds">${esc(extra)}</div>`:''}</div></div>
       ${cues?`<div class="cue">${pintaCue(conVAM(cues))}</div>`:''}
       ${!vid2 && (series || camposDe(f).length) && ['running','evento','descanso','info'].indexOf(norm(f.TIPO))<0
-        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
+        ? botonesBusqueda(nombre)
         : ''}</div>`;
   }
 
@@ -3195,7 +3197,7 @@ function ejercicio(bl,dia,f){
          <button class="verej" onclick="verVideo(null)">${tr("Ocultar vídeo")}</button>`
       : `<button class="verej" onclick="verVideo('${eid}')">▶ ${tr("Ver ejercicio")}</button>`)
       : ((series>0 || campos.length) && ['running','evento','descanso','info','cardio'].indexOf(norm(f.TIPO))<0
-        ? `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`
+        ? botonesBusqueda(nombre)
         : '')}
     ${/* v4.8: antes esto se decidia por el TIPO, y solo valia "fuerza" e
          "hibrido". Pero un face pull marcado como "extra" sigue siendo un
@@ -3234,6 +3236,25 @@ function quitaSalto(bl, dia, ej){
    boton lleva a una busqueda en YouTube con el nombre del ejercicio ya
    escrito. Asi nadie tiene que copiar el nombre y buscarlo a mano.
    En cuanto haya vídeo propio en la pestaña EJERCICIOS, manda el suyo. */
+/* v5.31 (13 oct): en una superserie («Curl con mancuernas + extensión de
+   tríceps en polea») el buscador metía los dos nombres juntos y YouTube
+   devolvía de todo. Ahora sale un botón por ejercicio, con su nombre:
+   «Ver cómo se hace: Curl con mancuernas». Lo de «top set + back-off» es un
+   solo ejercicio y no se parte. */
+function partesBusqueda(nombre){
+  const n = String(nombre||'');
+  if(/top set|back-?off|\+\s*\d+\s*series/i.test(n)) return [n];
+  const sin = n.replace(/^[^:+]{0,40}:\s*/, '');      // «Superserie abs: », «Superset: »
+  const p = sin.split(/\s+\+\s+/).map(x => x.trim()).filter(Boolean);
+  return p.length > 1 ? p.map(x => x.charAt(0).toUpperCase() + x.slice(1)) : [n];
+}
+function botonesBusqueda(nombre){
+  const p = partesBusqueda(nombre);
+  if(p.length === 1)
+    return `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`;
+  return `<div class="verejs">${p.map(x =>
+    `<a class="verej" href="${esc(buscarYoutube(x))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}: ${esc(x)}</a>`).join('')}</div>`;
+}
 function buscarYoutube(nombre){
   const limpio = String(nombre||'').replace(/\([^)]*\)/g,' ')   // quita "(o prensa)"
                                    .replace(/[\/→>|]+/g,' ')
