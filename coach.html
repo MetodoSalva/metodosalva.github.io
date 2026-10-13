@@ -72,17 +72,44 @@ const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov'
 const fecha = f => { const m = String(f||'').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? (+m[3]) + ' ' + MESES[+m[2]-1] : String(f||''); };
 function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
 
+/* 13 oct: con 20 clientes, la bandeja entera en una sola peticion tardaba mas de
+   un minuto y el iPhone cortaba («Load failed»). Ahora se pide clienta a clienta,
+   todas a la vez (unos segundos). La lista de clientas sale de la ultima lectura;
+   una vez al dia, y si no hay lista, se pide tambien la bandeja entera por detras
+   para enterarse de las altas nuevas. */
+const CLIENTAS_BASE = ['alexia','sergio','carlos','justine','diana','carmen','ben','ignacio','smi','ana','paula',
+  'sergiol','elena','stephanie','jorge','madelina','juanpablo','anaperez','justo','salva'];
+const limpia = c => { c.items = (c.items || []).filter(i => !/^fotos~/.test(i.id) && !/prueba/i.test(i.id)); return c; };
+async function pide(extra){
+  const r = await fetch(API + '?bandeja=1&dias=30&k=' + encodeURIComponent(S.k) + extra);
+  const j = await r.json(); if(j.error) throw new Error(j.error);
+  return (j.BANDEJA || []).map(limpia);
+}
+function guarda(){ LS.set('cache', {t: Date.now(), d: S.datos}); }
 async function cargar(){
   S.cargando = true; S.err = ''; pinta();
-  try{
-    const r = await fetch(API + '?bandeja=1&dias=30&k=' + encodeURIComponent(S.k));
-    const j = await r.json();
-    if(j.error) throw new Error(j.error);
-    // fuera las fotos de progreso (privadas, no se responden) y las filas de prueba
-    j.BANDEJA.forEach(c => { c.items = (c.items || []).filter(i => !/^fotos~/.test(i.id) && !/prueba/i.test(i.id)); });
-    S.datos = j.BANDEJA; LS.set('cache', {t: Date.now(), d: j.BANDEJA});
-  }catch(e){ S.err = String(e.message || e); }
+  const ids = Array.from(new Set((S.datos || []).map(c => c.cliente).concat(CLIENTAS_BASE)));
+  const res = await Promise.all(ids.map(id => pide('&cliente=' + encodeURIComponent(id)).then(d => d, e => ({error: e}))));
+  const nuevos = [], fallos = [], idsFallo = {};
+  res.forEach((r, n) => { if(r.error){ fallos.push(String(r.error.message || r.error)); idsFallo[ids[n]] = 1; } else nuevos.push(...r); });
+  if(nuevos.length){
+    // las que han fallado se quedan con lo de la ultima vez
+    const viejas = (S.datos || []).filter(c => idsFallo[c.cliente]);
+    S.datos = nuevos.concat(viejas);
+    guarda();
+  } else S.err = fallos[0] || 'sin respuesta';
+  if(fallos.length && nuevos.length) toast('No se pudieron leer ' + fallos.length + ' clientas; reintenta en un rato');
   S.cargando = false; pinta();
+  if(!nuevos.length) return;
+  const ult = LS.get('entera', 0);
+  if(Date.now() - ult > 86400000){
+    pide('').then(d => {
+      LS.set('entera', Date.now());
+      const hay = {}; S.datos.forEach(c => { hay[c.cliente] = 1; });
+      const altas = d.filter(c => !hay[c.cliente]);
+      if(altas.length){ S.datos = S.datos.concat(altas); guarda(); pinta(); }
+    }, () => {});
+  }
 }
 /* «Ya está»: visto sin escribirle (lo trataste por WhatsApp, o no pide respuesta). Se guarda en este movil. */
 const vistos = () => LS.get('vistos', {});
