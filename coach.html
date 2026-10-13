@@ -105,7 +105,7 @@ function vLista(){
   return `<div class="card"><div class="row" style="justify-content:space-between">
       <div><h2>Bandeja</h2><p class="sm">${total ? total + ' cosas sin responder' : 'Todo respondido'} · últimos 30 días</p></div>
       <button class="btn" onclick="cargar()">Actualizar</button></div></div>
-    ${ds.map((c,i)=>`<button class="cli" onclick="S.cliente='${esc(c.cliente)}'; S.filtro='pend'; pinta(); scrollTo(0,0)">
+    ${ds.map((c,i)=>`<button class="cli" onclick="abrirCliente('${esc(c.cliente)}')">
       <span><b>${esc(c.nombre || c.cliente)}</b>${c.error ? `<br><span class="sm">No se pudo leer: ${esc(c.error)}</span>` : ''}</span>
       <span class="badge ${pendientes(c) ? '' : 'ok'}">${pendientes(c) || '✓'}</span></button>`).join('')}`;
 }
@@ -114,7 +114,7 @@ function vCliente(){
   const resp = {}; (c.mensajes || []).forEach(m => { if(m.DE === 'salva' && m.PARA) resp[m.PARA] = m; });
   const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
   const hist = (c.mensajes || []).slice().sort((a,b)=>String(b.FECHA).localeCompare(String(a.FECHA)));
-  return `<div class="row" style="margin-bottom:10px"><button class="btn" onclick="S.cliente=null; pinta()">← Bandeja</button>
+  return `<div class="row" style="margin-bottom:10px"><button class="btn" onclick="volverLista()">← Bandeja</button>
       <h2 style="margin:0 0 0 6px">${esc(c.nombre || c.cliente)}</h2></div>
     <div class="card"><b>Aviso suelto</b><p class="sm">Le aparece en su app como mensaje tuyo, sin cita.</p>
       <textarea id="suelto" placeholder="Por ejemplo: estás anotando mal el RIR…"></textarea>
@@ -174,6 +174,31 @@ function pinta(){
     <button class="btn" onclick="S.k=''; LS.set('k',''); pinta()">Cambiar la clave</button></div></div>`; return; }
   app.innerHTML = (S.cargando ? '<p class="sm">Actualizando…</p>' : '') + (S.cliente ? vCliente() : vLista());
 }
+/* 13 oct (Salvador): dentro de una clienta, deslizar el dedo de lado vuelve a la
+   bandeja, a la misma altura en la que estaba. Tambien el gesto de atras del movil. */
+function abrirCliente(id){
+  S.yLista = scrollY; S.cliente = id; S.filtro = 'pend';
+  try{ history.pushState({c: id}, ''); }catch(e){}
+  pinta(); scrollTo(0, 0);
+}
+function volverLista(desdeHistoria){
+  if(!S.cliente) return;
+  if(!desdeHistoria && history.state && history.state.c){ history.back(); return; }
+  S.cliente = null; pinta(); scrollTo(0, S.yLista || 0);
+}
+addEventListener('popstate', () => volverLista(true));
+let toque = null;
+addEventListener('touchstart', e => {
+  const t = e.target;
+  toque = (!S.cliente || e.touches.length > 1 || /^(TEXTAREA|INPUT)$/.test(t.tagName)) ? null
+        : {x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now()};
+}, {passive: true});
+addEventListener('touchend', e => {
+  if(!toque) return;
+  const dx = e.changedTouches[0].clientX - toque.x, dy = e.changedTouches[0].clientY - toque.y;
+  const lento = Date.now() - toque.t > 800; toque = null;
+  if(!lento && Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) volverLista();
+}, {passive: true});
 const cache = LS.get('cache', null);
 if(cache && cache.d) S.datos = cache.d;
 pinta();
