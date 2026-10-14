@@ -336,6 +336,8 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .menu-b{width:38px;height:38px;border-radius:10px;border:1px solid rgba(246,243,238,.28);background:rgba(246,243,238,.12);
   color:var(--sobre);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
 .menu-b svg{width:20px;height:20px}
+.menu-b.gira svg{animation:gira 0.9s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
 .menu-fondo{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:45}
 .menu{position:fixed;top:calc(env(safe-area-inset-top) + 64px);right:12px;width:min(320px,calc(100vw - 24px));z-index:46;
   background:var(--sup);border:1px solid var(--linea);border-radius:14px;box-shadow:0 18px 40px -12px rgba(0,0,0,.45);
@@ -492,7 +494,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.31';
+const VERSION = 'v5.32';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -901,7 +903,7 @@ const EN = {
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
-  "Menú": "Menu", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
+  "Menú": "Menu", "Actualizar": "Refresh", "Plan actualizado": "Plan updated", "Sin conexión: sigue tu plan guardado": "No connection: showing your saved plan", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
   "Elige cómo quieres verla: clara, oscura o automática (sigue a tu móvil). Lo tienes aquí abajo y en el menú ☰ de arriba a la derecha.": "Choose how you want it to look: light, dark or automatic (follows your phone). It's right below, and in the ☰ menu at the top right.",
   "En cada sesión, una barra arriba te dice cuánto llevas, y un dibujo te enseña qué músculos trabajas.": "In every session a bar at the top shows how far you've got, and a drawing shows which muscles you work.",
   "¿No sabes qué poner en el RIR? Toca el ¿? junto a la casilla.": "Not sure what to put in RIR? Tap the ? next to the box.",
@@ -1758,6 +1760,26 @@ function faltaCheckin(){
 }
 
 /* ---------- carga ---------- */
+/* v5.32 (14 oct, Salvador): boton de actualizar arriba. La app ya se pone al
+   dia sola al abrirla, pero si estaba abierta de antes y vuelven a ella no
+   recarga. Esto baja el plan otra vez y, si hay una version nueva de la app,
+   recarga la pagina (lo anotado esta guardado en el movil y se manda antes). */
+async function actualizar(){
+  if(S.actualizando) return;
+  S.actualizando = true; pinta();
+  try{ const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if(reg) reg.update(); }catch(e){}
+  let nueva = false;
+  try{
+    const t = await (await fetch('./?v=' + Date.now(), {cache:'no-store'})).text();
+    const m = t.match(/const VERSION = '([^']+)'/);
+    nueva = !!(m && m[1] !== VERSION);
+  }catch(e){}
+  if(nueva){ try{ enviarAlSalir(); }catch(e){} setTimeout(()=>location.reload(), 400); return; }
+  const antes = S.d;
+  await cargar();
+  S.actualizando = false; pinta();
+  toast(S.d && S.d !== antes && !S.cache ? tr('Plan actualizado') : tr('Sin conexión: sigue tu plan guardado'));
+}
 async function cargar(){
   if(!CID || !KEY){ S.err=tr('Te falta parte del enlace. Abre entero el que te mandó Salva.'); pinta(); return; }
   if(!S.d){
@@ -1908,6 +1930,8 @@ function cabecera(){
         return `<button class="pill pill-b" onclick="abreSemanas()" aria-haspopup="listbox" aria-expanded="${S.listaSem}"
           aria-label="${tr('Elegir semana')}">${esPrep(w) ? tr('Semana de preparación')
           : tr('Semana')+' '+esc(numSem(w))+' '+(enIngles()?'of':'de')+' '+semanasReales().length}<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></button>`; })():''}
+      <button class="menu-b act${S.actualizando ? ' gira' : ''}" onclick="actualizar()" aria-label="${tr('Actualizar')}" title="${tr('Actualizar')}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
       <button class="menu-b" onclick="abreMenu()" aria-label="${tr('Menú')}" aria-expanded="${S.menu}" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>${S.d && noLeidos().length ? '<i class="punto" aria-label="' + tr('Mensajes sin leer') + '"></i>' : ''}</button></div>
   </div>${S.cache?`<div style="font-size:11.5px;opacity:.8;margin-top:8px">${tr("Mostrando tu plan guardado · actualizando…")}</div>`:''}${barraSesion()}</div>`;
