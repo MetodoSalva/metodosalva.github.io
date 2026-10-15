@@ -494,7 +494,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.32';
+const VERSION = 'v5.33';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -903,7 +903,10 @@ const EN = {
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
-  "Menú": "Menu", "Actualizar": "Refresh", "Plan actualizado": "Plan updated", "Sin conexión: sigue tu plan guardado": "No connection: showing your saved plan", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
+  "Menú": "Menu", "Bloque terminado": "Block finished", "Has terminado tu bloque.": "You have finished your block.",
+  "Salva está preparando el siguiente. En cuanto lo suba aparecerá aquí: toca ↻ arriba para buscarlo.": "Salva is preparing the next one. As soon as he uploads it, it will show up here: tap ↻ at the top to check.",
+  "Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, cuéntaselo en Mensajes.": "Everything you did is still in My plan and Progress. If you train in the meantime, tell him in Messages.",
+  "Ver mi plan": "See my plan", "Escribir a Salva": "Write to Salva", "Actualizar": "Refresh", "Plan actualizado": "Plan updated", "Sin conexión: sigue tu plan guardado": "No connection: showing your saved plan", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
   "Elige cómo quieres verla: clara, oscura o automática (sigue a tu móvil). Lo tienes aquí abajo y en el menú ☰ de arriba a la derecha.": "Choose how you want it to look: light, dark or automatic (follows your phone). It's right below, and in the ☰ menu at the top right.",
   "En cada sesión, una barra arriba te dice cuánto llevas, y un dibujo te enseña qué músculos trabajas.": "In every session a bar at the top shows how far you've got, and a drawing shows which muscles you work.",
   "¿No sabes qué poner en el RIR? Toca el ¿? junto a la casilla.": "Not sure what to put in RIR? Tap the ? next to the box.",
@@ -2154,7 +2157,29 @@ function avisoCheckin(){
 }
 
 /* ---------- HOY ---------- */
+/* v5.33 (15 oct): cuando se acaba el bloque la app se quedaba en la ultima
+   semana para siempre, y lo que se anotaba encima PISABA lo de esa semana
+   (mismo identificador). Ahora, pasada la ultima semana, Hoy no ofrece
+   ninguna sesion: avisa de que el bloque ha terminado. Lo anterior se puede
+   seguir mirando y corrigiendo en Mi plan, como cualquier semana pasada. */
+function finBloque(){
+  const ss = semanasReales(); const ult = ss[ss.length-1];
+  const ini = ult && fechaIni(ult.FECHAS); if(!ini) return false;
+  const fin = new Date(ini); fin.setDate(fin.getDate() + 7);
+  const h = new Date(); h.setHours(0,0,0,0);
+  return h >= fin;
+}
+function vFinBloque(){
+  return `<div class="card"><div class="lbl">${tr('Bloque terminado')}</div>
+    <h2 style="margin-top:6px">${tr('Has terminado tu bloque.')}</h2>
+    <p class="mut" style="margin-top:8px">${tr('Salva está preparando el siguiente. En cuanto lo suba aparecerá aquí: toca ↻ arriba para buscarlo.')}</p>
+    <p class="mut" style="margin-top:8px">${tr('Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, cuéntaselo en Mensajes.')}</p>
+    <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn pri" onclick="irTab('plan')">${tr('Ver mi plan')}</button>
+      <button class="btn" onclick="irMenu('mensajes')">${tr('Escribir a Salva')}</button></div></div>`;
+}
 function vHoy(){
+  if(finBloque()) return avisoMensajes() + vFinBloque();
   const bl = bloqueDe(S.semana), d = diaDeHoy(bl);
   const hoyTxt = (enIngles() ? DIAS_EN : DIAS)[new Date().getDay()];
   const fase = S.semana ? (S.semana['FASE / TÍTULO']||'') : '';
@@ -3717,6 +3742,11 @@ async function enviar(opc){
     const d = await r.json();
     clearTimeout(reloj);
     if(d.error) throw new Error(d.error);
+    /* v5.33: antes se daba por bueno cualquier "ok". Ahora el puente tiene que
+       decir que ha escrito tantas filas como se mandaron; si no, nada se marca
+       como enviado y sale otra vez en el siguiente envio. */
+    if(!d.ok || ((d.nuevas||0) + (d.corregidas||0)) < reg.length + chk.length)
+      throw new Error('La hoja no ha recibido todo');
 
     // se conserva todo, marcado como enviado: así se puede corregir después
     Object.keys(foto).forEach(id=>{

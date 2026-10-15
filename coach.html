@@ -66,8 +66,8 @@ const LS = { get(k, d){ try{ const v = localStorage.getItem('coach_' + k); retur
              set(k, v){ try{ localStorage.setItem('coach_' + k, JSON.stringify(v)); }catch(e){} } };
 const S = { k: LS.get('k', ''), datos: null, cliente: null, cargando: false, filtro: 'pend', err: '' };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const TIPO = {nota:'Nota del ejercicio', sesion:'Comentario de la sesión', seguimiento:'Seguimiento', video:'Vídeo', mensaje:'Mensaje', extra:'Entreno extra'};
-const TIPO_CITA = {nota:'Tu nota', sesion:'Tu comentario de la sesión', seguimiento:'Tu seguimiento', video:'Tu vídeo', mensaje:'Tu mensaje', extra:'Tu entreno extra'};
+const TIPO = {nota:'Nota del ejercicio', sesion:'Comentario de la sesión', seguimiento:'Seguimiento', video:'Vídeo', foto:'Foto del reloj', mensaje:'Mensaje', extra:'Entreno extra'};
+const TIPO_CITA = {nota:'Tu nota', sesion:'Tu comentario de la sesión', seguimiento:'Tu seguimiento', video:'Tu vídeo', foto:'Tu foto del reloj', mensaje:'Tu mensaje', extra:'Tu entreno extra'};
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const fecha = f => { const m = String(f||'').match(/^(\d{4})-(\d\d)-(\d\d)/); return m ? (+m[3]) + ' ' + MESES[+m[2]-1] : String(f||''); };
 function toast(t){ const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(()=>d.remove(), 2600); }
@@ -113,7 +113,7 @@ async function cargar(){
 }
 /* «Ya está»: visto sin escribirle (lo trataste por WhatsApp, o no pide respuesta). Se guarda en este movil. */
 const vistos = () => LS.get('vistos', {});
-const pendItems = c => (c.items || []).filter(i => !i.respondido && !(i.tipo === 'video' && i.respuesta) && !vistos()[c.cliente + '|' + i.id]);
+const pendItems = c => (c.items || []).filter(i => !i.respondido && !((i.tipo === 'video' || i.tipo === 'foto') && i.respuesta) && !vistos()[c.cliente + '|' + i.id]);
 function pendientes(c){ return pendItems(c).length; }
 function yaEsta(n){ const c = (S.datos || []).find(x => x.cliente === S.cliente); const it = pendItems(c)[n]; if(!it) return;
   const v = vistos(); v[c.cliente + '|' + it.id] = 1; LS.set('vistos', v); pinta(); }
@@ -159,7 +159,8 @@ function vCliente(){
           <div class="tipo">${esc(TIPO[it.tipo] || it.tipo)} · ${esc(fecha(it.fecha))}</div>
           ${it.que ? `<div class="que">${esc(it.que)}</div>` : ''}
           <div class="tx">${esc(it.texto || '(sin texto)')}</div>
-          ${it.enlace ? `<p style="margin:6px 0 0"><a href="${esc(it.enlace)}" target="_blank" rel="noopener">Ver el vídeo</a></p>` : ''}
+          ${it.tipo === 'foto' ? `<div id="f_${n}" style="margin:8px 0 0"><button class="btn" onclick="verFoto(${n})">Ver la foto aquí</button>${it.enlace ? ` <a href="${esc(it.enlace)}" target="_blank" rel="noopener">o en Drive</a>` : ''}</div>`
+            : (it.enlace ? `<p style="margin:6px 0 0"><a href="${esc(it.enlace)}" target="_blank" rel="noopener">Ver el vídeo</a></p>` : '')}
           ${resp[it.id] ? `<div class="resp ${REACCIONES.indexOf(String(resp[it.id].TEXTO).trim()) > -1 ? 'emo' : ''}">${esc(resp[it.id].TEXTO)}<div class="sm">${resp[it.id].LEIDO ? 'leído ' + esc(resp[it.id].LEIDO) : 'sin leer'}</div></div>`
             : (it.respuesta ? `<div class="resp">${esc(it.respuesta)}</div>` : '')}
           ${it.respondido ? '' : `<div class="reac">${REACCIONES.map(e => `<button onclick="responder(${n}, '${e}')" aria-label="Reaccionar ${e}">${e}</button>`).join('')}</div>
@@ -171,6 +172,19 @@ function vCliente(){
 /* 8 oct (Salvador): reaccionar con un toque en vez de escribir «¡sigue así!».
    Se guarda como un mensaje de un solo emoji con su cita: la app de ella lo pinta
    pequeno («Salva reacciono con 💪 a tu nota de…») y aqui cuenta como respondido. */
+/* 15 oct: las fotos del reloj se ven aqui dentro, sin abrir Drive (puente v4.12, ?archivo=). */
+async function verFoto(n){
+  const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
+  const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
+  const it = items[n], caja = document.getElementById('f_' + n); if(!it || !caja) return;
+  caja.innerHTML = '<p class="sm">Cargando la foto…</p>';
+  try{
+    const r = await fetch(API + '?archivo=' + encodeURIComponent(it.id) + '&cliente=' + encodeURIComponent(c.cliente) + '&k=' + encodeURIComponent(S.k));
+    const j = await r.json(); if(j.error) throw new Error(j.error);
+    const a = j.ARCHIVO; if(!a || !a.DATOS) throw new Error('no es una imagen');
+    caja.innerHTML = `<img src="data:${esc(a.MIME)};base64,${a.DATOS}" alt="Foto del reloj" style="width:100%;border-radius:10px">`;
+  }catch(e){ caja.innerHTML = `<p class="sm">No se ha podido cargar: ${esc(e.message || e)}</p>`; }
+}
 const REACCIONES = ['❤️', '💪', '🔥', '😂'];
 async function responder(n, emo){
   const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
