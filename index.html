@@ -494,7 +494,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.33';
+const VERSION = 'v5.34';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1333,10 +1333,22 @@ const esMovilidad = f => /movilidad|respiraci|estiramiento|mobility|stretch|brea
    «grabate» y el «esfuerzo X de 10». Se queda «Ver como se hace». */
 const esCalentamiento = f => esMovilidad(f) || ['movilidad','calentamiento'].indexOf(norm(f && f.TIPO)) > -1
   || /calentamiento|warm-?up|activacion|activation/.test(norm(f && f['EJERCICIO / ELEMENTO']));
-/* una serie que se aguanta (plancha) en vez de contarse en repeticiones */
-const aguantePorTiempo = f => (parseInt(f && f.SERIES)||0) > 0 && !camposHoja(f).length
-                              && !esCorrer(f) && esPorTiempo(f && f['REPS / DOSIS']) && !esMovilidad(f);
+/* una serie que se aguanta (plancha) en vez de contarse en repeticiones.
+   v5.34 (16 oct, Sergio A: «Reps y kgs no pega en este ejercicio. 24 sec, 25 sec,
+   26 sec»): los isometricos por nombre (colgarse, planchas, hollow...) se anotan
+   en tiempo por serie aunque la dosis diga «maximo» o la hoja ponga REGISTRO
+   «tiempo». Lo que se mueve (plancha con toques, caminando) no cuenta. */
+const ISOMETRICO = /colgar|colgado|dead hang|\bhang\b|plancha|plank|hollow|isometric|wall sit|bear hold|suitcase hold|\baguante\b/;
+const esIsometrico = f => { const n = norm(f && f['EJERCICIO / ELEMENTO']);
+  return ISOMETRICO.test(n) && !/toque|tap|caminando|walk|remo|row|jack/.test(n); };
+const aguantePorTiempo = f => {
+  if(!((parseInt(f && f.SERIES)||0) > 0) || esCorrer(f) || esMovilidad(f)) return false;
+  const c = camposHoja(f);
+  if(!c.length) return esPorTiempo(f && f['REPS / DOSIS']) || esIsometrico(f);
+  return esIsometrico(f) && c.every(k => k === 'tiempo' || k === 'rpe');
+};
 function camposDe(f){
+  if(aguantePorTiempo(f) && esIsometrico(f)) return [];   // v5.34: tiempo serie a serie, sin casilla de totales
   let c = camposHoja(f);
   const nom = norm(f && f['EJERCICIO / ELEMENTO']);
   if(norm(f && f.TIPO) === 'cardio' && /^cardio . /.test(nom)) return ES_CARDIO_CORRER.test(nom) ? ['km','tiempo','rpe'] : ['tiempo','rpe'];
