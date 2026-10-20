@@ -202,6 +202,13 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .escala button.on{border-color:var(--verde);background:var(--verde);color:var(--on-verde)}
 
 /* nav */
+.crono{position:fixed;left:10px;right:10px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:31;
+  background:#24533A;color:#fff;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.crono .t{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;flex:1}
+.crono .t small{display:block;font-size:11.5px;font-weight:600;opacity:.85;letter-spacing:.04em}
+.crono button{background:rgba(255,255,255,.16);color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+.crono.fin{background:#8A3B12}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--sup);border-top:1px solid var(--linea);
   display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:30}
 nav button{flex:1;background:none;border:0;padding:9px 2px 10px;display:flex;flex-direction:column;
@@ -494,7 +501,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.34';
+const VERSION = 'v5.36';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -903,7 +910,7 @@ const EN = {
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
-  "Menú": "Menu", "Bloque terminado": "Block finished", "Has terminado tu bloque.": "You have finished your block.",
+  "Menú": "Menu", "Descanso": "Rest", "¡A por la siguiente!": "Next set!", "Saltar": "Skip", "Cerrar": "Close", "Deja la pantalla encendida: con el móvil bloqueado el aviso no puede sonar.": "Keep the screen on: with the phone locked the alert cannot sound.", "Bloque terminado": "Block finished", "Has terminado tu bloque.": "You have finished your block.",
   "Salva está preparando el siguiente. En cuanto lo suba aparecerá aquí: toca ↻ arriba para buscarlo.": "Salva is preparing the next one. As soon as he uploads it, it will show up here: tap ↻ at the top to check.",
   "Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, cuéntaselo en Mensajes.": "Everything you did is still in My plan and Progress. If you train in the meantime, tell him in Messages.",
   "Ver mi plan": "See my plan", "Escribir a Salva": "Write to Salva", "Actualizar": "Refresh", "Plan actualizado": "Plan updated", "Sin conexión: sigue tu plan guardado": "No connection: showing your saved plan", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
@@ -914,7 +921,7 @@ const EN = {
   "Ojo con «cómo quedaron las piernas»: ahora 5 = frescas y 1 = destrozadas. Como en todo lo demás, 5 es siempre lo bueno.": "Heads-up on \"how your legs felt\": now 5 = fresh and 1 = very heavy. As everywhere else, 5 is always the good end.",
   "Tu sesión": "Your session",
   "Tu mejor serie de cada semana. Toca un punto para ver el dato.": "Your best set each week. Tap a point to see it.",
-  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Hoy haces": "Today you do", "de ayuda": "of assistance", "una banda más fina": "a lighter band", "sin ayuda": "no assistance", "En la asistida, menos ayuda es más difícil.": "On the assisted version, less assistance is harder.", "ayuda": "assist", "Con banda, deja el peso vacío y di en la nota qué banda usaste.": "With a band, leave the weight empty and say which band in the note.", "En la máquina asistida anota los kilos de AYUDA: cuantos menos, mejor.": "On the assisted machine, log the ASSISTANCE: the less, the better.", "Mensajes": "Messages", "Tus fotos de progreso": "Your progress photos", "tanda": "set", "tandas": "sets", "Frontales con frontales, laterales con laterales y posteriores con posteriores, de la más antigua a la más nueva.": "Front with front, side with side and back with back, oldest to newest.", "Comparar mis fotos": "Compare my photos", "Cargando tus fotos…": "Loading your photos…", "No se han podido cargar. Inténtalo otra vez con cobertura.": "Could not load them. Try again with signal.", "Todavía no hay fotos de esta postura.": "No photos of this pose yet.", "Desliza para ver las demás.": "Swipe to see the rest.", "Sólo las ves tú y Salva.": "Only you and Salva can see them.", "Frontal": "Front", "Lateral": "Side", "Posterior": "Back", "Le gustó": "Liked it", "¡Bien hecho!": "Well done!", "¡Brutal!": "Brilliant!", "Le hizo gracia": "Made him laugh", "Salva reaccionó con": "Salva reacted with", "a tu nota de": "to your note on", "a lo que le contaste": "to what you told him", "Mensajes sin leer": "Unread messages", "Tienes un mensaje de Salva": "You have a message from Salva", "Tienes mensajes de Salva": "You have messages from Salva", "Leer": "Read", "Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.": "This is where I answer what you tell me in your exercise notes, your session comments and your check-in, and where I leave you notes. You can write to me too.", "Tú": "You", "enviando…": "sending…", "Todavía no hay mensajes.": "No messages yet.", "Escribir a Salva": "Write to Salva", "Una duda, cómo te ha ido, lo que quieras": "A question, how it went, anything", "Enviar": "Send", "Escribe algo primero.": "Write something first.", "Enviado. Salva lo verá.": "Sent. Salva will see it.", "No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.": "Could not send. It is saved: try again later.", "ene":"Jan","feb":"Feb","mar":"Mar","abr":"Apr","may":"May","jun":"Jun","jul":"Jul","ago":"Aug","sep":"Sep","oct":"Oct","nov":"Nov","dic":"Dec", "Con mancuernas, anota la suma de las dos: 2 × 10 kg son 20 kg.": "With dumbbells, log both added together: 2 × 10 kg is 20 kg.", "Qué ejercicio haces": "Which exercise you do", "se puede corregir": "can be corrected", "Estás en la semana": "You are in week", "que ya pasó.": "which has passed.", "Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.": "What you change here is corrected in that week. Tap Save and send when you finish.", "Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.": "This week has passed. If you logged something wrong or forgot a session, open it and fix it: it is saved in this week.", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
+  "Ver menos": "Show fewer", "Ver todos": "Show all", "récord": "record", "Récord": "Record", "Km por semana": "Km per week", "Elegir semana": "Choose a week", "Hoy haces": "Today you do", "de ayuda": "of assistance", "una banda más fina": "a lighter band", "sin ayuda": "no assistance", "En la asistida, menos ayuda es más difícil.": "On the assisted version, less assistance is harder.", "ayuda": "assist", "Con banda, deja el peso vacío y di en la nota qué banda usaste.": "With a band, leave the weight empty and say which band in the note.", "En la máquina asistida anota los kilos de AYUDA: cuantos menos, mejor.": "On the assisted machine, log the ASSISTANCE: the less, the better.", "Mensajes": "Messages", "Tus fotos de progreso": "Your progress photos", "tanda": "set", "tandas": "sets", "Frontales con frontales, laterales con laterales y posteriores con posteriores, de la más antigua a la más nueva.": "Front with front, side with side and back with back, oldest to newest.", "Comparar mis fotos": "Compare my photos", "Cargando tus fotos…": "Loading your photos…", "No se han podido cargar. Inténtalo otra vez con cobertura.": "Could not load them. Try again with signal.", "Todavía no hay fotos de esta postura.": "No photos of this pose yet.", "Desliza para ver las demás.": "Swipe to see the rest.", "Sólo las ves tú y Salva.": "Only you and Salva can see them.", "Frontal": "Front", "Lateral": "Side", "Posterior": "Back", "Le gustó": "Liked it", "¡Bien hecho!": "Well done!", "¡Brutal!": "Brilliant!", "Le hizo gracia": "Made him laugh", "De acuerdo": "OK", "Lo siente": "He is sorry", "Salva reaccionó con": "Salva reacted with", "a tu nota de": "to your note on", "a lo que le contaste": "to what you told him", "Mensajes sin leer": "Unread messages", "Tienes un mensaje de Salva": "You have a message from Salva", "Tienes mensajes de Salva": "You have messages from Salva", "Leer": "Read", "Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.": "This is where I answer what you tell me in your exercise notes, your session comments and your check-in, and where I leave you notes. You can write to me too.", "Tú": "You", "enviando…": "sending…", "Todavía no hay mensajes.": "No messages yet.", "Escribir a Salva": "Write to Salva", "Una duda, cómo te ha ido, lo que quieras": "A question, how it went, anything", "Enviar": "Send", "Escribe algo primero.": "Write something first.", "Enviado. Salva lo verá.": "Sent. Salva will see it.", "No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.": "Could not send. It is saved: try again later.", "ene":"Jan","feb":"Feb","mar":"Mar","abr":"Apr","may":"May","jun":"Jun","jul":"Jul","ago":"Aug","sep":"Sep","oct":"Oct","nov":"Nov","dic":"Dec", "Con mancuernas, anota la suma de las dos: 2 × 10 kg son 20 kg.": "With dumbbells, log both added together: 2 × 10 kg is 20 kg.", "Qué ejercicio haces": "Which exercise you do", "se puede corregir": "can be corrected", "Estás en la semana": "You are in week", "que ya pasó.": "which has passed.", "Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.": "What you change here is corrected in that week. Tap Save and send when you finish.", "Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.": "This week has passed. If you logged something wrong or forgot a session, open it and fix it: it is saved in this week.", "Semana anterior": "Previous week", "Semana siguiente": "Next week", "Preparación": "Prep", "lo que has corrido": "what you ran", "el plan": "the plan", "plan": "plan", "de los": "of the", "del plan": "in the plan",
   "Récords de esta semana": "This week's records", "sesión anotada": "session logged", "sesiones anotadas": "sessions logged",
   "kilos movidos": "kilos lifted", "corridos": "run", "Seguimiento enviado": "Check-in sent", "Lo que mejoró": "What improved",
   "Sumar semanas así es lo que hace que el cambio llegue.": "Stacking weeks like this is what makes the change happen.",
@@ -1440,7 +1447,7 @@ function anotaEst(id, etq){
   LS.set('log', LOG);
 }
 
-function setsCorre(bl, dia, nombre, series, hayTotales){
+function setsCorre(bl, dia, nombre, series, hayTotales, desc){
   const base = slug(bl)+'~'+slug(dia)+'~'+slug(nombre);
   const ids = Array.from({length:series},(_,i)=>idSerie(bl,dia,nombre,i));
   const conDatos = ids.some(id=>{ const v=LOG[id]||{}; return v.t || v.e; });
@@ -1448,7 +1455,7 @@ function setsCorre(bl, dia, nombre, series, hayTotales){
   const filas = abierto ? `<div class="sets">${ids.map((id,i)=>{
       recordarNombre(id, nombre);
       const v = LOG[id] || {};
-      return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
+      return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${desc||0}" data-ultima="${i+1>=series?1:0}">
         <span class="i">${series>1?i+1:'·'}</span>
         <div class="hms">${(()=>{ const t = partesTiempo(v.t); const mm = t.h ? String(t.h*60 + +t.m) : t.m;
           return ['m','s'].map(q=>`<span><input inputmode="numeric" pattern="[0-9]*" maxlength="3"
@@ -1489,6 +1496,7 @@ function confirmarC(id){
   const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
   if(fila) fila.classList.toggle('ok', !!LOG[id].ok);
   if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+  if(LOG[id].ok) cronoTrasSerie(fila);
 }
 function vaciarC(id){
   const v = LOG[id] || {};
@@ -2504,7 +2512,7 @@ function misMensajes(){
    Salva toca ❤️ 💪 o 🔥 en su app (coach.html). Llega como un mensaje de un solo
    emoji con su cita, y aqui se pinta pequeno: «Salva reaccionó con 💪 a tu nota
    de Sentadilla búlgara», y debajo de la nota del propio ejercicio. */
-const REAC = {'❤️':'Le gustó', '💪':'¡Bien hecho!', '🔥':'¡Brutal!', '😂':'Le hizo gracia'};  // 😂 desde el 9 oct
+const REAC = {'❤️':'Le gustó', '💪':'¡Bien hecho!', '🔥':'¡Brutal!', '😂':'Le hizo gracia', '👍':'De acuerdo', '😢':'Lo siente'};  // 😂 desde el 9 oct; 👍 y 😢 desde el 20 oct
 const esReac = m => !!m && m.DE === 'salva' && !!REAC[String(m.TEXTO||'').trim()];
 const sobreReac = m => { const l = String(m.CITA||'').split('\n')[0].split(' · ');
   return l.length > 2 ? l[1] : ''; };
@@ -3201,7 +3209,7 @@ function ejercicio(bl,dia,f){
     /* v5.2: una carrera no se anota con kilos. Si son series o cuestas,
        cada una tiene su fila (tiempo y esfuerzo) y los totales van debajo;
        plegado, porque la mayoria de dias solo hace falta el total. */
-    sets = setsCorre(bl, dia, nombre, series, campos.length>0);
+    sets = setsCorre(bl, dia, nombre, series, campos.length>0, descansoSeg(f));
   }
   else if(series>0 && !campos.length){
     /* v5.22 (3 oct, Salvador): con mancuernas, la suma de las dos. Justine
@@ -3218,7 +3226,7 @@ function ejercicio(bl,dia,f){
       const id = idSerie(bl,dia,nombre,i);
       recordarNombre(id, nombre);
       const v = LOG[id] || {};
-      return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}">
+      return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${descansoSeg(f)}" data-ultima="${i+1>=series?1:0}">
         <span class="i">${i+1}${v.c && hayLibras() && (v.u||'kg') !== uni ? `<small>${v.u||'kg'}</small>` : ''}</span>
         <input inputmode="numeric" placeholder="reps" value="${esc(v.r||'')}" id="r_${id}"
           oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nombre)}">
@@ -3512,6 +3520,65 @@ function anota(id){
 }
 
 /* --- confirmar / desmarcar una serie, sin tocar el resto --- */
+/* ================= v5.35 · CRONOMETRO DE DESCANSO (D-198) =================
+   Lo pidio Ben (13 oct). El tiempo sale de la columna DESCANSO de cada fila
+   («90 s», «60-90 s» -> el de abajo, «2-3 min», «1:30»); sin numero, no hay
+   cronometro. Arranca solo al marcar una serie como hecha, menos en la ultima.
+   Se guarda la HORA DE FIN, no un contador: al volver de bloquear el movil
+   ensena el tiempo real. Con la pantalla bloqueada no puede sonar (la web no
+   deja). No manda nada a la hoja.
+   OCULTO hasta que Salvador lo apruebe: solo con &crono=1 en el enlace. */
+const CRONO_ON = (() => { try{ if(qs.get('crono')==='1') localStorage.setItem('crono','1');
+  if(qs.get('crono')==='0') localStorage.removeItem('crono'); return localStorage.getItem('crono')==='1'; }catch(e){ return false; } })();
+function descansoSeg(f){
+  const t = norm(f && f.DESCANSO); if(!t || /^(no\b|none|sin\b|-|—)/.test(t)) return 0;
+  const mmss = t.match(/(\d{1,2}):(\d{2})/); if(mmss) return (+mmss[1])*60 + (+mmss[2]);
+  const m = t.match(/(\d+(?:[.,]\d+)?)\s*(?:[-–]\s*\d+(?:[.,]\d+)?\s*)?(min|m\b|'|s\b|s\/|seg|sec|")/);
+  if(!m) return 0;
+  const n = parseFloat(m[1].replace(',','.'));
+  return Math.round(/^(min|m|')$/.test(m[2]) ? n*60 : n);
+}
+let CRONO = null, CRONO_T = null, AUDIO = null, WAKE = null;
+function cronoTrasSerie(fila){
+  if(!CRONO_ON || !fila) return;
+  const s = parseInt(fila.dataset.desc)||0;
+  if(s > 0 && fila.dataset.ultima !== '1') arrancaCrono(s);
+}
+function arrancaCrono(seg){
+  try{ AUDIO = AUDIO || new (window.AudioContext || window.webkitAudioContext)(); if(AUDIO.state==='suspended') AUDIO.resume(); }catch(e){}
+  try{ if(navigator.wakeLock && !WAKE) navigator.wakeLock.request('screen').then(w=>{ WAKE = w; w.addEventListener('release',()=>{ WAKE = null; }); }).catch(()=>{}); }catch(e){}
+  const primera = !LS.get('crono_aviso', false); if(primera) LS.set('crono_aviso', true);
+  CRONO = {fin: Date.now() + seg*1000, avisado: false, primera: primera};
+  pintaCrono(); clearInterval(CRONO_T); CRONO_T = setInterval(pintaCrono, 250);
+}
+function masCrono(seg){ if(!CRONO) return; CRONO.fin = Math.max(CRONO.fin, Date.now()) + seg*1000; CRONO.avisado = false; pintaCrono(); }
+function paraCrono(){
+  CRONO = null; clearInterval(CRONO_T);
+  const b = document.getElementById('crono'); if(b) b.remove();
+  try{ if(WAKE){ WAKE.release(); WAKE = null; } }catch(e){}
+}
+function pitido(){
+  try{ navigator.vibrate && navigator.vibrate([250,120,250]); }catch(e){}
+  try{ if(!AUDIO) return; [0, .25].forEach(d=>{ const o = AUDIO.createOscillator(), g = AUDIO.createGain();
+    o.frequency.value = 880; o.connect(g); g.connect(AUDIO.destination);
+    g.gain.setValueAtTime(.25, AUDIO.currentTime + d); g.gain.exponentialRampToValueAtTime(.001, AUDIO.currentTime + d + .2);
+    o.start(AUDIO.currentTime + d); o.stop(AUDIO.currentTime + d + .22); }); }catch(e){}
+}
+function pintaCrono(){
+  if(!CRONO) return;
+  const r = Math.ceil((CRONO.fin - Date.now())/1000);
+  if(r <= 0 && !CRONO.avisado){ CRONO.avisado = true; pitido(); }
+  if(r <= -8){ paraCrono(); return; }
+  let b = document.getElementById('crono');
+  if(!b){ b = document.createElement('div'); b.id = 'crono'; b.className = 'crono'; b.setAttribute('role','timer'); document.body.appendChild(b); }
+  const x = Math.max(r,0), txt = Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
+  b.classList.toggle('fin', r <= 0);
+  b.innerHTML = `<div class="t"><small>${r <= 0 ? tr('¡A por la siguiente!') : tr('Descanso')}</small>${txt}${CRONO.primera && r > 0
+      ? `<small style="font-weight:500;letter-spacing:0;margin-top:2px">${tr('Deja la pantalla encendida: con el móvil bloqueado el aviso no puede sonar.')}</small>` : ''}</div>
+    <button onclick="masCrono(30)">+30 s</button><button onclick="paraCrono()">${tr(r <= 0 ? 'Cerrar' : 'Saltar')}</button>`;
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && CRONO) pintaCrono(); });
+
 function confirmar(id){
   const r=document.getElementById('r_'+id);
   const v = LOG[id] || {};
@@ -3527,6 +3594,7 @@ function confirmar(id){
   const fila=document.getElementById('fila_'+id), btn=document.getElementById('b_'+id);
   if(fila) fila.classList.toggle('ok', !!LOG[id].ok);
   if(btn) btn.textContent = tr(LOG[id].ok ? 'Hecha' : 'Anotar');
+  if(LOG[id].ok) cronoTrasSerie(fila);
 }
 
 function vaciar(id){

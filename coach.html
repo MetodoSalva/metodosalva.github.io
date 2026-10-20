@@ -185,7 +185,7 @@ async function verFoto(n){
     caja.innerHTML = `<img src="data:${esc(a.MIME)};base64,${a.DATOS}" alt="Foto del reloj" style="width:100%;border-radius:10px">`;
   }catch(e){ caja.innerHTML = `<p class="sm">No se ha podido cargar: ${esc(e.message || e)}</p>`; }
 }
-const REACCIONES = ['❤️', '💪', '🔥', '😂'];
+const REACCIONES = ['❤️', '💪', '🔥', '😂', '👍', '😢'];   // 👍 y 😢 desde el 20 oct
 async function responder(n, emo){
   const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
   const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
