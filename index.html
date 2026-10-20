@@ -202,6 +202,8 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .escala button.on{border-color:var(--verde);background:var(--verde);color:var(--on-verde)}
 
 /* nav */
+.set.corre .metros{width:74px}
+.crono-b{margin:0 14px 10px;background:none;border:1px solid var(--linea2);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--txt2);cursor:pointer}
 .crono{position:fixed;left:10px;right:10px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:31;
   background:#24533A;color:#fff;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;
   box-shadow:0 6px 24px rgba(0,0,0,.25)}
@@ -245,6 +247,10 @@ nav .g svg{width:22px;height:22px;display:block}
 .vid{position:relative;width:100%;background:#000;border-radius:10px;overflow:hidden;margin:0 14px 12px;width:calc(100% - 28px)}
 .vid iframe{width:100%;aspect-ratio:9/16;max-height:60vh;display:block;border:0}
 .vid.h iframe{aspect-ratio:16/9}
+.bi-leyenda{margin:0 14px 8px;font-size:13.5px;line-height:1.5}
+.bi-leyenda b{display:inline-block;min-width:18px}
+.bi-serie{margin-bottom:6px}
+.bi-n{font-size:12px;font-weight:700;opacity:.7;margin:6px 0 2px 2px}
 .verejs{display:flex;flex-direction:column;align-items:flex-start}
 .verejs .verej{margin-bottom:8px}
 .verej{background:none;border:1px solid var(--linea2);border-radius:8px;padding:7px 12px;font-size:13px;
@@ -501,7 +507,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.36';
+const VERSION = 'v5.37';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -910,7 +916,7 @@ const EN = {
   "glúteo": "glutes", "cuádriceps": "quads", "femoral": "hamstrings", "gemelos": "calves", "pecho": "chest",
   "hombros": "shoulders", "espalda": "back", "brazos": "arms", "core": "core", "lumbar": "lower back",
   "Fuerza": "Strength", "Carrera": "Running", "Híbrido": "Hybrid",
-  "Menú": "Menu", "Descanso": "Rest", "¡A por la siguiente!": "Next set!", "Saltar": "Skip", "Cerrar": "Close", "Deja la pantalla encendida: con el móvil bloqueado el aviso no puede sonar.": "Keep the screen on: with the phone locked the alert cannot sound.", "Bloque terminado": "Block finished", "Has terminado tu bloque.": "You have finished your block.",
+  "Menú": "Menu", "Distancia de este tramo (km)": "Distance of this segment (km)", "Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.": "This segment only, as your watch shows it. The time is already filled in: change it if you did more or less.", "metros": "metres", "Serie": "Set", "Descanso": "Rest", "¡A por la siguiente!": "Next set!", "Saltar": "Skip", "Cerrar": "Close", "Deja la pantalla encendida: con el móvil bloqueado no puede avisarte.": "Keep the screen on: with the phone locked it cannot alert you.", "Bloque terminado": "Block finished", "Has terminado tu bloque.": "You have finished your block.",
   "Salva está preparando el siguiente. En cuanto lo suba aparecerá aquí: toca ↻ arriba para buscarlo.": "Salva is preparing the next one. As soon as he uploads it, it will show up here: tap ↻ at the top to check.",
   "Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, cuéntaselo en Mensajes.": "Everything you did is still in My plan and Progress. If you train in the meantime, tell him in Messages.",
   "Ver mi plan": "See my plan", "Escribir a Salva": "Write to Salva", "Actualizar": "Refresh", "Plan actualizado": "Plan updated", "Sin conexión: sigue tu plan guardado": "No connection: showing your saved plan", "Novedades": "What's new", "Tu app se ha renovado": "Your app has been refreshed",
@@ -1109,6 +1115,12 @@ function textoCarga(c, u, uni){
   return t + ' (' + otra + ' ' + uni + ')';
 }
 function cambiaUnidad(bl, dia, nombre, uni){
+  const partes = partesBusqueda(nombre);
+  if(partes.length > 1) partes.forEach(p=>cambiaUnidad1(bl, dia, p, uni));   // v5.37: biserie
+  cambiaUnidad1(bl, dia, nombre, uni);
+  LS.set('log', LOG); pinta();
+}
+function cambiaUnidad1(bl, dia, nombre, uni){
   const ej = slug(nombre), pre = SEM()+'~'+slug(bl)+'~'+slug(dia)+'~'+ej+'~s';
   LS.set('unidad~'+ej, uni);
   /* lo escrito hoy y TODAVIA SIN ENVIAR pasa a la unidad nueva: el numero
@@ -1119,7 +1131,6 @@ function cambiaUnidad(bl, dia, nombre, uni){
     if(k.indexOf(pre) !== 0 || !v || !v.c || v.sent || (v.u||'kg') === uni) return;
     v.u = uni;
   });
-  LS.set('log', LOG); pinta();
 }
 
 function ultimaVez(bl, dia, nombre){
@@ -1358,6 +1369,7 @@ function camposDe(f){
   if(aguantePorTiempo(f) && esIsometrico(f)) return [];   // v5.34: tiempo serie a serie, sin casilla de totales
   let c = camposHoja(f);
   const nom = norm(f && f['EJERCICIO / ELEMENTO']);
+  if(c.length && tramoPorTiempo(f) && c.indexOf('tiempo') > -1 && c.indexOf('km') < 0 && c.indexOf('metros') < 0) c = ['km'].concat(c);
   if(norm(f && f.TIPO) === 'cardio' && /^cardio . /.test(nom)) return ES_CARDIO_CORRER.test(nom) ? ['km','tiempo','rpe'] : ['tiempo','rpe'];
   if(cardioOpciones(f)) return ['tiempo','rpe'];   // la fila sin elegir: se anota como registro, no como series ("elige")
   if(estacionesDe(f).length){ c = c.filter(k=>k!=='carga'); return c; }
@@ -1377,8 +1389,8 @@ function camposDe(f){
    contestan de un toque y no hay que teclear), el resto como casilla de
    texto. Debajo, la linea de ayuda si la tiene. */
 const ANCHAS = {vam:1, ritmo:1, fuel:1};
-function casilla(rid, k, d, cs, nombre){
-  const C = CAMPOS[k], val = String(d[k]||'');
+function casilla(rid, k, d, cs, nombre, cambia){
+  const C = Object.assign({}, CAMPOS[k], cambia || {}), val = String(d[k]||'');
   if(C.solo) return '';
   const ay = C.ayuda ? `<p class="ayuda">${esc(tr(C.ayuda))}</p>` : '';
   const ancho = (ANCHAS[k] || C.escala) ? ' ancho' : '';
@@ -1411,6 +1423,20 @@ function casilla(rid, k, d, cs, nombre){
    ejercicio de 10 reps dentro de un hibrido sigue siendo fuerza. */
 const DOSIS_TIEMPO = /^\s*\d+([.,]\d+)?\s*(''|"|s|seg|segundos|sec|min|minutos|minutes|h|km|m|metros|mi|miles)\b/i;
 const esCorrer = f => ['running','hibrido'].indexOf(norm(f && f.TIPO)) > -1;
+/* v5.37 (20 oct, Salvador; nota de la sesion de Smi del 12 oct): en un tramo POR
+   TIEMPO («8 min») el tiempo ya se sabe de antemano; lo que falta es la distancia.
+   Se pide la distancia (km en el registro, metros serie a serie), el tiempo sale ya
+   puesto con lo prescrito y se puede cambiar si hizo mas o menos. Con los dos sale
+   el ritmo. */
+const DOSIS_SOLO_TIEMPO = /^\s*(\d+(?:[.,]\d+)?)\s*(''|"|s|seg|segundos|sec|min|minutos|minutes|h)\b/i;
+const tramoPorTiempo = f => esCorrer(f) && DOSIS_SOLO_TIEMPO.test(String((f && f['REPS / DOSIS']) || ''))
+  && !/bici|bike|remo|row|ski|eliptic|camin|walk|aerob|test/.test(norm(f && f['EJERCICIO / ELEMENTO']));
+function tiempoDosis(f){
+  const m = String((f && f['REPS / DOSIS']) || '').match(DOSIS_SOLO_TIEMPO); if(!m) return '';
+  const n = parseFloat(m[1].replace(',','.')), u = m[2].toLowerCase();
+  const sg = Math.round(u === 'h' ? n*3600 : /^(min|minutos|minutes)$/.test(u) ? n*60 : n);
+  return juntaTiempo(0, 0, sg);
+}
 const corrPorTiempo = f => esCorrer(f) && DOSIS_TIEMPO.test(String((f && f['REPS / DOSIS']) || ''));
 const ABIERTAS = {};                       // series desplegadas, solo en esta visita
 function abreSeries(id){ ABIERTAS[id] = !ABIERTAS[id]; pinta(); }
@@ -1447,7 +1473,8 @@ function anotaEst(id, etq){
   LS.set('log', LOG);
 }
 
-function setsCorre(bl, dia, nombre, series, hayTotales, desc){
+function setsCorre(bl, dia, nombre, series, hayTotales, desc, f){
+  const porT = !!(f && tramoPorTiempo(f)), tPres = porT ? tiempoDosis(f) : '';
   const base = slug(bl)+'~'+slug(dia)+'~'+slug(nombre);
   const ids = Array.from({length:series},(_,i)=>idSerie(bl,dia,nombre,i));
   const conDatos = ids.some(id=>{ const v=LOG[id]||{}; return v.t || v.e; });
@@ -1457,7 +1484,9 @@ function setsCorre(bl, dia, nombre, series, hayTotales, desc){
       const v = LOG[id] || {};
       return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${desc||0}" data-ultima="${i+1>=series?1:0}">
         <span class="i">${series>1?i+1:'·'}</span>
-        <div class="hms">${(()=>{ const t = partesTiempo(v.t); const mm = t.h ? String(t.h*60 + +t.m) : t.m;
+        ${porT ? `<input inputmode="numeric" placeholder="${tr('metros')}" value="${esc(v.m||'')}" id="m_${id}" class="metros"
+          oninput="anotaC('${id}')" aria-label="${tr('metros')} ${i+1} ${esc(nombre)}">` : ''}
+        <div class="hms">${(()=>{ const t = partesTiempo(v.t || tPres); const mm = t.h ? String(t.h*60 + +t.m) : t.m;
           return ['m','s'].map(q=>`<span><input inputmode="numeric" pattern="[0-9]*" maxlength="3"
             placeholder="${q==='m'?'min':'s'}" value="${q==='m'?mm:t.s}" id="t_${id}_${q}"
             oninput="anotaC('${id}')" aria-label="${tr('tiempo')} ${q==='m'?'min':'s'} ${i+1} ${esc(nombre)}"></span>`).join(''); })()}</div>
@@ -1474,10 +1503,10 @@ function setsCorre(bl, dia, nombre, series, hayTotales, desc){
 }
 function anotaC(id){
   const tm=document.getElementById('t_'+id+'_m'), ts=document.getElementById('t_'+id+'_s'),
-        e=document.getElementById('e_'+id);
+        e=document.getElementById('e_'+id), me=document.getElementById('m_'+id);
   const prev = LOG[id] || {};
   LOG[id] = Object.assign({}, prev, {t:tm ? juntaTiempo('', tm.value, ts&&ts.value) : (prev.t||''),
-                                     e:e?e.value.trim():''});
+                                     e:e?e.value.trim():''}, me ? {m: me.value.trim()} : {});
   if(prev.sent) LOG[id].corregido = true;
   LS.set('log', LOG);
   const fila = document.getElementById('fila_'+id);
@@ -1488,7 +1517,7 @@ function confirmarC(id){
   if(v.ok){ LOG[id] = Object.assign({}, v, {ok:false}); }
   else {
     anotaC(id);
-    if(!LOG[id].t && !LOG[id].e){ toast(tr('Anota al menos un dato antes de confirmar.')); return; }
+    if(!LOG[id].t && !LOG[id].e && !LOG[id].m){ toast(tr('Anota al menos un dato antes de confirmar.')); return; }
     LOG[id].ok = true;
     LOG[id].ts = new Date().toISOString();
   }
@@ -1673,6 +1702,24 @@ function idYoutube(url){
 }
 
 /* ---------- estado de sesión ---------- */
+/* v5.37 (20 oct, Salvador): BISERIES. Una fila «Curl martillo + extension de
+   triceps» tenia una sola casilla de peso; Ana tuvo que escribir el triceps en la
+   nota. Ahora, si el nombre lleva « + » (misma regla que partesBusqueda: «top set»,
+   «back-off» o «+ N series» no se parten), cada serie tiene una linea por
+   ejercicio, y cada parte se guarda como SU ejercicio (su ID), con su historial y
+   su «la ultima vez». Si esa fila ya tenia datos guardados a la antigua (una sola
+   casilla), se sigue ensenando a la antigua para no perderlos de vista. */
+function partesBiserie(bl, dia, f){
+  if(!f || alternativasDe(f) || esCorrer(f) || camposDe(f).length || !(parseInt(f.SERIES)||0)) return null;
+  const nombre = f['EJERCICIO / ELEMENTO'] || '';
+  const p = partesBusqueda(nombre); if(p.length < 2) return null;
+  const n = parseInt(f.SERIES)||0;
+  for(let i=0;i<n;i++){ const v = LOG[idSerie(bl,dia,nombre,i)]; if(v && (v.ok || v.r || v.c)) return null; }
+  return p;
+}
+const idsSerie = (bl, dia, f, i) => { const p = partesBiserie(bl, dia, f);
+  return p ? p.map(x=>idSerie(bl,dia,x,i)) : [idSerie(bl,dia,nombreEf(bl,dia,f),i)]; };
+
 function estadoSesion(b,d){
   if(LOG[idOmit(b,d)]) return 'omitida';
   const todas = sesionDe(b,d).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
@@ -1702,7 +1749,7 @@ function estadoSesion(b,d){
   conSeries.forEach(f=>{
     const n = parseInt(f.SERIES)||1; ejercicios++;
     let m = 0;
-    for(let i=0;i<n;i++){ const v=LOG[idSerie(b,d,nombreEf(b,d,f),i)]; if(v && v.ok) m++; }
+    for(let i=0;i<n;i++){ if(idsSerie(b,d,f,i).some(id=>LOG[id] && LOG[id].ok)) m++; }
     anotadas += m; if(m) conAlgo++;
   });
   conReg.forEach(f=>{
@@ -2885,7 +2932,7 @@ function progresoSesion(bl, dia){
     if(saltado(bl, dia, nombre)){ hechos++; return; }
     const vale = v => v && !v.borrada && (v.ok || tieneAlgo(v));
     if(cs.length){ if(vale(LOG[idReg(bl,dia,nombre)])) { hechos++; return; } }
-    for(let i=0;i<n;i++){ if(vale(LOG[idSerie(bl,dia,nombre,i)])){ hechos++; return; } }
+    for(let i=0;i<n;i++){ if(idsSerie(bl,dia,f,i).some(id=>vale(LOG[id]))){ hechos++; return; } }
   });
   return {total, hechos};
 }
@@ -3192,10 +3239,12 @@ function ejercicio(bl,dia,f){
   if(campos.length && !saltado(bl,dia,nombre)){
     const rid = idReg(bl,dia,nombre);
     recordarNombre(rid, nombre);
-    const v = LOG[rid] || {}, d = v.d || {}, cs = campos.join('-');
+    const v = LOG[rid] || {}, cs = campos.join('-');
+    let d = v.d || {};
+    if(!d.tiempo && tramoPorTiempo(f) && campos.indexOf('tiempo') > -1) d = Object.assign({}, d, {tiempo: tiempoDosis(f)});   // v5.37
     registro = `<div class="reg ${v.ok?'ok':''}" id="reg_${rid}">
       ${esCorrer(f) && series>1 ? `<div class="totales">${tr('Totales de la sesión')}</div>` : ''}
-      ${campos.map(k=>casilla(rid, k, d, cs, nombre)).join('')}
+      ${campos.map(k=>casilla(rid, k, d, cs, nombre, k === 'km' && tramoPorTiempo(f) ? {et: 'Distancia de este tramo (km)', ayuda: 'Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.'} : null)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
         ? `<div class="ritmo${d.km && aSegundos(d.tiempo) && !ritmoCreible(d) ? ' mal' : ''}" id="ritmo_${rid}">${esc(textoRitmo(d))}</div>` : ''}
       ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam, rid))}</div>` : ''}
@@ -3209,7 +3258,7 @@ function ejercicio(bl,dia,f){
     /* v5.2: una carrera no se anota con kilos. Si son series o cuestas,
        cada una tiene su fila (tiempo y esfuerzo) y los totales van debajo;
        plegado, porque la mayoria de dias solo hace falta el total. */
-    sets = setsCorre(bl, dia, nombre, series, campos.length>0, descansoSeg(f));
+    sets = (aguantePorTiempo(f) ? botonCrono(f) : '') + setsCorre(bl, dia, nombre, series, campos.length>0, descansoSeg(f), f);
   }
   else if(series>0 && !campos.length){
     /* v5.22 (3 oct, Salvador): con mancuernas, la suma de las dos. Justine
@@ -3222,23 +3271,33 @@ function ejercicio(bl,dia,f){
                                              : 'En la máquina asistida anota los kilos de AYUDA: cuantos menos, mejor.')}</p>` : ''}${hayLibras() ? `<div class="uni">${tr('Pesos en')}
         ${['kg','lb'].map(x=>`<button class="${x===uni?'on':''}" aria-pressed="${x===uni}"
           onclick="cambiaUnidad('${esc(bl)}','${esc(dia)}','${esc(nombre)}','${x}')">${x}</button>`).join('')}</div>` : ''}
-      <div class="sets">${Array.from({length:series},(_,i)=>{
-      const id = idSerie(bl,dia,nombre,i);
-      recordarNombre(id, nombre);
-      const v = LOG[id] || {};
-      return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${descansoSeg(f)}" data-ultima="${i+1>=series?1:0}">
-        <span class="i">${i+1}${v.c && hayLibras() && (v.u||'kg') !== uni ? `<small>${v.u||'kg'}</small>` : ''}</span>
+      ${(function(){
+        const fila = (nom, i, etq) => {
+          const id = idSerie(bl,dia,nom,i);
+          recordarNombre(id, nom);
+          const v = LOG[id] || {};
+          return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${descansoSeg(f)}" data-ultima="${i+1>=series?1:0}">
+        <span class="i">${etq}${v.c && hayLibras() && (v.u||'kg') !== uni ? `<small>${v.u||'kg'}</small>` : ''}</span>
         <input inputmode="numeric" placeholder="reps" value="${esc(v.r||'')}" id="r_${id}"
-          oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nombre)}">
+          oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nom)}">
         <input inputmode="decimal" placeholder="${asist && !banda ? tr('ayuda') : uni}" value="${esc(v.c||'')}" id="c_${id}"
-          oninput="anota('${id}')" aria-label="Carga serie ${i+1} (${uni})">
+          oninput="anota('${id}')" aria-label="Carga serie ${i+1} (${uni}) de ${esc(nom)}">
         <span class="rirc"><input inputmode="numeric" placeholder="RIR" value="${esc(v.rir||'')}" id="i_${id}"
           oninput="anota('${id}')" aria-label="RIR serie ${i+1}"><button type="button" class="rq"
           onclick="ayudaRIR('${id}')" data-obj="${esc(rirObjetivo(f))}" id="rq_${id}"
           aria-label="${tr('¿Qué pongo en el RIR?')}">${enIngles()?'?':'¿?'}</button></span>
         <button id="b_${id}" onclick="confirmar('${id}')">${tr(v.ok?'Hecha':'Anotar')}</button>
         <button class="x" onclick="vaciar('${id}')" aria-label="${tr('Vaciar')} ${tr('serie')} ${i+1}" title="${tr('Vaciar')}">✕</button>
-      </div>${rirRaro(v.rir) && !v.sent ? avisoRIR(id) : ''}`;}).join('')}</div>`;
+      </div>${rirRaro(v.rir) && !v.sent ? avisoRIR(id) : ''}`; };
+        const partes = partesBiserie(bl, dia, f), bc = botonCrono(f);
+        if(!partes) return `${bc}<div class="sets">${Array.from({length:series},(_,i)=>fila(nombre, i, i+1)).join('')}</div>`;
+        /* biserie: serie a serie, una linea por ejercicio con su letra (A, B...) */
+        const letra = j => String.fromCharCode(65 + j);
+        return `${bc}<div class="bi-leyenda">${partes.map((p,j)=>`<div><b>${letra(j)}</b> ${esc(p)}${(()=>{ const u = ultimaVez(bl,dia,p);
+            return u ? ` <span class="sm">· ${tr('La última vez')}: ${u.carga ? esc(textoCarga(u.carga,u.u,uni))+' × ' : ''}${esc(u.reps)}</span>` : ''; })()}</div>`).join('')}</div>
+          <div class="sets">${Array.from({length:series},(_,i)=>`<div class="bi-serie"><div class="bi-n">${tr('Serie')} ${i+1}</div>${
+            partes.map((p,j)=>fila(p, i, letra(j))).join('')}</div>`).join('')}</div>`;
+      })()}`;
   }
 
   return `<div class="ej">
@@ -3527,9 +3586,10 @@ function anota(id){
    Se guarda la HORA DE FIN, no un contador: al volver de bloquear el movil
    ensena el tiempo real. Con la pantalla bloqueada no puede sonar (la web no
    deja). No manda nada a la hoja.
-   OCULTO hasta que Salvador lo apruebe: solo con &crono=1 en el enlace. */
-const CRONO_ON = (() => { try{ if(qs.get('crono')==='1') localStorage.setItem('crono','1');
-  if(qs.get('crono')==='0') localStorage.removeItem('crono'); return localStorage.getItem('crono')==='1'; }catch(e){ return false; } })();
+   v5.37 (20 oct, Salvador): NO arranca solo. Es un boton opcional en cada
+   ejercicio que lleva descanso, ya con su tiempo puesto; solo vibra, sin sonido.
+   Para todos. No sale en carrera, cardio ni estaciones de HYROX. */
+const CRONO_ON = true;
 function descansoSeg(f){
   const t = norm(f && f.DESCANSO); if(!t || /^(no\b|none|sin\b|-|—)/.test(t)) return 0;
   const mmss = t.match(/(\d{1,2}):(\d{2})/); if(mmss) return (+mmss[1])*60 + (+mmss[2]);
@@ -3539,13 +3599,15 @@ function descansoSeg(f){
   return Math.round(/^(min|m|')$/.test(m[2]) ? n*60 : n);
 }
 let CRONO = null, CRONO_T = null, AUDIO = null, WAKE = null;
-function cronoTrasSerie(fila){
-  if(!CRONO_ON || !fila) return;
-  const s = parseInt(fila.dataset.desc)||0;
-  if(s > 0 && fila.dataset.ultima !== '1') arrancaCrono(s);
+function cronoTrasSerie(fila){ /* v5.37: ya no arranca solo */ }
+const fmtCrono = x => Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
+/* el boton del ejercicio: solo si la fila tiene descanso y no es carrera, cardio ni HYROX */
+function botonCrono(f){
+  const sg = descansoSeg(f);
+  if(!sg || esCorrer(f) || ['running','hibrido','cardio','descanso','info'].indexOf(norm(f && f.TIPO)) > -1 || tipoHyrox(f)) return '';
+  return `<button type="button" class="crono-b" onclick="arrancaCrono(${sg})" aria-label="${tr('Descanso')} ${fmtCrono(sg)}">⏱ ${tr('Descanso')} ${fmtCrono(sg)}</button>`;
 }
 function arrancaCrono(seg){
-  try{ AUDIO = AUDIO || new (window.AudioContext || window.webkitAudioContext)(); if(AUDIO.state==='suspended') AUDIO.resume(); }catch(e){}
   try{ if(navigator.wakeLock && !WAKE) navigator.wakeLock.request('screen').then(w=>{ WAKE = w; w.addEventListener('release',()=>{ WAKE = null; }); }).catch(()=>{}); }catch(e){}
   const primera = !LS.get('crono_aviso', false); if(primera) LS.set('crono_aviso', true);
   CRONO = {fin: Date.now() + seg*1000, avisado: false, primera: primera};
@@ -3557,12 +3619,8 @@ function paraCrono(){
   const b = document.getElementById('crono'); if(b) b.remove();
   try{ if(WAKE){ WAKE.release(); WAKE = null; } }catch(e){}
 }
-function pitido(){
-  try{ navigator.vibrate && navigator.vibrate([250,120,250]); }catch(e){}
-  try{ if(!AUDIO) return; [0, .25].forEach(d=>{ const o = AUDIO.createOscillator(), g = AUDIO.createGain();
-    o.frequency.value = 880; o.connect(g); g.connect(AUDIO.destination);
-    g.gain.setValueAtTime(.25, AUDIO.currentTime + d); g.gain.exponentialRampToValueAtTime(.001, AUDIO.currentTime + d + .2);
-    o.start(AUDIO.currentTime + d); o.stop(AUDIO.currentTime + d + .22); }); }catch(e){}
+function pitido(){   // v5.37: solo vibra (Android; el iPhone no deja vibrar desde la web: ahi avisa la barra)
+  try{ navigator.vibrate && navigator.vibrate([300,150,300]); }catch(e){}
 }
 function pintaCrono(){
   if(!CRONO) return;
@@ -3574,7 +3632,7 @@ function pintaCrono(){
   const x = Math.max(r,0), txt = Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
   b.classList.toggle('fin', r <= 0);
   b.innerHTML = `<div class="t"><small>${r <= 0 ? tr('¡A por la siguiente!') : tr('Descanso')}</small>${txt}${CRONO.primera && r > 0
-      ? `<small style="font-weight:500;letter-spacing:0;margin-top:2px">${tr('Deja la pantalla encendida: con el móvil bloqueado el aviso no puede sonar.')}</small>` : ''}</div>
+      ? `<small style="font-weight:500;letter-spacing:0;margin-top:2px">${tr('Deja la pantalla encendida: con el móvil bloqueado no puede avisarte.')}</small>` : ''}</div>
     <button onclick="masCrono(30)">+30 s</button><button onclick="paraCrono()">${tr(r <= 0 ? 'Cerrar' : 'Saltar')}</button>`;
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && CRONO) pintaCrono(); });
@@ -3794,7 +3852,8 @@ async function enviar(opc){
     const enLb = v.u === 'lb' && num(v.c) > 0;
     reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', serie:serie, reps:v.r||'',
       carga: enLb ? redondea(aKg(v.c,'lb')) : (v.c||''), notas: enLb ? v.c + ' lb' : '',
-      rir:v.rir||'', tiempo:v.t||'', rpe:v.e||'', estado: v.borrada ? '' : (v.ok?'realizada':'')}));
+      rir:v.rir||'', tiempo:v.t||'', rpe:v.e||'', km: v.m ? String(Math.round(num(v.m))/1000) : '',
+      estado: v.borrada ? '' : (v.ok?'realizada':'')}));
   });
 
   // La semana que se está respondiendo es la que pide el aviso; si no hay
