@@ -507,7 +507,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.37';
+const VERSION = 'v5.38';
 const ANIO = 2026;
 
 /* ---------- cliente activo ---------- */
@@ -1374,7 +1374,7 @@ function camposDe(f){
   if(cardioOpciones(f)) return ['tiempo','rpe'];   // la fila sin elegir: se anota como registro, no como series ("elige")
   if(estacionesDe(f).length){ c = c.filter(k=>k!=='carga'); return c; }
   if(tipoHyrox(f) && c.length && EST_HYROX.test(nom)){        // una estacion sola
-    const peso = EST_PESO.test(nom);
+    const peso = EST_PESO.test(nom) && !/trx/.test(nom);   // v5.38: con TRX no hay carga
     if(!peso) c = c.filter(k=>k!=='carga');
     if(peso && c.indexOf('carga') < 0) c.push('carga');
     if(c.indexOf('tiempo') < 0 && !esPorTiempo(f['REPS / DOSIS'])) c.unshift('tiempo');
@@ -1754,7 +1754,7 @@ function estadoSesion(b,d){
   });
   conReg.forEach(f=>{
     ejercicios++;
-    const v = LOG[idReg(b,d,cardioOpciones(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO'])];
+    const v = LOG[idReg(b,d,alternativasDe(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO'])];
     if(v && v.ok){ anotadas++; conAlgo++; }
   });
   if(!anotadas) return 'sin';
@@ -3119,10 +3119,24 @@ function cardioSiNo(bl, dia, id0, orig, si){
   if(si){ LOG[idAlt(bl,dia,id0)] = {si:1}; LS.set('log', LOG); pinta(); }
   else salta(bl, dia, orig);
 }
+/* v5.38 (22 oct, Salvador): «a todos los sled pull agrega la alternativa con TRX,
+   muchos clientes estan fallando con ese ejercicio ya que no es facil hacerlo en
+   los gyms». Todo arrastre de trineo que va solo (no «1 km + sled pull», no un
+   tramo) ofrece «Trineo / Con TRX». Lo de TRX se guarda como su propio ejercicio
+   y «Ver como se hace» busca el sled pull con TRX. Sin tocar ninguna hoja. */
+const SLED_PULL = /sled pull|arrastre|trineo[^+]*arrastr/i;
+function altTRX(f, n){
+  if(!f || !SLED_PULL.test(n) || /\+|\(\s*(o|or)\s|trx|^tramo/i.test(n)) return null;
+  if(['running','descanso','info','cardio','evento'].indexOf(norm(f.TIPO)) > -1) return null;   // el dia de la carrera hay trineo
+  const en = enIngles();
+  const t = en ? 'TRX sled pull' : 'Sled pull con TRX';
+  return [{id: n, txt: n}, {id: t, txt: t}];
+}
 function alternativasDe(f){
   const ops = cardioOpciones(f);
   if(ops) return ops.map(o=>({id: 'Cardio · ' + may(o), txt: may(o)}));
   const n = String((f && f['EJERCICIO / ELEMENTO']) || '').trim();
+  const trx = altTRX(f, n); if(trx) return trx;
   if(!f || ['fuerza','hibrido'].indexOf(norm(f.TIPO)) < 0 || !(parseInt(f.SERIES) > 0)) return null;
   if(/^(calentamiento|warm-?up|si tienes)/i.test(n) || /\((potencia|power)\)/i.test(n)) return null;
   let a, b, m, suf = '';
