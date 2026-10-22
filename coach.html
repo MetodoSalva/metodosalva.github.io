@@ -78,7 +78,7 @@ function toast(t){ const d = document.createElement('div'); d.className = 'toast
    una vez al dia, y si no hay lista, se pide tambien la bandeja entera por detras
    para enterarse de las altas nuevas. */
 const CLIENTAS_BASE = ['alexia','sergio','carlos','justine','diana','carmen','ben','ignacio','smi','ana','paula',
-  'sergiol','elena','stephanie','jorge','madelina','juanpablo','anaperez','justo','salva'];
+  'sergiol','elena','stephanie','jorge','madelina','juanpablo','anaperez','justo','salva','mariateresa'];
 const limpia = c => { c.items = (c.items || []).filter(i => !/^fotos~/.test(i.id) && !/prueba/i.test(i.id)); return c; };
 async function pide(extra){
   const r = await fetch(API + '?bandeja=1&dias=30&k=' + encodeURIComponent(S.k) + extra);
