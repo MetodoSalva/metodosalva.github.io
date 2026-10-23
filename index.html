@@ -215,6 +215,28 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .est .en .cronom-b{margin:4px 0 0;padding:3px 9px;display:block}
 button.cronom-b{background:none!important;border:1px solid var(--linea2)!important;color:var(--txt2)!important;width:auto!important;min-height:0!important;font-size:12.5px!important;padding:5px 11px!important;border-radius:999px!important;font-weight:600}
 .crono.cronom{background:#1F4E79}
+.diarow{position:relative;border-bottom:1px solid var(--linea)}
+.diarow:last-child{border-bottom:0}
+.diarow > .dia{border-bottom:0;padding-right:46px}
+.diarow > .mas{position:absolute;right:0;top:9px;width:40px;height:36px;border:1px solid var(--linea2);border-radius:10px;
+  background:none;color:var(--txt2);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
+.cierre-fondo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.cierre{background:var(--card,#1b211d);color:var(--txt);width:100%;max-width:560px;border-radius:18px 18px 0 0;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:85vh;overflow:auto}
+.cierre h3{font-size:17px;margin-bottom:4px}
+.cierre .op{display:block;width:100%;text-align:left;margin-top:8px;padding:13px 14px;border:1px solid var(--linea2);
+  border-radius:12px;background:none;color:var(--txt);font-size:15px;font-weight:600;cursor:pointer}
+.cierre .op.pri{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
+.cierre .op small{display:block;font-weight:400;font-size:12.5px;color:var(--txt3);margin-top:2px}
+.cierre .op.pri small{color:inherit;opacity:.8}
+.cierre textarea{width:100%;margin-top:10px;min-height:70px;border:1px solid var(--linea2);border-radius:10px;padding:10px;
+  background:none;color:var(--txt);font:inherit;font-size:16px}
+.cierre .mut2{font-size:13px;color:var(--txt3)}
+.pend-ses .fila{padding:10px 0;border-top:1px solid var(--linea)}
+.pend-ses .fila:first-of-type{border-top:0}
+.pend-ses .bts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pend-ses .bts button{border:1px solid var(--linea2);border-radius:999px;background:none;color:var(--txt);padding:7px 11px;font-size:13px;font-weight:600;cursor:pointer}
+.pend-ses .bts button.pri{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
 .crono.cronom.pausa{background:#3D4F63}
 .crono.cronom button.g{background:#fff;color:#1F4E79;border-color:#fff}
 .flash{animation:flash 1.6s ease}
@@ -515,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.42';   // D-216: Guardar y enviar cierra la sesion
+const VERSION = 'v5.43';   // D-218: marcar sesiones desde la lista y aviso de pendientes
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -758,7 +780,7 @@ const EN = {
   "intensidad": "intensity",
   "1 = muy suave · 5 = a tope": "1 = very easy · 5 = all out",
   "Algo que contarme": "Anything to tell me",
-  "Guardar": "Save", "Cronometrar": "Time it", "Cronómetro": "Stopwatch", "en pausa": "paused", "Pausa": "Pause", "Seguir": "Resume", "Descartar": "Discard", "¿Descartar este tiempo?": "Discard this time?", "Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?": "Another stopwatch is running. Discard it and start this one?", "Tiempo guardado. Puedes cambiarlo a mano.": "Time saved. You can change it by hand.", "Abre la sesión de este ejercicio para guardar el tiempo.": "Open this exercise's session to save the time.",
+  "Guardar": "Save", "Ver todas": "See all", "Hecha sin datos": "Done, not logged", "No hecha": "Not done", "Marcar": "Mark", "La hice (sin apuntar)": "I did it (not logged)", "Cuenta como hecha; no hace falta poner pesos.": "Counts as done; no need to add weights.", "No la hice / no la voy a hacer": "I did not / will not do it", "Deja de salir como pendiente.": "It stops showing as pending.", "Apuntarla ahora": "Log it now", "Cancelar": "Cancel", "¿Por qué? Un toque y listo.": "Why? One tap and done.", "No tuve tiempo": "I had no time", "No me gustó": "I did not like it", "No me encuentro bien": "I am not feeling well", "Tengo una molestia que me limita": "A niggle is limiting me", "Otro": "Other", "¿Dónde? ¿Qué te molesta? (opcional)": "Where? What bothers you? (optional)", "Cuéntame el motivo (opcional)": "Tell me why (optional)", "Sin motivo": "No reason", "Marcada como hecha.": "Marked as done.", "Marcada como no hecha. Ya no sale pendiente.": "Marked as not done. It no longer shows as pending.", "La marcaste como hecha sin apuntar.": "You marked it as done without logging.", "La marcaste como no hecha.": "You marked it as not done.", "Quitar la marca": "Remove the mark", "Vuelve a quedar pendiente.": "It becomes pending again.", "Si al final la haces o quieres apuntarla, quita la marca.": "If you end up doing it or want to log it, remove the mark.", "Tienes una sesión sin registrar": "You have a session not logged", "Tienes sesiones sin registrar": "You have sessions not logged", "Dime qué pasó con cada una. Si cambiaste el día, toca «Aún no».": "Tell me what happened with each one. If you moved the day, tap Not yet.", "semana pasada": "last week", "La hice sin apuntar": "Did it, not logged", "No la hice": "Did not do it", "Aún no": "Not yet", "Más tarde": "Later", "Vale. Te la vuelvo a preguntar en un par de días.": "OK. I will ask again in a couple of days.", "Cronometrar": "Time it", "Cronómetro": "Stopwatch", "en pausa": "paused", "Pausa": "Pause", "Seguir": "Resume", "Descartar": "Discard", "¿Descartar este tiempo?": "Discard this time?", "Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?": "Another stopwatch is running. Discard it and start this one?", "Tiempo guardado. Puedes cambiarlo a mano.": "Time saved. You can change it by hand.", "Abre la sesión de este ejercicio para guardar el tiempo.": "Open this exercise's session to save the time.",
   "Cancelar": "Cancel",
   "Quitar": "Remove",
   "extra": "extra",
@@ -1085,6 +1107,7 @@ const SEM = () => 's' + slug(String(((corrigiendo() ? S.mirando : S.semana) || {
 const idSerie = (b,d,ej,i) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~s${i+1}`;
 const idOmit  = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~omitida`;
 const idObs   = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~obs`;
+const idCierre = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~cierre`;   // v5.43: hecha sin apuntar / no hecha
 /* Nota del cliente sobre un ejercicio concreto: "no sé si lo hago bien",
    "me molesta el hombro"... Llega a la hoja con el nombre del ejercicio,
    así se sabe exactamente de cuál habla. */
@@ -1736,6 +1759,8 @@ const idsSerie = (bl, dia, f, i) => { const p = partesBiserie(bl, dia, f);
 
 function estadoSesion(b,d){
   if(LOG[idOmit(b,d)]) return 'omitida';
+  const cz = LOG[idCierre(b,d)];
+  if(cz && cz.ok && !cz.borrada) return cz.tipo === 'hecha' ? 'sindatos' : 'nohecha';
   const todas = sesionDe(b,d).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f)
                                         && !saltado(b,d,f['EJERCICIO / ELEMENTO'])
                                         && !(cardioOpciones(f) && !cardioElegido(b,d,f)));   // v5.27: opcional
@@ -1772,9 +1797,9 @@ function estadoSesion(b,d){
     const id = idReg(b,d,alternativasDe(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO']), v = LOG[id];
     if(v && v.ok){ anotadas++; conAlgo++; usados.push(id); }
   });
-  if(!anotadas) return 'sin';
+  if(!anotadas) return viejaSinCerrar() ? 'nohecha' : 'sin';
   if(conAlgo >= ejercicios) return 'hecha';
-  /* v5.42 (D-216): una sesion de un dia que ya paso, con todo lo anotado ya
+  /* v5.42 (D-217): una sesion de un dia que ya paso, con todo lo anotado ya
      enviado, esta terminada aunque no se marcara cada ejercicio. Asi se cierran
      tambien las que se enviaron antes de este cambio. La de hoy sigue en
      «Parcial» hasta que se toque Guardar y enviar. */
@@ -1783,13 +1808,13 @@ function estadoSesion(b,d){
   if(pasada && usados.every(id=>LOG[id].sent && !LOG[id].corregido)) return 'hecha';
   return 'parcial';
 }
-/* v5.42 (D-216, Salvador 23 oct): «Guardar y enviar» CIERRA la sesion. Lo que no
+/* v5.42 (D-217, Salvador 23 oct): «Guardar y enviar» CIERRA la sesion. Lo que no
    tenga nada anotado se marca como no hecho (igual que el boton «No he hecho este
    ejercicio») y sale a la hoja como omitido, asi la sesion queda Registrada aunque
    no se marcara cada cosa. Se puede corregir despues: «Deshacer» en el ejercicio.
    Si no hay NADA anotado, no se cierra (un toque sin querer no la da por hecha). */
 function cierraSesion(bl, dia){
-  if(!bl || !dia || LOG[idOmit(bl,dia)]) return 0;
+  if(!bl || !dia || LOG[idOmit(bl,dia)] || (LOG[idCierre(bl,dia)] && LOG[idCierre(bl,dia)].ok)) return 0;
   const fs = sesionDe(bl,dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f) && !(cardioOpciones(f) && !cardioElegido(bl,dia,f)));
   const vale = v => v && v.ok && !v.borrada;
   let hay = vale(LOG[idVal(bl,dia)]) || !!(LOG[idObs(bl,dia)] && LOG[idObs(bl,dia)].obs);
@@ -1813,7 +1838,15 @@ function cierraSesion(bl, dia){
   LS.set('log', LOG);
   return faltan.length;
 }
-const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida']};
+const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida'],
+             sindatos:['verde','Hecha sin datos'], nohecha:['rojo','No hecha']};
+/* v5.43 (D-218): una semana que acabo hace mas de dos semanas no se queda
+   «Sin registrar» para siempre: se ve como No hecha. Solo se ve; no se manda. */
+function viejaSinCerrar(){
+  const w = corrigiendo() ? S.mirando : null; if(!w) return false;
+  const ini = fechaIni(w.FECHAS); if(!ini) return false;
+  return (Date.now() - ini.getTime()) / 86400000 > 7 + 14;
+}
 const chipEstado = e => { const [c,t]=ETQ[e]||ETQ.sin; return `<span class="sem ${c}"><i>${semForma(c)}</i>${tr(t)}</span>`; };
 /* v5.6: lo que hay escrito y todavia no esta en la hoja.
    Antes solo contaba lo confirmado con "Anotar", asi que quien escribia sus
@@ -1946,7 +1979,7 @@ function migrarSemana(){
      clientes cuyo bloque se llama S01: hay que contar las partes.
      Las marcas de dia (omitida, obs, valoracion, fecha) tienen 4 partes
      nuevas y 3 viejas; todo lo demas, 5 nuevas y 4 viejas. */
-  const MARCAS = ['omitida','obs','valoracion','fecha'];
+  const MARCAS = ['omitida','obs','valoracion','fecha','cierre'];
   const semDe = b => {
     // Si ese bloque es de una sola semana, es esa. Si dura varias (no se
     // puede saber cual), la semana en la que esta hoy.
@@ -1985,6 +2018,13 @@ function fusionarRegistros(filas){
         const tit = String(f.EJERCICIO||'').replace(/^EXTRA\s*·\s*/,'');
         if(tit) LOG[id] = {extra:{titulo:tit, min:String(f.TIEMPO||'').replace(/\s*min$/,''),
                                   int:parseInt(f.RPE)||0, nota:f.NOTAS||''}, ok:true, sent:true};
+      } else if(id.endsWith('~cierre')){
+        const est = String(f.ESTADO||'').toLowerCase();
+        if(est === 'realizada' || est === 'omitida'){
+          const m = MOTIVOS.find(x=>String(f.NOTAS||'').indexOf(x.t) === 0);
+          LOG[id] = {tipo: est === 'realizada' ? 'hecha' : 'no', motivo: m ? m.k : (String(f.NOTAS||'').trim() ? 'otro' : ''),
+                     texto: String(f.NOTAS||'').replace(m ? m.t : '', '').replace(/^\s*[·:]\s*/, ''), ok:true, sent:true, ts:f.FECHA||''};
+        }
       } else if(id.endsWith('~salto')){
         if(String(f.ESTADO||'').toLowerCase() === 'omitida') LOG[id] = {salto:true, ok:true, sent:true};
       } else if(id.endsWith('~reg')){
@@ -2306,7 +2346,7 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   if(!d || esDescanso(d)){
@@ -2351,21 +2391,23 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + bloqueHoy + `
+  return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <div class="row" style="gap:6px">${flechasSem(S.semana)}<button class="btn sm2" onclick="abreSemanas()" aria-haspopup="listbox">${tr("Ver todo")}</button></div></div>
     ${diasDeBloque(bl).map(x=>{
       const es = estadoSesion(bl,x['DÍA']);
       const esHoy = hoyNombres().some(h=>norm(x['DÍA']).startsWith(h));
-      const yaHecha = ['hecha','omitida'].includes(es);
-      return `<button class="dia ${esHoy?'hoy':''} ${yaHecha?'hecha':''}" onclick="abrir('${esc(x['DÍA'])}')">
+      const yaHecha = ['hecha','omitida','sindatos','nohecha'].includes(es);
+      const conMas = !esDescanso(x) && sesionDe(bl,x['DÍA']).length;
+      return `${conMas ? '<div class="diarow">' : ''}<button class="dia ${esHoy?'hoy':''} ${yaHecha?'hecha':''}" onclick="abrir('${esc(x['DÍA'])}')">
         <span class="d">${esc(String(x['DÍA']).slice(0,3))}</span>
         <span style="flex:1"><span class="n">${esc(partir(x['SESIÓN']).t)}</span>
           <div class="row wrap" style="gap:6px;margin-top:5px">
             <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
             ${esDescanso(x)||!sesionDe(bl,x['DÍA']).length?'':chipEstado(es)}
-            ${extrasDe(bl,x['DÍA']).length?`<span class="tag">+${extrasDe(bl,x['DÍA']).length} ${tr("extra")}</span>`:''}</div></span></button>`;
+            ${extrasDe(bl,x['DÍA']).length?`<span class="tag">+${extrasDe(bl,x['DÍA']).length} ${tr("extra")}</span>`:''}</div></span></button>${
+        conMas ? botonMas(bl, x['DÍA']) + '</div>' : ''}`;
     }).join('')}</div>
   <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
     <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
@@ -2399,24 +2441,24 @@ function vHoyLibre(bl, fase, nota){
     ${pend.length?pend.map(x=>{
       const es = estadoSesion(bl,x['DÍA']);
       const p = partir(x['SESIÓN']);
-      return `<button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
+      return `<div class="diarow"><button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
         <span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(p.t)}</span>
           ${p.sub?`<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>`:''}
           <div class="row wrap" style="gap:6px;margin-top:5px">
             <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
             ${fmtMin(x.MIN)?`<span class="sm">${esc(fmtMin(x.MIN))}</span>`:''}
             ${esOpcional(x)?`<span class="tag">${tr("opcional")}</span>`:''}
-            ${es==='parcial'?chipEstado(es):''}</div></span></button>`;
+            ${es==='parcial'?chipEstado(es):''}</div></span></button>${botonMas(bl, x['DÍA'])}</div>`;
     }).join('')
     :`<p class="mut" style="margin-top:6px">${tr("Has registrado todas las sesiones de la semana. Descansa y nos vemos en la siguiente.")}</p>`}
   </div>
   ${todas.filter(x=>!pend.includes(x)).length?`<div class="card">
     <h3 style="margin-bottom:4px">${tr("Ya hechas esta semana")}</h3>
     <p class="sm" style="margin-bottom:8px">${tr("No hace falta repetirlas. Ábrelas solo si quieres revisar o corregir lo que anotaste.")}</p>
-    ${todas.filter(x=>!pend.includes(x)).map(x=>`<button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')">
+    ${todas.filter(x=>!pend.includes(x)).map(x=>`<div class="diarow"><button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')">
       <span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
       <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(estadoSesion(bl,x['DÍA']))}
-      ${fechaDe(bl,x['DÍA'])?`<span class="sm">${esc(fechaDe(bl,x['DÍA']))}</span>`:''}</div></span></button>`).join('')}
+      ${fechaDe(bl,x['DÍA'])?`<span class="sm">${esc(fechaDe(bl,x['DÍA']))}</span>`:''}</div></span></button>${botonMas(bl, x['DÍA'])}</div>`).join('')}
     </div>`:''}
   <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
     <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
@@ -3076,6 +3118,10 @@ function vSesion(){
         <h2 style="margin-top:5px;font-size:19px">${esc(partir(meta['SESIÓN']||'').t)}</h2>
         ${partir(meta['SESIÓN']||'').sub?`<p class="sm" style="margin-top:3px">${esc(partir(meta['SESIÓN']||'').sub)}</p>`:''}</div>
       ${chipEstado(est)}</div>
+    ${(est==='sindatos'||est==='nohecha') ? `<div class="aviso" style="margin-top:10px"><b>${tr(est==='sindatos'?'La marcaste como hecha sin apuntar.':'La marcaste como no hecha.')}</b>${
+      LOG[idCierre(bl,dia)] && LOG[idCierre(bl,dia)].motivo ? `<p class="sm" style="margin-top:3px">${esc(textoMotivo(LOG[idCierre(bl,dia)]))}</p>` : ''}
+      <p class="sm" style="margin-top:3px">${tr('Si al final la haces o quieres apuntarla, quita la marca.')}</p>
+      <button class="btn sm2" style="margin-top:8px" onclick="quitaCierre('${esc(bl)}','${esc(dia)}')">${tr('Quitar la marca')}</button></div>` : ''}
     ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
     ${mapaCuerpo(bl, dia)}
     ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
@@ -3918,6 +3964,146 @@ function desomitir(bl,dia){
   else delete LOG[id];
   LS.set('log', LOG); pinta();
 }
+/* ================= v5.43 · MARCAR SESIONES SIN ENTRAR (D-218) =================
+   Lo pidio Salvador (23 oct). Cada sesion de la lista lleva un «⋯» con «La hice
+   (sin apuntar)» y «No la voy a hacer»; al decir que no, un motivo de un toque
+   (Otro y Molestia dejan escribir; «Sin motivo» siempre a mano). Arriba en Hoy,
+   las sesiones de dias pasados sin registrar (esta semana y la anterior) se
+   preguntan: Apuntarla ahora · La hice sin apuntar · No la hice · Aun no (por si
+   ha movido el dia: no la vuelve a preguntar en 2 dias). «Mas tarde» esconde el
+   aviso hasta manana. Todo va a la hoja (ESTADO realizada u omitida, motivo en
+   NOTAS) y se reconstruye desde ella en cualquier movil. Se quita con «Quitar la
+   marca». Las opcionales no se preguntan. */
+const MOTIVOS = [
+  {k:'tiempo',   t:'No tuve tiempo'},
+  {k:'gusto',    t:'No me gustó'},
+  {k:'mal',      t:'No me encuentro bien'},
+  {k:'molestia', t:'Tengo una molestia que me limita', escribe:'¿Dónde? ¿Qué te molesta? (opcional)'},
+  {k:'otro',     t:'Otro', escribe:'Cuéntame el motivo (opcional)'}
+];
+const textoMotivo = v => { const m = MOTIVOS.find(x=>x.k === (v && v.motivo));
+  return (m ? m.t : '') + (v && v.texto ? (m ? ' · ' : '') + v.texto : ''); };
+let CIERRE = null;   // {w, bl, dia, paso, motivo}
+function enSemana(w, fn){ const g = S.mirando; S.mirando = (!w || (S.semana && w.SEMANA === S.semana.SEMANA)) ? null : w;
+  try{ return fn(); } finally { S.mirando = g; } }
+function botonMas(bl, dia){
+  if(soloLectura()) return '';
+  const w = semanaVista();
+  return `<button class="mas" aria-label="${tr('Marcar')} · ${esc(dia)}"
+    onclick="abreCierre('${esc(String(w && w.SEMANA || ''))}','${esc(bl)}','${esc(dia)}')">⋯</button>`;
+}
+const semanaPorNum = n => (S.d.SEMANAS||[]).find(w=>String(w.SEMANA) === String(n)) || S.semana;
+function abreCierre(sem, bl, dia, paso){
+  CIERRE = {w: semanaPorNum(sem), bl: bl, dia: dia, paso: paso || 'inicio', motivo: ''};
+  pintaCierre();
+}
+function cierraCierre(){ CIERRE = null; const f = document.getElementById('cierre'); if(f) f.remove(); }
+function pintaCierre(){
+  if(!CIERRE) return;
+  let f = document.getElementById('cierre');
+  if(!f){ f = document.createElement('div'); f.id = 'cierre'; f.className = 'cierre-fondo';
+    f.onclick = e => { if(e.target === f) cierraCierre(); }; document.body.appendChild(f); }
+  const c = CIERRE, nom = partir(((diasDeBloque(c.bl).find(x=>x['DÍA'] === c.dia)) || {})['SESIÓN'] || '').t;
+  const ya = enSemana(c.w, ()=>LOG[idCierre(c.bl, c.dia)]);
+  const marcada = ya && ya.ok && !ya.borrada;
+  let html = `<div class="cierre" role="dialog" aria-modal="true"><h3>${esc(c.dia)}${nom ? ' · ' + esc(nom) : ''}</h3>`;
+  if(c.paso === 'inicio'){
+    html += marcada
+      ? `<p class="mut2">${tr(ya.tipo === 'hecha' ? 'La marcaste como hecha sin apuntar.' : 'La marcaste como no hecha.')}${ya.motivo ? ' ' + esc(textoMotivo(ya)) : ''}</p>
+         <button class="op" onclick="quitaCierre('${esc(c.bl)}','${esc(c.dia)}', 1)">${tr('Quitar la marca')}<small>${tr('Vuelve a quedar pendiente.')}</small></button>`
+      : `<button class="op pri" onclick="marcaCierre('hecha')">✓ ${tr('La hice (sin apuntar)')}<small>${tr('Cuenta como hecha; no hace falta poner pesos.')}</small></button>
+         <button class="op" onclick="CIERRE.paso='motivo'; pintaCierre()">⊘ ${tr('No la hice / no la voy a hacer')}<small>${tr('Deja de salir como pendiente.')}</small></button>
+         <button class="op" onclick="cierraCierre(); abrirDe('${esc(String(c.w && c.w.SEMANA || ''))}','${esc(c.dia)}')">✎ ${tr('Apuntarla ahora')}</button>`;
+    html += `<button class="op" style="text-align:center" onclick="cierraCierre()">${tr('Cancelar')}</button>`;
+  } else {
+    const m = MOTIVOS.find(x=>x.k === c.motivo);
+    html += `<p class="mut2">${tr('¿Por qué? Un toque y listo.')}</p>
+      ${MOTIVOS.map(x=>`<button class="op${c.motivo === x.k ? ' pri' : ''}" onclick="eligeMotivo('${x.k}')">${tr(x.t)}</button>`).join('')}
+      ${m && m.escribe ? `<textarea id="cierre_txt" placeholder="${esc(tr(m.escribe))}"></textarea>
+        <button class="op pri" style="text-align:center" onclick="marcaCierre('no', CIERRE.motivo, (document.getElementById('cierre_txt')||{}).value)">${tr('Guardar')}</button>` : ''}
+      <button class="op" style="text-align:center" onclick="marcaCierre('no', '')">${tr('Sin motivo')}</button>`;
+  }
+  f.innerHTML = html + '</div>';
+  const t = document.getElementById('cierre_txt'); if(t) setTimeout(()=>t.focus(), 50);
+}
+function eligeMotivo(k){
+  const m = MOTIVOS.find(x=>x.k === k);
+  if(m && m.escribe){ CIERRE.motivo = k; pintaCierre(); return; }   // deja escribir
+  marcaCierre('no', k);
+}
+function marcaCierre(tipo, motivo, texto){
+  const c = CIERRE; if(!c) return;
+  enSemana(c.w, ()=>{
+    const id = idCierre(c.bl, c.dia), prev = LOG[id] || {};
+    LOG[id] = {tipo: tipo, motivo: motivo || '', texto: String(texto || '').trim(), ok: true, ts: new Date().toISOString()};
+    if(prev.sent) LOG[id].corregido = true;
+    recordarNombre(id, c.dia);
+  });
+  LS.set('log', LOG); cierraCierre(); pinta();
+  toast(tr(tipo === 'hecha' ? 'Marcada como hecha.' : 'Marcada como no hecha. Ya no sale pendiente.'));
+  enviar({auto: true});
+}
+function quitaCierre(bl, dia, desdeMenu){
+  const w = desdeMenu && CIERRE ? CIERRE.w : semanaVista();
+  enSemana(w, ()=>{
+    const id = idCierre(bl, dia), v = LOG[id] || {};
+    if(v.sent) LOG[id] = Object.assign({}, v, {ok:false, borrada:true, corregido:true});
+    else delete LOG[id];
+  });
+  LS.set('log', LOG); cierraCierre(); pinta();
+  enviar({auto: true});
+}
+function abrirDe(sem, dia){
+  const w = semanaPorNum(sem);
+  if(w && S.semana && w.SEMANA !== S.semana.SEMANA){ S.mirando = w; }
+  abrir(dia);
+}
+/* El aviso de Hoy: sesiones de dias pasados sin registrar, de esta semana y la anterior */
+const idxDia = d => { const n = norm(d); let i = DIAS.findIndex(x=>n.startsWith(norm(x))); if(i < 0) i = DIAS_EN.findIndex(x=>n.startsWith(norm(x)));
+  return i < 0 ? -1 : (i + 6) % 7; };   // lunes = 0
+function sesionesPorCerrar(){
+  if(!S.d || !S.semana) return [];
+  const ss = S.d.SEMANAS || [], i = ss.findIndex(w=>w.SEMANA === S.semana.SEMANA);
+  const hoy = (new Date().getDay() + 6) % 7, apl = LS.get('aplazadas', {}), ahora = Date.now();
+  const out = [];
+  [[ss[i-1], true], [S.semana, false]].forEach(([w, anterior])=>{
+    if(!w) return;
+    enSemana(w, ()=>{
+      const bl = bloqueDe(w); if(!bl) return;
+      diasDeBloque(bl).forEach(x=>{
+        const dia = x['DÍA'];
+        if(esDescanso(x) || esOpcional(x) || !sesionDe(bl, dia).length) return;
+        if(!anterior){ const k = idxDia(dia); if(k < 0 || k >= hoy) return; }   // esta semana: solo dias ya pasados
+        if(estadoSesion(bl, dia) !== 'sin') return;
+        const clave = String(w.SEMANA) + '~' + slug(dia);
+        if(apl[clave] && apl[clave] > ahora) return;
+        out.push({w: w, bl: bl, dia: dia, clave: clave, nom: partir(x['SESIÓN'] || '').t});
+      });
+    });
+  });
+  return out;
+}
+function avisoPendientes(){
+  if(soloLectura() || S.mirando || S.cache) return '';    // con datos de la cache aun no estan sus registros
+  const hasta = LS.get('pend_mas_tarde', 0); if(hasta && hasta > Date.now()) return '';
+  const ps = sesionesPorCerrar(); if(!ps.length) return '';
+  const una = ps.length === 1, MAX = 4, ver = S.pendTodas ? ps : ps.slice(0, MAX);
+  return `<div class="card pend-ses"><div class="lbl">${tr(una ? 'Tienes una sesión sin registrar' : 'Tienes sesiones sin registrar')}</div>
+    <p class="sm" style="margin-top:4px">${tr('Dime qué pasó con cada una. Si cambiaste el día, toca «Aún no».')}</p>
+    ${ver.map(p=>{ const A = `'${esc(String(p.w.SEMANA))}','${esc(p.bl)}','${esc(p.dia)}'`;
+      return `<div class="fila"><b>${esc(p.dia)}${p.w.SEMANA !== S.semana.SEMANA ? ' (' + tr('semana pasada') + ')' : ''}</b>${p.nom ? ' · ' + esc(p.nom) : ''}
+      <div class="bts"><button onclick="abrirDe('${esc(String(p.w.SEMANA))}','${esc(p.dia)}')">✎ ${tr('Apuntarla ahora')}</button>
+        <button class="pri" onclick="abreCierre(${A}); marcaCierre('hecha')">✓ ${tr('La hice sin apuntar')}</button>
+        <button onclick="abreCierre(${A}, 'motivo')">⊘ ${tr('No la hice')}</button>
+        <button onclick="aplaza('${esc(p.clave)}')">${tr('Aún no')}</button></div></div>`; }).join('')}
+    ${ps.length > ver.length ? `<button class="btn sm2" style="margin-top:8px" onclick="S.pendTodas=true; pinta()">${tr('Ver todas')} (${ps.length})</button>` : ''}
+    <div style="text-align:right;margin-top:8px"><button class="btn sm2" onclick="LS.set('pend_mas_tarde', Date.now() + 20*3600000); pinta()">${tr('Más tarde')}</button></div></div>`;
+}
+function aplaza(clave){
+  const a = LS.get('aplazadas', {}); a[clave] = Date.now() + 2*86400000; LS.set('aplazadas', a);
+  toast(tr('Vale. Te la vuelvo a preguntar en un par de días.')); pinta();
+}
+
 /* ================= ENVÍO ================= */
 /* v5.11: AUTOENVIO. De Carmen no ha llegado nada en cinco semanas: lo mas
    probable es que anote y no toque nunca "Guardar y enviar". Ahora tambien se
@@ -3963,6 +4149,11 @@ async function enviar(opc){
                   km:'', tiempo:'', ritmo:'', rpe:'', piernas:'', valoracion:''};
 
     if(id.endsWith('~omitida')){ reg.push(Object.assign(base,{estado:v.borrada?'':'omitida'})); return; }
+    if(id.endsWith('~cierre')){            // v5.43 (D-218)
+      reg.push(Object.assign(base,{ejercicio: v.tipo === 'hecha' ? 'SESIÓN HECHA SIN APUNTAR' : 'SESIÓN NO HECHA',
+        notas: v.borrada ? '' : textoMotivo(v), estado: v.borrada ? '' : (v.tipo === 'hecha' ? 'realizada' : 'omitida')}));
+      return;
+    }
     if(id.endsWith('~extra')){
       const e = v.extra || {};
       reg.push(Object.assign(base,{ejercicio:'EXTRA · ' + (e.titulo||''),
@@ -4331,7 +4522,7 @@ function vResumen(){
 function vProgreso(){
   const bl = bloqueDe(S.semana);
   const dias = sesionesContables(bl);
-  const hechas = dias.filter(d=>['hecha','parcial'].includes(estadoSesion(bl,d['DÍA']))).length;
+  const hechas = dias.filter(d=>['hecha','parcial','sindatos'].includes(estadoSesion(bl,d['DÍA']))).length;
   const pct = dias.length ? Math.round(hechas/dias.length*100) : 0;
   const totalSem = semanasReales().length;
   const semN = parseInt(String((S.semana||{}).SEMANA||'0').replace(/\D/g,'')) || 0;
