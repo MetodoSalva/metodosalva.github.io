@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.45';   // D-220: Ver como se hace solo en ejercicios concretos
+const VERSION = 'v5.46';   // D-221: lo de hace dos semanas ya es No hecha
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1776,7 +1776,7 @@ function estadoSesion(b,d){
     // "sin registrar" para siempre y nunca contaba como hecha: ahora basta
     // con valorarla al terminar.
     const val = LOG[idVal(b,d)];
-    return (val && val.val) ? 'hecha' : 'sin';
+    return (val && val.val) ? 'hecha' : (viejaSinCerrar() ? 'nohecha' : 'sin');
   }
   /* v3.19: la sesion esta HECHA cuando todos los ejercicios tienen algo
      anotado, aunque falte alguna serie suelta. Antes hacia falta que
@@ -1840,12 +1840,13 @@ function cierraSesion(bl, dia){
 }
 const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida'],
              sindatos:['verde','Hecha sin datos'], nohecha:['rojo','No hecha']};
-/* v5.43 (D-218): una semana que acabo hace mas de dos semanas no se queda
-   «Sin registrar» para siempre: se ve como No hecha. Solo se ve; no se manda. */
+/* v5.43 (D-218): una semana vieja no se queda «Sin registrar» para siempre: se ve
+   como No hecha. Solo se ve; no se manda. v5.46 (D-221, Salvador): desde la semana
+   antepasada (la semana pasada aun se pregunta en Hoy). */
 function viejaSinCerrar(){
   const w = corrigiendo() ? S.mirando : null; if(!w) return false;
   const ini = fechaIni(w.FECHAS); if(!ini) return false;
-  return (Date.now() - ini.getTime()) / 86400000 > 7 + 14;
+  return (Date.now() - ini.getTime()) / 86400000 >= 14;
 }
 const chipEstado = e => { const [c,t]=ETQ[e]||ETQ.sin; return `<span class="sem ${c}"><i>${semForma(c)}</i>${tr(t)}</span>`; };
 /* v5.6: lo que hay escrito y todavia no esta en la hoja.
