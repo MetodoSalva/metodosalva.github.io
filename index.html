@@ -211,6 +211,14 @@ button.dia::after{content:'';flex:none;align-self:center;width:8px;height:8px;ma
 .crono .t small{display:block;font-size:11.5px;font-weight:600;opacity:.85;letter-spacing:.04em}
 .crono button{background:rgba(255,255,255,.16);color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
 .crono.fin{background:#8A3B12}
+.cronom-b{background:none;border:1px solid var(--linea2);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--txt2);cursor:pointer;margin-top:6px}
+.est .en .cronom-b{margin:4px 0 0;padding:3px 9px;display:block}
+button.cronom-b{background:none!important;border:1px solid var(--linea2)!important;color:var(--txt2)!important;width:auto!important;min-height:0!important;font-size:12.5px!important;padding:5px 11px!important;border-radius:999px!important;font-weight:600}
+.crono.cronom{background:#1F4E79}
+.crono.cronom.pausa{background:#3D4F63}
+.crono.cronom button.g{background:#fff;color:#1F4E79;border-color:#fff}
+.flash{animation:flash 1.6s ease}
+@keyframes flash{0%{background:rgba(47,107,74,.28)}100%{background:transparent}}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--sup);border-top:1px solid var(--linea);
   display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:30}
 nav button{flex:1;background:none;border:0;padding:9px 2px 10px;display:flex;flex-direction:column;
@@ -507,8 +515,8 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.39';
-/* v5.39 (22 oct, D-212): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
+const VERSION = 'v5.40';
+/* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
 const ANIO = 2026;
@@ -750,7 +758,7 @@ const EN = {
   "intensidad": "intensity",
   "1 = muy suave · 5 = a tope": "1 = very easy · 5 = all out",
   "Algo que contarme": "Anything to tell me",
-  "Guardar": "Save",
+  "Guardar": "Save", "Cronometrar": "Time it", "Cronómetro": "Stopwatch", "en pausa": "paused", "Pausa": "Pause", "Seguir": "Resume", "Descartar": "Discard", "¿Descartar este tiempo?": "Discard this time?", "Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?": "Another stopwatch is running. Discard it and start this one?", "Tiempo guardado. Puedes cambiarlo a mano.": "Time saved. You can change it by hand.", "Abre la sesión de este ejercicio para guardar el tiempo.": "Open this exercise's session to save the time.",
   "Cancelar": "Cancel",
   "Quitar": "Remove",
   "extra": "extra",
@@ -1403,7 +1411,7 @@ function casilla(rid, k, d, cs, nombre, cambia){
         maxlength="${q==='h'?1:3}" placeholder="${ph}" value="${v}" oninput="anotaReg('${rid}','${cs}')"
         aria-label="${esc(tr(C.et))} ${q} · ${esc(nombre)}"><small>${q==='m'?'min':q}</small></span>`;
     return `<div class="c${ancho}"><label for="g_${rid}_${k}_m">${esc(tr(C.et))}</label>
-      <div class="hms">${u('h',t.h,'0')}${u('m',t.m,'00')}${u('s',t.s,'00')}</div>${ay}</div>`;
+      <div class="hms">${u('h',t.h,'0')}${u('m',t.m,'00')}${u('s',t.s,'00')}</div>${C.cronom ? botonCronom('g_'+rid+'_'+k, nombre) : ''}${ay}</div>`;
   }
   if(C.escala) return `<div class="c${ancho}"><label>${esc(tr(C.et))}</label>
     <div class="escala">${Array.from({length:C.escala},(_,i)=>i+1).map(n=>
@@ -1456,7 +1464,7 @@ function filasEstaciones(bl, dia, nombre, f){
     if(rondas && !peso) return '';
     recordarNombre(id, nombre + ' · ' + e);
     const t = partesTiempo(v.t), mm = t.h ? String(t.h*60 + +t.m) : t.m;
-    return `<div class="est ${v.sent?'sent':''}" id="fila_${id}"><div class="en">${esc(e)}</div><div class="ec${rondas?' r':''}">
+    return `<div class="est ${v.sent?'sent':''}" id="fila_${id}"><div class="en">${esc(e)}${rondas ? '' : botonCronom('t_'+id, nombre + ' · ' + e)}</div><div class="ec${rondas?' r':''}">
       ${rondas ? '' : `<div class="hms">${['m','s'].map(q=>`<span><input inputmode="numeric" pattern="[0-9]*" maxlength="3"
           placeholder="${q==='m'?'min':'s'}" value="${q==='m'?mm:t.s}" id="t_${id}_${q}" oninput="anotaEst('${id}','${esc(e)}')"
           aria-label="${tr('tiempo')} ${q==='m'?'min':'s'} · ${esc(e)}"></span>`).join('')}</div>`}
@@ -1482,7 +1490,8 @@ function setsCorre(bl, dia, nombre, series, hayTotales, desc, f){
   const ids = Array.from({length:series},(_,i)=>idSerie(bl,dia,nombre,i));
   const conDatos = ids.some(id=>{ const v=LOG[id]||{}; return v.t || v.e; });
   const abierto = !hayTotales || conDatos || !!ABIERTAS[base];
-  const filas = abierto ? `<div class="sets">${ids.map((id,i)=>{
+  const filas = abierto ? `${conCronom(f) ? `<button type="button" class="cronom-b" style="margin:0 14px 10px" data-ids="${ids.join(',')}"
+      data-etq="${esc(nombre)}" onclick="cronomSerie(this)" aria-label="${tr('Cronometrar')} · ${esc(nombre)}">⏱ ${tr('Cronometrar')}</button>` : ''}<div class="sets">${ids.map((id,i)=>{
       recordarNombre(id, nombre);
       const v = LOG[id] || {};
       return `<div class="set corre ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${desc||0}" data-ultima="${i+1>=series?1:0}">
@@ -3261,7 +3270,8 @@ function ejercicio(bl,dia,f){
     if(!d.tiempo && tramoPorTiempo(f) && campos.indexOf('tiempo') > -1) d = Object.assign({}, d, {tiempo: tiempoDosis(f)});   // v5.37
     registro = `<div class="reg ${v.ok?'ok':''}" id="reg_${rid}">
       ${esCorrer(f) && series>1 ? `<div class="totales">${tr('Totales de la sesión')}</div>` : ''}
-      ${campos.map(k=>casilla(rid, k, d, cs, nombre, k === 'km' && tramoPorTiempo(f) ? {et: 'Distancia de este tramo (km)', ayuda: 'Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.'} : null)).join('')}
+      ${campos.map(k=>casilla(rid, k, d, cs, nombre, k === 'km' && tramoPorTiempo(f) ? {et: 'Distancia de este tramo (km)', ayuda: 'Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.'}
+        : k === 'tiempo' && conCronom(f) ? {cronom: 1} : null)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
         ? `<div class="ritmo${d.km && aSegundos(d.tiempo) && !ritmoCreible(d) ? ' mal' : ''}" id="ritmo_${rid}">${esc(textoRitmo(d))}</div>` : ''}
       ${campos.indexOf('vam')>-1 ? `<div class="ritmo" id="vam_${rid}">${esc(textoVAM(d.vam, rid))}</div>` : ''}
@@ -3635,7 +3645,8 @@ function masCrono(seg){ if(!CRONO) return; CRONO.fin = Math.max(CRONO.fin, Date.
 function paraCrono(){
   CRONO = null; clearInterval(CRONO_T);
   const b = document.getElementById('crono'); if(b) b.remove();
-  try{ if(WAKE){ WAKE.release(); WAKE = null; } }catch(e){}
+  if(!(CRONOM && CRONOM.ini)) try{ if(WAKE){ WAKE.release(); WAKE = null; } }catch(e){}
+  posCronom();
 }
 function pitido(){   // v5.37: solo vibra (Android; el iPhone no deja vibrar desde la web: ahi avisa la barra)
   try{ navigator.vibrate && navigator.vibrate([300,150,300]); }catch(e){}
@@ -3646,7 +3657,7 @@ function pintaCrono(){
   if(r <= 0 && !CRONO.avisado){ CRONO.avisado = true; pitido(); }
   if(r <= -8){ paraCrono(); return; }
   let b = document.getElementById('crono');
-  if(!b){ b = document.createElement('div'); b.id = 'crono'; b.className = 'crono'; b.setAttribute('role','timer'); document.body.appendChild(b); }
+  if(!b){ b = document.createElement('div'); b.id = 'crono'; b.className = 'crono'; b.setAttribute('role','timer'); document.body.appendChild(b); posCronom(); }
   const x = Math.max(r,0), txt = Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
   b.classList.toggle('fin', r <= 0);
   b.innerHTML = `<div class="t"><small>${r <= 0 ? tr('¡A por la siguiente!') : tr('Descanso')}</small>${txt}${CRONO.primera && r > 0
@@ -3654,6 +3665,87 @@ function pintaCrono(){
     <button onclick="masCrono(30)">+30 s</button><button onclick="paraCrono()">${tr(r <= 0 ? 'Cerrar' : 'Saltar')}</button>`;
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && CRONO) pintaCrono(); });
+
+/* ================= v5.40 · CRONOMETRO DE EJERCICIO (D-214) =================
+   Lo pidio Salvador (23 oct). Donde se anota un tiempo (estaciones de HYROX,
+   «lo mas rapido posible», aguantes, lo que tarde), un boton «Cronometrar»
+   abre una barra que cuenta hacia ARRIBA. Al pausar: Seguir, Guardar o
+   descartar (✕). Guardar escribe el tiempo en las casillas min y s de ese
+   ejercicio como si lo hubiera tecleado, y desde ahi se corrige a mano; sin
+   usarlo, se sigue escribiendo como siempre. Se guarda la hora de arranque, no
+   un contador: con el movil bloqueado sigue contando y sobrevive a recargar.
+   No sale en carrera (TIPO running) ni en tramos por tiempo («8 min»). */
+const conCronom = f => norm(f && f.TIPO) !== 'running' && !tramoPorTiempo(f);
+let CRONOM = LS.get('cronom', null), CRONOM_T = null;
+function botonCronom(pre, etq){
+  return `<button type="button" class="cronom-b" data-etq="${esc(etq)}" onclick="abreCronom('${pre}', this.dataset.etq)"
+    aria-label="${tr('Cronometrar')} · ${esc(etq)}">⏱ ${tr('Cronometrar')}</button>`;
+}
+/* en las series: un solo boton, que cronometra la primera serie que no tiene tiempo */
+function cronomSerie(btn){
+  const ids = btn.dataset.ids.split(','), n = ids.length;
+  let i = ids.findIndex(id => !(LOG[id] || {}).t); if(i < 0) i = n - 1;
+  abreCronom('t_' + ids[i], btn.dataset.etq + (n > 1 ? ' · ' + tr('serie') + ' ' + (i+1) : ''));
+}
+const cronomSeg = () => CRONOM ? Math.floor(((CRONOM.acum||0) + (CRONOM.ini ? Date.now() - CRONOM.ini : 0)) / 1000) : 0;
+const fmtCronom = sg => { const h = Math.floor(sg/3600), m = Math.floor(sg%3600/60), x = sg%60, d = v => String(v).padStart(2,'0');
+  return h ? h + ':' + d(m) + ':' + d(x) : m + ':' + d(x); };
+function abreCronom(pre, etq){
+  if(CRONOM && CRONOM.pre === pre){ tickCronom(); return; }
+  if(CRONOM && cronomSeg() > 0 && !confirm(tr('Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?'))) return;
+  paraCrono();
+  CRONOM = {pre: pre, etq: etq || '', ini: Date.now(), acum: 0};
+  LS.set('cronom', CRONOM);
+  try{ if(navigator.wakeLock && !WAKE) navigator.wakeLock.request('screen').then(w=>{ WAKE = w; w.addEventListener('release',()=>{ WAKE = null; }); }).catch(()=>{}); }catch(e){}
+  tickCronom();
+}
+function pausaCronom(){ if(!CRONOM || !CRONOM.ini) return; CRONOM.acum = (CRONOM.acum||0) + Date.now() - CRONOM.ini; CRONOM.ini = 0; LS.set('cronom', CRONOM); tickCronom(); }
+function sigueCronom(){ if(!CRONOM || CRONOM.ini) return; CRONOM.ini = Date.now(); LS.set('cronom', CRONOM); tickCronom(); }
+function cierraCronom(){
+  CRONOM = null; LS.set('cronom', null); clearInterval(CRONOM_T);
+  const b = document.getElementById('cronom'); if(b) b.remove();
+  if(!CRONO) try{ if(WAKE){ WAKE.release(); WAKE = null; } }catch(e){}
+}
+function descartaCronom(){ if(cronomSeg() >= 5 && !confirm(tr('¿Descartar este tiempo?'))) return; cierraCronom(); }
+function guardaCronom(){
+  if(!CRONOM) return;
+  const sg = cronomSeg(); if(!sg){ cierraCronom(); return; }
+  const p = CRONOM.pre, h = document.getElementById(p+'_h'), m = document.getElementById(p+'_m'), x = document.getElementById(p+'_s');
+  if(!m || !x){ toast(tr('Abre la sesión de este ejercicio para guardar el tiempo.')); return; }
+  const H = Math.floor(sg/3600), M = Math.floor(sg%3600/60);
+  if(h){ h.value = H ? String(H) : ''; m.value = String(M); } else m.value = String(H*60 + M);
+  x.value = String(sg%60).padStart(2,'0');
+  m.dispatchEvent(new Event('input', {bubbles: true}));
+  const caja = m.closest('.c, .set, .est');
+  if(caja){ caja.classList.remove('flash'); void caja.offsetWidth; caja.classList.add('flash'); try{ caja.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){} }
+  cierraCronom();
+  toast(tr('Tiempo guardado. Puedes cambiarlo a mano.'));
+}
+function posCronom(){
+  const b = document.getElementById('cronom'); if(!b) return;
+  b.style.bottom = document.getElementById('crono') ? 'calc(140px + env(safe-area-inset-bottom))' : '';
+}
+function tickCronom(){
+  clearInterval(CRONOM_T); pintaCronom();
+  if(CRONOM && CRONOM.ini) CRONOM_T = setInterval(pintaCronom, 250);
+}
+function pintaCronom(){
+  if(!CRONOM) return;
+  let b = document.getElementById('cronom');
+  if(!b){ b = document.createElement('div'); b.id = 'cronom'; b.className = 'crono cronom'; b.setAttribute('role','timer'); document.body.appendChild(b); }
+  const corre = !!CRONOM.ini, st = corre ? 'c' : 'p';
+  if(b.dataset.st !== st){            // los botones solo se pintan al cambiar de estado: si no, el toque se pierde
+    b.dataset.st = st; b.classList.toggle('pausa', !corre);
+    b.innerHTML = `<div class="t"><small>${esc(CRONOM.etq || tr('Cronómetro'))}${corre ? '' : ' · ' + tr('en pausa')}</small><span class="v"></span></div>` +
+      (corre ? `<button onclick="pausaCronom()">${tr('Pausa')}</button>`
+             : `<button onclick="sigueCronom()">${tr('Seguir')}</button><button class="g" onclick="guardaCronom()">${tr('Guardar')}</button>
+                <button onclick="descartaCronom()" aria-label="${tr('Descartar')}">✕</button>`);
+    posCronom();
+  }
+  b.querySelector('.v').textContent = fmtCronom(cronomSeg());
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && CRONOM) tickCronom(); });
+setTimeout(()=>{ if(CRONOM) tickCronom(); }, 600);
 
 function confirmar(id){
   const r=document.getElementById('r_'+id);
