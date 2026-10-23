@@ -515,7 +515,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.40';
+const VERSION = 'v5.41';   // D-215: descanso tambien en HYROX e hibridos
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -3359,7 +3359,7 @@ function ejercicio(bl,dia,f){
          "hibrido". Pero un face pull marcado como "extra" sigue siendo un
          ejercicio, y a Sergio se le quedaban nueve sin el buscador. Lo que
          decide no es la etiqueta: es si hay SERIES que hacer. */''}
-    ${sets}${registro}${saltado(bl,dia,nombre) ? '' : filasEstaciones(bl, dia, nombre, f)}
+    ${sets}${registro && !/crono-b/.test(sets) ? botonCrono(f) : ''}${registro}${saltado(bl,dia,nombre) ? '' : filasEstaciones(bl, dia, nombre, f)}
     ${(function(){
       if(!(series>0 || campos.length)) return '';
       const sal = saltado(bl,dia,nombre);
@@ -3629,10 +3629,12 @@ function descansoSeg(f){
 let CRONO = null, CRONO_T = null, AUDIO = null, WAKE = null;
 function cronoTrasSerie(fila){ /* v5.37: ya no arranca solo */ }
 const fmtCrono = x => Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
-/* el boton del ejercicio: solo si la fila tiene descanso y no es carrera, cardio ni HYROX */
+/* el boton del ejercicio: solo si la fila tiene descanso y no es carrera ni cardio.
+   v5.41 (23 oct, Salvador, wall balls de Stephanie): tambien en HYROX y en las sesiones
+   hibridas; lo que se corre (carrera, tramos por tiempo) sigue sin el. */
 function botonCrono(f){
   const sg = descansoSeg(f);
-  if(!sg || esCorrer(f) || ['running','hibrido','cardio','descanso','info'].indexOf(norm(f && f.TIPO)) > -1 || tipoHyrox(f)) return '';
+  if(!sg || ['running','cardio','descanso','info'].indexOf(norm(f && f.TIPO)) > -1 || esCarrera(f) || tramoPorTiempo(f)) return '';
   return `<button type="button" class="crono-b" onclick="arrancaCrono(${sg})" aria-label="${tr('Descanso')} ${fmtCrono(sg)}">⏱ ${tr('Descanso')} ${fmtCrono(sg)}</button>`;
 }
 function arrancaCrono(seg){
