@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.43';   // D-218: marcar sesiones desde la lista y aviso de pendientes
+const VERSION = 'v5.44';   // D-219: un bloque compuesto no es una superserie
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -3484,14 +3484,28 @@ function quitaSalto(bl, dia, ej){
    devolvía de todo. Ahora sale un botón por ejercicio, con su nombre:
    «Ver cómo se hace: Curl con mancuernas». Lo de «top set + back-off» es un
    solo ejercicio y no se parte. */
+/* v5.44 (23 oct, Salvador): «4 × [1 km + estación completa]» salía partido como
+   superserie, con dos «Ver cómo se hace» sin sentido. Un bloque compuesto (con
+   corchetes, o «1 km + …») no es un ejercicio: ni se parte ni se busca. Un «+»
+   dentro de () o [] tampoco parte. */
+const bloqueCompuesto = n => /[\[\]]/.test(String(n||'')) || /\b\d+([.,]\d+)?\s*(km|m|metros)\s*\+/i.test(String(n||''));
 function partesBusqueda(nombre){
   const n = String(nombre||'');
-  if(/top set|back-?off|\+\s*\d+\s*series/i.test(n)) return [n];
+  if(/top set|back-?off|\+\s*\d+\s*series/i.test(n) || bloqueCompuesto(n)) return [n];
   const sin = n.replace(/^[^:+]{0,40}:\s*/, '');      // «Superserie abs: », «Superset: »
+  if(!/\s\+\s/.test(sin.replace(/\([^)]*\)/g, ''))) return [n];   // el «+» solo dentro de un paréntesis
   const p = sin.split(/\s+\+\s+/).map(x => x.trim()).filter(Boolean);
   return p.length > 1 ? p.map(x => x.charAt(0).toUpperCase() + x.slice(1)) : [n];
 }
+/* en «1 km + sled push 50 m» se busca solo la estacion; en «[1 km + estacion completa]», nada */
+const estacionesBusqueda = n => /[\[\]]/.test(String(n||'')) ? [] : String(n||'').split(/\s+\+\s+/).slice(1)
+  .map(x => x.replace(/\s+\d[\d.,]*\s*(m|kg|metros)?\s*$/i, '').trim()).filter(x => x && !/estaci|^\d/.test(norm(x)))
+  .map(x => x.charAt(0).toUpperCase() + x.slice(1));
 function botonesBusqueda(nombre){
+  if(bloqueCompuesto(nombre)){
+    const e = estacionesBusqueda(nombre);
+    return e.map(x => `<a class="verej" href="${esc(buscarYoutube(x))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}: ${esc(x)}</a>`).join('');
+  }
   const p = partesBusqueda(nombre);
   if(p.length === 1)
     return `<a class="verej" href="${esc(buscarYoutube(nombre))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}</a>`;
