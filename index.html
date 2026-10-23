@@ -515,7 +515,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.41';   // D-215: descanso tambien en HYROX e hibridos
+const VERSION = 'v5.42';   // D-216: Guardar y enviar cierra la sesion
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -841,6 +841,8 @@ const EN = {
   "Revisa los metros de la cinta: parece que falta alguna cifra.": "Check the treadmill metres: a digit looks missing.",
   "Se guarda solo mientras escribes. Al terminar, ": "It saves itself as you type. When you finish, ",
   " lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.": " sends everything, whether or not you tapped Log it. Log it is just for ticking off what you have done; if you get something wrong, tap it again or use the ✕.",
+  " lo manda todo, hayas tocado «Anotar» o no, y da la sesión por terminada: lo que no hayas anotado queda como no hecho. Si te equivocas, puedes corregirlo después.": " sends everything, whether or not you tapped Log it, and closes the session: anything you did not log stays as not done. If you get something wrong, you can fix it later.",
+  "Enviado. Sesión terminada.": "Sent. Session finished.", "ejercicios quedan como no hechos.": "exercises stay as not done.", "ejercicio queda como no hecho.": "exercise stays as not done.",
   "Marcar como omitida": "Mark as skipped",
   "Marcaste esta sesión como omitida.": "You marked this session as skipped.",
   "Marcada como omitida. Es distinto de no haberla anotado.": "Marked as skipped. That's different from not logging it.",
@@ -1758,19 +1760,58 @@ function estadoSesion(b,d){
      lo que de verdad importa: hay ejercicios sin tocar. El detalle serie
      a serie sigue entero en la hoja. */
   let ejercicios=0, conAlgo=0, anotadas=0;
+  const usados = [];
   conSeries.forEach(f=>{
     const n = parseInt(f.SERIES)||1; ejercicios++;
     let m = 0;
-    for(let i=0;i<n;i++){ if(idsSerie(b,d,f,i).some(id=>LOG[id] && LOG[id].ok)) m++; }
+    for(let i=0;i<n;i++){ const ok = idsSerie(b,d,f,i).filter(id=>LOG[id] && LOG[id].ok); if(ok.length){ m++; usados.push(...ok); } }
     anotadas += m; if(m) conAlgo++;
   });
   conReg.forEach(f=>{
     ejercicios++;
-    const v = LOG[idReg(b,d,alternativasDe(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO'])];
-    if(v && v.ok){ anotadas++; conAlgo++; }
+    const id = idReg(b,d,alternativasDe(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO']), v = LOG[id];
+    if(v && v.ok){ anotadas++; conAlgo++; usados.push(id); }
   });
   if(!anotadas) return 'sin';
-  return conAlgo >= ejercicios ? 'hecha' : 'parcial';
+  if(conAlgo >= ejercicios) return 'hecha';
+  /* v5.42 (D-216): una sesion de un dia que ya paso, con todo lo anotado ya
+     enviado, esta terminada aunque no se marcara cada ejercicio. Asi se cierran
+     tambien las que se enviaron antes de este cambio. La de hoy sigue en
+     «Parcial» hasta que se toque Guardar y enviar. */
+  const ult = usados.map(id=>String(LOG[id].ts||'').slice(0,10)).sort().pop() || '';
+  const pasada = !/^\d{4}-\d\d-\d\d$/.test(ult) || ult < hoyISO();
+  if(pasada && usados.every(id=>LOG[id].sent && !LOG[id].corregido)) return 'hecha';
+  return 'parcial';
+}
+/* v5.42 (D-216, Salvador 23 oct): «Guardar y enviar» CIERRA la sesion. Lo que no
+   tenga nada anotado se marca como no hecho (igual que el boton «No he hecho este
+   ejercicio») y sale a la hoja como omitido, asi la sesion queda Registrada aunque
+   no se marcara cada cosa. Se puede corregir despues: «Deshacer» en el ejercicio.
+   Si no hay NADA anotado, no se cierra (un toque sin querer no la da por hecha). */
+function cierraSesion(bl, dia){
+  if(!bl || !dia || LOG[idOmit(bl,dia)]) return 0;
+  const fs = sesionDe(bl,dia).filter(f=>parseInt(f.ORDEN)>0 && !esExtra(f) && !(cardioOpciones(f) && !cardioElegido(bl,dia,f)));
+  const vale = v => v && v.ok && !v.borrada;
+  let hay = vale(LOG[idVal(bl,dia)]) || !!(LOG[idObs(bl,dia)] && LOG[idObs(bl,dia)].obs);
+  const faltan = [];
+  fs.forEach(f=>{
+    const orig = f['EJERCICIO / ELEMENTO'] || '', nom = alternativasDe(f) ? nombreEf(bl,dia,f) : orig;
+    const n = parseInt(f.SERIES)||0, cs = camposDe(f);
+    if(!cs.length && !n) return;                         // fila sin nada que anotar
+    if(saltado(bl,dia,orig)) return;
+    let hecho = false;
+    if(cs.length) hecho = vale(LOG[idReg(bl,dia,nom)]);
+    for(let i=0;i<n && !hecho;i++) hecho = idsSerie(bl,dia,f,i).some(id=>vale(LOG[id]));
+    if(!hecho && estacionesDe(f).length) hecho = estacionesDe(f).some((e,i)=>vale(LOG[idEst(bl,dia,orig,i)]));
+    if(!hecho) hecho = [idFoto(bl,dia,nom), idVideo(bl,dia,nom)].some(id=>LOG[id] && !LOG[id].borrada);   // subio la foto del reloj o un video
+    if(hecho) hay = true; else faltan.push(orig);
+  });
+  if(!hay || !faltan.length) return 0;
+  const ts = new Date().toISOString();
+  faltan.forEach(n=>{ const id = idSalto(bl,dia,n); recordarNombre(id, n); LOG[id] = {salto:true, ok:true, ts:ts, auto:true}; });
+  marcaFecha(bl, dia);
+  LS.set('log', LOG);
+  return faltan.length;
 }
 const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['verde','Registrada'], omitida:['rojo','Omitida']};
 const chipEstado = e => { const [c,t]=ETQ[e]||ETQ.sin; return `<span class="sem ${c}"><i>${semForma(c)}</i>${tr(t)}</span>`; };
@@ -3038,7 +3079,7 @@ function vSesion(){
     ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
     ${mapaCuerpo(bl, dia)}
     ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
-      ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Al terminar, ")}<b>${tr("Guardar y enviar")}</b>${tr(" lo manda todo, hayas tocado «Anotar» o no. Anotar sirve para ir tachando lo hecho; si te equivocas, vuelve a tocarlo o usa la ✕.")}</p>`
+      ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Al terminar, ")}<b>${tr("Guardar y enviar")}</b>${tr(" lo manda todo, hayas tocado «Anotar» o no, y da la sesión por terminada: lo que no hayas anotado queda como no hecho. Si te equivocas, puedes corregirlo después.")}</p>`
       : `<p class="sm" style="margin-top:12px">${tr("Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.")}</p>`}
   </div>
   ${est==='hecha'&&!omitida?`<div class="yahecha">
@@ -3895,6 +3936,11 @@ async function enviar(opc){
   if(S.enviando && Date.now() - (S.enviandoDesde||0) < 45000){ if(opc.auto) S.otraVez = true; return; }
   if(opc.auto && navigator.onLine === false) return;
   confirmaLoEscrito();      // v5.6: lo escrito cuenta, aunque no lleve "Anotar"
+  let cerrados = 0;
+  if(!opc.auto && S.vista === 'sesion' && S.d){           // v5.42: cierra la sesion que se esta viendo
+    const blS = bloqueDe(semanaVista()), diaS = S.dia || (diaDeHoy(blS)||{})['DÍA'];
+    cerrados = cierraSesion(blS, diaS);
+  }
   const reg = [], hoy = new Date().toISOString().slice(0,10);
   /* v5.11: lo que sale, tal como sale. Al volver la respuesta solo se marca
      como enviado lo que no ha cambiado mientras tanto: con el autoenvio se
@@ -4022,7 +4068,9 @@ async function enviar(opc){
     } else {
       S.pila = []; S.vista = S.resumen ? 'resumen' : 'hoy'; window.scrollTo(0,0); pinta();
       const c = d.corregidas||0;
-      toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}` : tr('Enviado. Salvador ya lo tiene.'));
+      toast(c ? `${tr('Enviado.')} ${c} ${tr(c>1?'datos corregidos.':'dato corregido.')}`
+              : cerrados ? `${tr('Enviado. Sesión terminada.')} ${cerrados} ${tr(cerrados>1?'ejercicios quedan como no hechos.':'ejercicio queda como no hecho.')}`
+              : tr('Enviado. Salvador ya lo tiene.'));
     }
   }catch(e){
     clearTimeout(reloj);
