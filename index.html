@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.44';   // D-219: un bloque compuesto no es una superserie
+const VERSION = 'v5.45';   // D-220: Ver como se hace solo en ejercicios concretos
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -3488,7 +3488,8 @@ function quitaSalto(bl, dia, ej){
    superserie, con dos «Ver cómo se hace» sin sentido. Un bloque compuesto (con
    corchetes, o «1 km + …») no es un ejercicio: ni se parte ni se busca. Un «+»
    dentro de () o [] tampoco parte. */
-const bloqueCompuesto = n => /[\[\]]/.test(String(n||'')) || /\b\d+([.,]\d+)?\s*(km|m|metros)\s*\+/i.test(String(n||''));
+const bloqueCompuesto = n => /[\[\]]/.test(String(n||'')) || /\b\d+([.,]\d+)?\s*(km|m|metros)\s*\+/i.test(String(n||''))
+  || /\+\s*\d+([.,]\d+)?\s*(km|m|metros)\b/i.test(String(n||''));
 function partesBusqueda(nombre){
   const n = String(nombre||'');
   if(/top set|back-?off|\+\s*\d+\s*series/i.test(n) || bloqueCompuesto(n)) return [n];
@@ -3500,8 +3501,44 @@ function partesBusqueda(nombre){
 /* en «1 km + sled push 50 m» se busca solo la estacion; en «[1 km + estacion completa]», nada */
 const estacionesBusqueda = n => /[\[\]]/.test(String(n||'')) ? [] : String(n||'').split(/\s+\+\s+/).slice(1)
   .map(x => x.replace(/\s+\d[\d.,]*\s*(m|kg|metros)?\s*$/i, '').trim()).filter(x => x && !/estaci|^\d/.test(norm(x)))
-  .map(x => x.charAt(0).toUpperCase() + x.slice(1));
+  .map(x => x.charAt(0).toUpperCase() + x.slice(1)).map(x => ALIAS_EST[norm(x)] || x);
+/* v5.45 (23 oct, Salvador): «Ver cómo se hace» solo en ejercicios concretos,
+   nunca en conceptos («Formato», «Calentamiento», «La carrera», «Vuelta 2 ·
+   Aprieta», «AMRAP 1 · …», «Las 8 estaciones»). Y lo que se busca es el
+   ejercicio, sin la etiqueta de delante («Ronda 1 ·», «Estación 2 ·», «Core A ·»,
+   «Superset A:») ni la coletilla de detrás («· 500 m», «· 6 kg a 3,00 m»,
+   «· técnica», «- ligero», «· top set»). */
+const CONCEPTO = /^(formato|format\b|calentamiento|warm.?up|activaci[oó]n|la carrera|carrera\b|hyrox|clase\b|vuelta\b|amrap|bloque continuo|continuous block|stations?$|las \d+ estaciones|estaci[oó]n h[ií]brida|circuito|movilidad( y repaso| \+ core)?$|mobility$|light upper body|medida 2|tu hombro, en v|ejercicio ya indicado|cardio\b|prefatiga|el reto|3\/4|¾|ensayo|simulaci|paseo y movilidad|caminar suave|t[eé]cnica de (tu peor|estaci)|si tienes|test\b|calibraci|opcional\b|run-walk|zancadas y wall balls, en peque)/;
+const ALIAS_EST = {empuje:'Empuje de trineo', arrastre:'Arrastre de trineo', farmers:'Farmers carry', remo:'Remo ergómetro', row:'Rowing machine'};
+function nombreBuscable(nombre){
+  let n = String(nombre||'').replace(/\s*\([^)]*\)/g, '').trim(), antes;
+  const conEtiqueta = /^(ronda|round|bloque|block|tramo|estaci[oó]n|station|\d+\s+[·:\-–—])/i.test(n) || /·\s*\d/.test(n) || /\d\s*(m|km|metros)\b/i.test(n);
+  do { antes = n;
+    n = n.replace(/^(ronda|round|bloque|block|tramo|estaci[oó]n|station)\s*\d+[a-z]?\s*[·:\-–—]\s*/i, '')
+         .replace(/^(core( [a-d])?( final)?|medida \w+|prueba de tolerancia|superset( [a-z])?|superserie[^:·]*)\s*[·:\-–—]\s*/i, '')
+         .replace(/^\d+[a-z]?\s+[·:\-–—]\s+/i, '');
+  } while(n !== antes);
+  n = n.replace(/\s+[·\-–—]\s+.*$/, '')                    // «· 500 m», «- ligero», «· paired with…»
+       .replace(/\s+\d[\d.,]*\s*(m|km|kg|metros|reps)\b.*$/i, '').replace(/\s+\d[\d.,]*$/, '')   // «Remo 1.000 m», «Wall balls 100»
+       .replace(/^\d+\s+(?=\D)/, '')                                  // «100 wall balls»
+       .trim();
+  if(!/\s/.test(n)){                                // una sola palabra: la etiqueta se comio el ejercicio
+    const a = ALIAS_EST[norm(n)];
+    if(a && (conEtiqueta || norm(n) !== 'remo')) n = a;
+    else {
+      const m = String(nombre||'').replace(/\s*\([^)]*\)/g, '').match(/^([^·\-–—]+)\s+[·\-–—]\s+([^·]+)/);   // «Banda · rotación externa»
+      if(m && !/\d/.test(m[2])) n = (m[1].trim() + ' ' + m[2].trim()).replace(/^\d+\s*/, '');
+    }
+  }
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
+}
+const esConcepto = nombre => { const n = nombreBuscable(nombre); return !n || CONCEPTO.test(norm(n)) || CONCEPTO.test(norm(nombre)); };
 function botonesBusqueda(nombre){
+  if(esConcepto(nombre) && !bloqueCompuesto(nombre)) return '';
+  if(!bloqueCompuesto(nombre) && partesBusqueda(nombre).length === 1){
+    const b = nombreBuscable(nombre);
+    return `<a class="verej" href="${esc(buscarYoutube(b))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}${norm(b) !== norm(nombre) ? ': ' + esc(b) : ''}</a>`;
+  }
   if(bloqueCompuesto(nombre)){
     const e = estacionesBusqueda(nombre);
     return e.map(x => `<a class="verej" href="${esc(buscarYoutube(x))}" target="_blank" rel="noopener">🔎 ${tr("Ver cómo se hace")}: ${esc(x)}</a>`).join('');
