@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.46';   // D-221: lo de hace dos semanas ya es No hecha
+const VERSION = 'v5.47';   // D-223: antes de la primera semana, Hoy dice cuando empieza
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -780,7 +780,7 @@ const EN = {
   "intensidad": "intensity",
   "1 = muy suave · 5 = a tope": "1 = very easy · 5 = all out",
   "Algo que contarme": "Anything to tell me",
-  "Guardar": "Save", "Ver todas": "See all", "Hecha sin datos": "Done, not logged", "No hecha": "Not done", "Marcar": "Mark", "La hice (sin apuntar)": "I did it (not logged)", "Cuenta como hecha; no hace falta poner pesos.": "Counts as done; no need to add weights.", "No la hice / no la voy a hacer": "I did not / will not do it", "Deja de salir como pendiente.": "It stops showing as pending.", "Apuntarla ahora": "Log it now", "Cancelar": "Cancel", "¿Por qué? Un toque y listo.": "Why? One tap and done.", "No tuve tiempo": "I had no time", "No me gustó": "I did not like it", "No me encuentro bien": "I am not feeling well", "Tengo una molestia que me limita": "A niggle is limiting me", "Otro": "Other", "¿Dónde? ¿Qué te molesta? (opcional)": "Where? What bothers you? (optional)", "Cuéntame el motivo (opcional)": "Tell me why (optional)", "Sin motivo": "No reason", "Marcada como hecha.": "Marked as done.", "Marcada como no hecha. Ya no sale pendiente.": "Marked as not done. It no longer shows as pending.", "La marcaste como hecha sin apuntar.": "You marked it as done without logging.", "La marcaste como no hecha.": "You marked it as not done.", "Quitar la marca": "Remove the mark", "Vuelve a quedar pendiente.": "It becomes pending again.", "Si al final la haces o quieres apuntarla, quita la marca.": "If you end up doing it or want to log it, remove the mark.", "Tienes una sesión sin registrar": "You have a session not logged", "Tienes sesiones sin registrar": "You have sessions not logged", "Dime qué pasó con cada una. Si cambiaste el día, toca «Aún no».": "Tell me what happened with each one. If you moved the day, tap Not yet.", "semana pasada": "last week", "La hice sin apuntar": "Did it, not logged", "No la hice": "Did not do it", "Aún no": "Not yet", "Más tarde": "Later", "Vale. Te la vuelvo a preguntar en un par de días.": "OK. I will ask again in a couple of days.", "Cronometrar": "Time it", "Cronómetro": "Stopwatch", "en pausa": "paused", "Pausa": "Pause", "Seguir": "Resume", "Descartar": "Discard", "¿Descartar este tiempo?": "Discard this time?", "Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?": "Another stopwatch is running. Discard it and start this one?", "Tiempo guardado. Puedes cambiarlo a mano.": "Time saved. You can change it by hand.", "Abre la sesión de este ejercicio para guardar el tiempo.": "Open this exercise's session to save the time.",
+  "Guardar": "Save", "Tu plan empieza el": "Your plan starts on", "Hasta entonces no hay nada que anotar. En Mi plan puedes ver lo que viene para organizarte.": "Until then there is nothing to log. In My plan you can see what is coming so you can get organised.", "Ver todas": "See all", "Hecha sin datos": "Done, not logged", "No hecha": "Not done", "Marcar": "Mark", "La hice (sin apuntar)": "I did it (not logged)", "Cuenta como hecha; no hace falta poner pesos.": "Counts as done; no need to add weights.", "No la hice / no la voy a hacer": "I did not / will not do it", "Deja de salir como pendiente.": "It stops showing as pending.", "Apuntarla ahora": "Log it now", "Cancelar": "Cancel", "¿Por qué? Un toque y listo.": "Why? One tap and done.", "No tuve tiempo": "I had no time", "No me gustó": "I did not like it", "No me encuentro bien": "I am not feeling well", "Tengo una molestia que me limita": "A niggle is limiting me", "Otro": "Other", "¿Dónde? ¿Qué te molesta? (opcional)": "Where? What bothers you? (optional)", "Cuéntame el motivo (opcional)": "Tell me why (optional)", "Sin motivo": "No reason", "Marcada como hecha.": "Marked as done.", "Marcada como no hecha. Ya no sale pendiente.": "Marked as not done. It no longer shows as pending.", "La marcaste como hecha sin apuntar.": "You marked it as done without logging.", "La marcaste como no hecha.": "You marked it as not done.", "Quitar la marca": "Remove the mark", "Vuelve a quedar pendiente.": "It becomes pending again.", "Si al final la haces o quieres apuntarla, quita la marca.": "If you end up doing it or want to log it, remove the mark.", "Tienes una sesión sin registrar": "You have a session not logged", "Tienes sesiones sin registrar": "You have sessions not logged", "Dime qué pasó con cada una. Si cambiaste el día, toca «Aún no».": "Tell me what happened with each one. If you moved the day, tap Not yet.", "semana pasada": "last week", "La hice sin apuntar": "Did it, not logged", "No la hice": "Did not do it", "Aún no": "Not yet", "Más tarde": "Later", "Vale. Te la vuelvo a preguntar en un par de días.": "OK. I will ask again in a couple of days.", "Cronometrar": "Time it", "Cronómetro": "Stopwatch", "en pausa": "paused", "Pausa": "Pause", "Seguir": "Resume", "Descartar": "Discard", "¿Descartar este tiempo?": "Discard this time?", "Hay otro cronómetro en marcha. ¿Lo descarto y empiezo este?": "Another stopwatch is running. Discard it and start this one?", "Tiempo guardado. Puedes cambiarlo a mano.": "Time saved. You can change it by hand.", "Abre la sesión de este ejercicio para guardar el tiempo.": "Open this exercise's session to save the time.",
   "Cancelar": "Cancel",
   "Quitar": "Remove",
   "extra": "extra",
@@ -2350,7 +2350,17 @@ function vHoy(){
   if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
-  if(!d || esDescanso(d)){
+  /* v5.47 (24 oct, alta de Christian): antes de que empiece la primera semana,
+     Hoy no ensena la sesion de ese dia de la semana (era la de la semana que
+     viene y se podia anotar en la semana equivocada). Dice cuando empieza. */
+  const ini = S.semana && fechaIni(S.semana.FECHAS), cero = new Date(); cero.setHours(0,0,0,0);
+  if(ini && cero < ini){
+    const dd = (enIngles() ? DIAS_EN : DIAS)[ini.getDay()].toLowerCase();
+    const mm = ini.toLocaleDateString(enIngles() ? 'en-GB' : 'es-ES', {day:'numeric', month:'long'});
+    bloqueHoy = `<div class="card"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
+      <h2 style="margin-top:6px">${tr('Tu plan empieza el')} ${esc(dd)} ${esc(mm)}</h2>
+      <p class="mut" style="margin-top:8px">${tr('Hasta entonces no hay nada que anotar. En Mi plan puedes ver lo que viene para organizarte.')}</p></div>`;
+  } else if(!d || esDescanso(d)){
     bloqueHoy = `<div class="card"><div class="lbl">${tr('Hoy')} · ${esc(hoyTxt)}</div>
       <h2 style="margin-top:6px">${d?esc(partir(d['SESIÓN']).t):tr("Descanso")}</h2>
       ${d&&d.FRASE?`<p class="frase">${esc(d.FRASE)}</p>`:''}
@@ -4125,7 +4135,13 @@ function sesionesPorCerrar(){
       diasDeBloque(bl).forEach(x=>{
         const dia = x['DÍA'];
         if(esDescanso(x) || esOpcional(x) || !sesionDe(bl, dia).length) return;
-        if(!anterior){ const k = idxDia(dia); if(k < 0 || k >= hoy) return; }   // esta semana: solo dias ya pasados
+        if(!anterior){                                   // esta semana: solo dias ya pasados, por su fecha real
+          const k = idxDia(dia); if(k < 0) return;
+          const iw = fechaIni(w.FECHAS);
+          if(iw){ const f = new Date(iw); f.setDate(f.getDate() + (k - (iw.getDay() + 6) % 7 + 7) % 7);
+                  const c0 = new Date(); c0.setHours(0,0,0,0); if(f >= c0) return; }
+          else if(k >= hoy) return;
+        }
         if(estadoSesion(bl, dia) !== 'sin') return;
         const clave = String(w.SEMANA) + '~' + slug(dia);
         if(apl[clave] && apl[clave] > ahora) return;
