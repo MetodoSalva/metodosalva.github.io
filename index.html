@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.48';   // D-225: banda no es siempre hombro
+const VERSION = 'v5.49';   // D-227: Actualizar trae siempre la version nueva
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1931,7 +1931,13 @@ async function actualizar(){
     const m = t.match(/const VERSION = '([^']+)'/);
     nueva = !!(m && m[1] !== VERSION);
   }catch(e){}
-  if(nueva){ try{ enviarAlSalir(); }catch(e){} setTimeout(()=>location.reload(), 400); return; }
+  if(nueva){
+    /* v5.49: antes de recargar se refresca la copia que guarda el navegador de ESTA
+       direccion (?c=…&k=…); si no, la recarga podia traer la version vieja 10 minutos. */
+    try{ enviarAlSalir(); }catch(e){}
+    try{ await fetch(location.href, {cache:'reload'}); await fetch('./index.html', {cache:'reload'}); }catch(e){}
+    setTimeout(()=>location.reload(), 300); return;
+  }
   const antes = S.d;
   await cargar();
   S.actualizando = false; pinta();

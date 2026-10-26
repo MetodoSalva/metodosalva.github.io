@@ -2,12 +2,12 @@
    Red primero: un despliegue nuevo se ve en cuanto hay cobertura.
    Cache de reserva: sin cobertura, la app abre igual con lo ultimo visto.
    Lo de fuera de este dominio (el puente de Google, las fuentes) no se toca. */
-const CACHE  = 'salva-v84';
+const CACHE  = 'salva-v85';
 const NUCLEO = ['./', './index.html', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {
-    return c.addAll(NUCLEO);
+    return c.addAll(NUCLEO.map(function (u) { return new Request(u, { cache: 'reload' }); }));
   }).then(function () { return self.skipWaiting(); }).catch(function () {}));
 });
 
@@ -35,8 +35,12 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
+  /* v85 (26 oct, lo vio Carmela): la pagina se pide sin la cache HTTP del navegador
+     (GitHub Pages la guarda 10 min): si no, una version nueva tardaba en verse aunque
+     se tocara Actualizar. 'no-cache' revalida con el servidor; sin cambios, no baja nada. */
+  const pagina = req.mode === 'navigate' || /\.html?$|\/$/.test(new URL(req.url).pathname) || /\.js$/.test(new URL(req.url).pathname);
   e.respondWith(
-    fetch(req).then(function (res) {
+    (pagina ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req)).then(function (res) {
       const copia = res.clone();
       caches.open(CACHE).then(function (c) { c.put(req, copia); }).catch(function () {});
       return res;
