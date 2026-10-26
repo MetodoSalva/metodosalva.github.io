@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.47';   // D-223: antes de la primera semana, Hoy dice cuando empieza
+const VERSION = 'v5.48';   // D-225: banda no es siempre hombro
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -2838,7 +2838,7 @@ const MUSCULOS = [
   ['femoral', /femoral|hamstring|leg curl|nordico|nordic|peso muerto|deadlift|rdl|rumano|romanian|good morning|swing|extension de cadera|hip extension|sled pull/],
   ['gemelo', /talon|calf|gemelo|soleo|tibial|pogo|salto|jump|comba|skipping/],
   ['pecho', /press de banca|banca|bench(?!.supported)|pecho|chest(?!.supported)|flexiones|flexion de brazos|push.?up|aperturas|fly|fondos|\bdip|burpee|press inclinado|incline.{0,12}press|press en maquina|press de suelo/],
-  ['hombro', /hombro|shoulder|militar|overhead press|press overhead|elevaci\w* lateral|lateral raise|arnold|face pull|pajaro|reverse pec|rotacion externa|rotacion interna|external rotation|\bt e y\b|\by boca abajo|wall ?ball|landmine|pike|handstand|banda|press por encima|serrato/],
+  ['hombro', /hombro|shoulder|militar|overhead press|press overhead|elevaci\w* lateral|lateral raise|arnold|face pull|pajaro|reverse pec|rotacion externa|rotacion interna|external rotation|\bt e y\b|\by boca abajo|wall ?ball|landmine|pike|handstand|^banda\b|pull-?apart|aperturas? inversas?|press por encima|serrato/],   // v5.48: «banda» sola ya no es hombro (pasos laterales, abducción, almeja con banda)
   ['espalda', /remo|row|jalon|pulldown|dominada|pull.?up|chin.?up|face pull|pullover|retraccion|escapular|reverse pec|pajaro|sled pull|farmer|granjero|encogimiento|shrug|skierg|\bski\b|colgarse|\bt e y\b|\by boca abajo/],
   ['brazos', /biceps|triceps|pushdown|fondos|\bdip|press frances|skull|martillo|hammer|farmer|granjero|colgarse/],
   ['core', /core|plancha|plank|dead ?bug|bicho|pallof|crunch|hollow|\boso\b|bear|abdominal|ab wheel|rueda|rollout|bird ?dog|transverso|antirrotacion|anti.?rot|lenador|woodchop|russian|copenhag|v-up|elevacion de piernas|leg raise|farmer|suitcase|maleta|carry|sit.?up|serrato/],
