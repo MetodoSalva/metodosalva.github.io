@@ -136,6 +136,11 @@
 .pf2 small{color:var(--txt3);font-size:12px}
 .pv{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
 .pv b{font-family:var(--m);font-size:32px;font-weight:600;color:var(--tinta)}
+.pfrir{margin-top:10px}.pfrir small{color:var(--txt3);font-size:12px}
+.pfrir .rq{margin-left:4px;border:1px solid var(--linea2);background:none;color:var(--txt3);border-radius:8px;padding:0 6px;font-size:12px}
+.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+.chips button{height:42px;border-radius:12px;border:1px solid var(--linea2);background:var(--sup2);color:var(--txt);font-family:var(--m);font-size:18px;font-weight:600}
+.chips button.on{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
 .pv button{width:42px;height:42px;border-radius:50%;border:1px solid var(--linea2);background:var(--sup);color:var(--txt);font-size:22px;line-height:1}
 .diarow > .dia.toca{background:var(--verde-b);border-radius:14px;padding:12px 56px 12px 14px;border-bottom:0}
 .dia.toca .lbl{color:var(--verde)}
@@ -629,7 +634,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.53';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
+const VERSION = 'v5.53.1';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -2936,13 +2941,17 @@ function panelSerie(bl, dia, f){
   if(k < 0) return `<div class="panelf hecho"><b>✓ ${tr('Todas las series hechas')}</b></div>`;
   const id = idSerie(bl, dia, nom, k), v = LOG[id] || {}, ant = k ? (LOG[idSerie(bl,dia,nom,k-1)] || {}) : {}, u = ultimaVez(bl, dia, nom) || {};
   const sg = (sugerencia(bl, dia, f) || '').match(/<b>[^<:]*:\s*([\d.,]+)/);   // «Hoy intenta: 21 kg» manda sobre la ultima vez
-  const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || u.reps || ((String(f['REPS / DOSIS']||'').match(/\d+/)||[''])[0]);
+  const sgR = (sugerencia(bl, dia, f) || '').match(/<b>[^<]*\(\s*\d+\s*→\s*(\d+)\s*\)/);   // «una repeticion mas (8 → 9)»
+  const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || (sgR ? sgR[1] : '') || u.reps || ((String(f['REPS / DOSIS']||'').match(/\d+/)||[''])[0]);
   const manc = /mancuerna|dumbbell|\bdb\b/i.test(nom), paso = manc ? 1 : 2.5;
-  S.pf = {id: id, c: c, r: r, paso: paso};
+  const obj = rirObjetivo(f), rir = v.rir || ant.rir || ((String(obj).match(/\d+/)||[''])[0]);
+  S.pf = {id: id, c: c, r: r, rir: rir, paso: paso};
   return `<div class="panelf"><div class="lbl">${tr('Serie')} ${k+1} ${tr('de')} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)} × ${esc(u.reps)}</span>` : ''}</div>
     <div class="pf2">
       <div><small>${esc(unidadDe(slug(nom)))}</small><div class="pv"><button onclick="pasoF('c',-1)" aria-label="${tr('Menos peso')}">−</button><b id="pf_c">${esc(c||'—')}</b><button onclick="pasoF('c',1)" aria-label="${tr('Más peso')}">+</button></div></div>
       <div><small>reps</small><div class="pv"><button onclick="pasoF('r',-1)" aria-label="${tr('Menos repeticiones')}">−</button><b id="pf_r">${esc(r||'—')}</b><button onclick="pasoF('r',1)" aria-label="${tr('Más repeticiones')}">+</button></div></div></div>
+    <div class="pfrir"><small>RIR · ${tr('las que te quedaban')}${obj ? ` · ${tr('objetivo')} ${esc(obj)}` : ''} <button class="rq" onclick="ayudaRIR('${id}')" aria-label="${tr('¿Qué pongo en el RIR?')}">${enIngles()?'?':'¿?'}</button></small>
+      <div class="chips" id="pf_rir">${['0','1','2','3','4'].map(x=>`<button class="${String(rir)===x?'on':''}" onclick="rirF('${x}')">${x}${x==='4'?'+':''}</button>`).join('')}</div></div>
     <button class="btn pri big" style="margin-top:10px" onclick="serieHechaF()">${tr('Serie hecha')}</button></div>`;
 }
 function pasoF(k, d){
@@ -2952,11 +2961,17 @@ function pasoF(k, d){
   const b = document.getElementById('pf_' + k); if(b) b.textContent = p[k];
   const inp = document.getElementById(k + '_' + p.id); if(inp){ inp.value = p[k]; anota(p.id); }
 }
+function rirF(x){
+  const p = S.pf; if(!p) return; p.rir = x;
+  document.querySelectorAll('#pf_rir button').forEach(b=>b.classList.toggle('on', b.textContent.replace('+','') === x));
+  const inp = document.getElementById('i_' + p.id); if(inp){ inp.value = x; anota(p.id); }
+}
 function serieHechaF(){
   const p = S.pf; if(!p) return;
   const r = document.getElementById('r_' + p.id), c = document.getElementById('c_' + p.id);
   if(r && !r.value.trim() && p.r) r.value = p.r;
   if(c && !c.value.trim() && p.c) c.value = p.c;
+  const ir = document.getElementById('i_' + p.id); if(ir && !ir.value.trim() && p.rir !== '') ir.value = p.rir;
   if(!r || !r.value.trim()){ toast(tr('Pon las repeticiones con el + o en la casilla.')); return; }
   confirmar(p.id); setTimeout(pinta, 60);
 }
