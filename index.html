@@ -119,6 +119,24 @@
 .ritmo-c{font-size:14px;margin-top:4px;text-align:center}
 .ritmo-c.ok{color:var(--verde)} .ritmo-c.justo{color:var(--ambar)} .ritmo-c.tarde{color:var(--rojo)}
 .diarow:has(.toca){border-bottom:0;margin:2px 0 8px}
+.lista-c .lc{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;border-bottom:1px solid var(--linea);padding:9px 2px;text-align:left;color:var(--txt)}
+.lista-c .lc:last-of-type{border-bottom:0}
+.lista-c .pt{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--linea2);flex:none}
+.lista-c .hecho .pt,.lista-c .salto .pt{background:var(--verde);border-color:var(--verde)}
+.lista-c .medio .pt{background:linear-gradient(90deg,var(--verde) 50%,transparent 50%);border-color:var(--verde)}
+.lista-c .salto .nm2{text-decoration:line-through;color:var(--txt3)}
+.lista-c .nm2{flex:1;font-size:14.5px;font-weight:500}
+.lista-c .ds2{font-size:12.5px;color:var(--txt3)}
+.lista-c .ahora{background:var(--verde-b);border-radius:10px;padding:9px 8px;border-bottom:0}
+.lista-c .ahora .pt{border-color:var(--verde)} .lista-c .ahora .ds2{color:var(--verde);font-weight:600}
+.panelf{background:var(--sup);border:1px solid var(--linea);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.panelf.hecho{text-align:center;color:var(--verde)}
+.pf2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pf2 > div{background:var(--sup2);border-radius:14px;padding:10px;text-align:center}
+.pf2 small{color:var(--txt3);font-size:12px}
+.pv{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.pv b{font-family:var(--m);font-size:32px;font-weight:600;color:var(--tinta)}
+.pv button{width:42px;height:42px;border-radius:50%;border:1px solid var(--linea2);background:var(--sup);color:var(--txt);font-size:22px;line-height:1}
 .diarow > .dia.toca{background:var(--verde-b);border-radius:14px;padding:12px 56px 12px 14px;border-bottom:0}
 .dia.toca .lbl{color:var(--verde)}
 .diarow:has(.toca) .mas{top:12px;right:10px}
@@ -611,7 +629,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.52.1';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
+const VERSION = 'v5.53';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -2875,12 +2893,80 @@ function vHoyNueva(bl, fase, nota){
     <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>` : ''}
   <p class="sm" style="text-align:center;margin-top:16px">SALVA ${VERSION} · ${tr('interfaz nueva')}</p>`;
 }
+/* ---------- v5.53 (D-239, fase 2): LA SESION POR DENTRO en la interfaz nueva ----------
+   Arriba la lista compacta (hecho / ahora / pendiente); debajo, UN ejercicio cada vez
+   con la tarjeta de siempre (no se pierde nada: cambiar ejercicio, notas, video) y un
+   panel grande para la serie que toca: kg y reps con - / + y «Serie hecha». */
+function hechoEj(bl, dia, f){
+  const nom = nombreEf(bl, dia, f), n = (parseInt(f.SERIES)||0) + masSeries(bl, dia, f['EJERCICIO / ELEMENTO']||''), cs = camposDe(f);
+  if(saltado(bl, dia, f['EJERCICIO / ELEMENTO']||'') || saltado(bl, dia, nom)) return 'salto';
+  if(cs.length) return (LOG[idReg(bl,dia,nom)]||{}).ok ? 'hecho' : 'no';
+  let k = 0; for(let i=0;i<n;i++) if(idsSerie(bl,dia,f,i).some(id=>(LOG[id]||{}).ok && !(LOG[id]||{}).borrada)) k++;
+  return !k ? 'no' : (k >= n ? 'hecho' : 'medio');
+}
+function sesionFoco(bl, dia, ejs){
+  const lista = ejs.filter(f=>(parseInt(f.SERIES)||0) > 0 || camposDe(f).length || cardioOpciones(f));
+  if(!lista.length) return ejerciciosConCambios(bl, dia, ejs);
+  const clave = bl + '~' + dia; S.foco = S.foco || {};
+  let i = S.foco[clave];
+  if(typeof i !== 'number' || i >= lista.length){ i = lista.findIndex(f=>hechoEj(bl,dia,f) === 'no' || hechoEj(bl,dia,f) === 'medio'); if(i < 0) i = 0; }
+  const est = lista.map(f=>hechoEj(bl, dia, f)), hechos = est.filter(x=>x === 'hecho' || x === 'salto').length;
+  const f = lista[i];
+  const fila = (g, j) => { const e = est[j], ahora = j === i;
+    return `<button class="lc ${ahora ? 'ahora' : ''} ${e}" onclick="S.foco['${esc(clave)}']=${j}; pinta(); document.getElementById('foco').scrollIntoView({behavior:'smooth'})">
+      <span class="pt"></span><span class="nm2">${esc(nombreEf(bl, dia, g))}</span>
+      <span class="ds2">${ahora ? tr('ahora') : esc((parseInt(g.SERIES)||0) ? (parseInt(g.SERIES) + masSeries(bl,dia,g['EJERCICIO / ELEMENTO']||'')) + '×' + (g['REPS / DOSIS']||'') : (g['REPS / DOSIS']||''))}</span></button>`; };
+  return `<div class="card lista-c"><div class="row sp"><b>${tr('Tu sesión')}</b><span class="sm">${hechos} ${tr('de')} ${lista.length}</span></div>
+      <div class="bar" style="margin:8px 0 6px"><i style="width:${Math.round(hechos/lista.length*100)}%"></i></div>
+      ${lista.map(fila).join('')}
+      <button class="btn sm2" style="margin-top:8px" onclick="S.verTodos=true; pinta()">${tr('Ver todos a la vez')}</button></div>
+    <div id="foco" class="foco"><div class="sm" style="margin:4px 2px 6px">${tr('Ejercicio')} ${i+1} ${tr('de')} ${lista.length}</div>
+      ${panelSerie(bl, dia, f)}${ejercicio(bl, dia, f)}
+      <div class="row sp" style="margin:10px 0 18px;gap:8px">
+        <button class="btn" style="flex:1" ${i === 0 ? 'disabled' : ''} onclick="S.foco['${esc(clave)}']=${i-1}; pinta(); document.getElementById('foco').scrollIntoView()">← ${tr('Anterior')}</button>
+        <button class="btn pri" style="flex:1" ${i === lista.length-1 ? 'disabled' : ''} onclick="S.foco['${esc(clave)}']=${i+1}; pinta(); document.getElementById('foco').scrollIntoView()">${tr('Siguiente')} →</button></div></div>`;
+}
+/* el panel grande: solo en fuerza con series (no carrera, no biserie, no registro por campos) */
+function panelSerie(bl, dia, f){
+  if(soloLectura() || camposDe(f).length || esCorrer(f) || !(parseInt(f.SERIES) > 0) || partesBiserie(bl, dia, f) || cardioOpciones(f)) return '';
+  const orig = f['EJERCICIO / ELEMENTO'] || '', nom = nombreEf(bl, dia, f);
+  if(saltado(bl, dia, orig) || saltado(bl, dia, nom)) return '';
+  const n = (parseInt(f.SERIES)||0) + masSeries(bl, dia, orig);
+  let k = -1; for(let i=0;i<n;i++){ const v = LOG[idSerie(bl,dia,nom,i)]; if(!(v && v.ok)){ k = i; break; } }
+  if(k < 0) return `<div class="panelf hecho"><b>✓ ${tr('Todas las series hechas')}</b></div>`;
+  const id = idSerie(bl, dia, nom, k), v = LOG[id] || {}, ant = k ? (LOG[idSerie(bl,dia,nom,k-1)] || {}) : {}, u = ultimaVez(bl, dia, nom) || {};
+  const sg = (sugerencia(bl, dia, f) || '').match(/<b>[^<:]*:\s*([\d.,]+)/);   // «Hoy intenta: 21 kg» manda sobre la ultima vez
+  const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || u.reps || ((String(f['REPS / DOSIS']||'').match(/\d+/)||[''])[0]);
+  const manc = /mancuerna|dumbbell|\bdb\b/i.test(nom), paso = manc ? 1 : 2.5;
+  S.pf = {id: id, c: c, r: r, paso: paso};
+  return `<div class="panelf"><div class="lbl">${tr('Serie')} ${k+1} ${tr('de')} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)} × ${esc(u.reps)}</span>` : ''}</div>
+    <div class="pf2">
+      <div><small>${esc(unidadDe(slug(nom)))}</small><div class="pv"><button onclick="pasoF('c',-1)" aria-label="${tr('Menos peso')}">−</button><b id="pf_c">${esc(c||'—')}</b><button onclick="pasoF('c',1)" aria-label="${tr('Más peso')}">+</button></div></div>
+      <div><small>reps</small><div class="pv"><button onclick="pasoF('r',-1)" aria-label="${tr('Menos repeticiones')}">−</button><b id="pf_r">${esc(r||'—')}</b><button onclick="pasoF('r',1)" aria-label="${tr('Más repeticiones')}">+</button></div></div></div>
+    <button class="btn pri big" style="margin-top:10px" onclick="serieHechaF()">${tr('Serie hecha')}</button></div>`;
+}
+function pasoF(k, d){
+  const p = S.pf; if(!p) return;
+  const v = parseFloat(String(p[k]||'0').replace(',','.')) || 0;
+  p[k] = String(Math.max(0, Math.round((v + d * (k === 'c' ? p.paso : 1)) * 10) / 10));
+  const b = document.getElementById('pf_' + k); if(b) b.textContent = p[k];
+  const inp = document.getElementById(k + '_' + p.id); if(inp){ inp.value = p[k]; anota(p.id); }
+}
+function serieHechaF(){
+  const p = S.pf; if(!p) return;
+  const r = document.getElementById('r_' + p.id), c = document.getElementById('c_' + p.id);
+  if(r && !r.value.trim() && p.r) r.value = p.r;
+  if(c && !c.value.trim() && p.c) c.value = p.c;
+  if(!r || !r.value.trim()){ toast(tr('Pon las repeticiones con el + o en la casilla.')); return; }
+  confirmar(p.id); setTimeout(pinta, 60);
+}
 /* presentacion a pantalla completa: la primera vez en el piloto, y desde el menu */
 const PASOS_INTRO = [
   ['Hay una versión nueva de tu app', 'Más clara, con números grandes y tu semana de un vistazo. Pruébala: si no te convence, vuelves a la de siempre desde el menú ☰ → Interfaz.', 'nueva'],
   ['Tu semana, día a día', 'Arriba, un círculo por día. Verde = entrenaste. Gris = no; y no pasa nada, porque tu plan es flexible. El de hoy lleva anillo. Toca un día para ver qué hiciste.', 'tira'],
   ['Debajo te dice cómo vas', '«2 de 4 · quedan 4 días». Se pone en ámbar si vas justo y en rojo solo si ya no da tiempo a todas. Con todas hechas: «Semana completa ✓».', 'ritmo'],
   ['¿Qué haces hoy?', 'Tus sesiones pendientes, la siguiente marcada. Elige la que quieras: se apunta en el día que la hagas. Con ⋯ la marcas como hecha sin apuntar o la saltas.', 'lista'],
+  ['Dentro de la sesión', 'Arriba, la lista de ejercicios: ✓ los hechos y «ahora» el que toca. Debajo, uno cada vez: pon el peso y las repeticiones con − y +, ya vienen rellenos con lo sugerido, y toca «Serie hecha». Arranca el descanso solo.', 'sesion'],
   ['Elige tu estilo', 'Deportivo, Claro, Cálido o Fácil de leer (letra grande). Lo cambias cuando quieras en el menú ☰.', 'estilos']
 ];
 function introNueva(){
@@ -2892,6 +2978,7 @@ function introNueva(){
     tira: `<div class="card"><div class="tira">${['hecho','','hecho','hoy','fut','fut','fut'].map((c,j)=>`<button class="${c}"><i>${j+2}</i><b>${(enIngles()?['M','T','W','T','F','S','S']:['L','M','X','J','V','S','D'])[j]}</b></button>`).join('')}</div></div>`,
     ritmo: `<div class="card"><div class="ritmo-c">2 ${tr('de')} 4 ${tr('esta semana')} · ${tr('quedan')} 4 ${tr('días')}</div><div class="ritmo-c justo">1 ${tr('de')} 4 · ${tr('quedan')} 3 ${tr('días')} · ${tr('vas justo')}</div><div class="ritmo-c ok">${tr('Semana completa')} ✓</div></div>`,
     lista: `<div class="card"><div class="diarow"><button class="dia toca"><span style="flex:1"><span class="lbl">${tr('Siguiente')}</span><br><span class="n">${tr('Sesión')} 3 · ${tr('Pierna + trineos')}</span></span></button><button class="mas">⋯</button></div></div>`,
+    sesion: `<div class="panelf"><div class="lbl">${tr('Serie')} 1 ${tr('de')} 3</div><div class="pf2"><div><small>kg</small><div class="pv"><button>−</button><b>21</b><button>+</button></div></div><div><small>reps</small><div class="pv"><button>−</button><b>12</b><button>+</button></div></div></div><button class="btn pri big" style="margin-top:10px">${tr('Serie hecha')}</button></div>`,
     estilos: `<div class="estilos">${ESTILOS.filter(([k])=>k !== 'clasico').map(([k,n,c])=>`<button class="${estilo()===k?'on':''}" onclick="ponEstilo('${k}')"><div class="mues">${c.map(x=>`<span style="background:${x};border:1px solid rgba(128,128,128,.35)"></span>`).join('')}</div>${tr(n)}</button>`).join('')}</div>`
   }[p[2]];
   return `<div class="intro-nueva" role="dialog" aria-modal="true">
@@ -3431,8 +3518,8 @@ function vSesion(){
       <p class="sm" style="margin-top:3px">${tr('Si al final la haces o quieres apuntarla, quita la marca.')}</p>
       <button class="btn sm2" style="margin-top:8px" onclick="quitaCierre('${esc(bl)}','${esc(dia)}')">${tr('Quitar la marca')}</button></div>` : ''}
     ${meta['SEMÁFORO']?`<div class="row" style="margin-top:10px"><span class="sem ${semColor(meta['SEMÁFORO'])}"><i>${semForma(meta['SEMÁFORO'])}</i>${esc(meta['SEMÁFORO'])}</span>${fmtMin(meta.MIN)?`<span class="sm">${tr('unos')} ${esc(fmtMin(meta.MIN))}</span>`:''}</div>`:''}
-    ${mapaCuerpo(bl, dia)}
-    ${ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
+    ${mapaCuerpo(bl, dia, interfazNueva())}
+    ${interfazNueva() ? `<p class="sm" style="margin-top:10px">${tr('Se guarda solo. Al terminar, «Guardar y enviar» abajo del todo.')}</p>` : ejs.some(f=>(parseInt(f.SERIES)||0)>0 || camposDe(f).length)
       ? `<p class="sm" style="margin-top:12px">${tr("Se guarda solo mientras escribes. Al terminar, ")}<b>${tr("Guardar y enviar")}</b>${tr(" lo manda todo, hayas tocado «Anotar» o no, y da la sesión por terminada: lo que no hayas anotado queda como no hecho. Si te equivocas, puedes corregirlo después.")}</p>`
       : `<p class="sm" style="margin-top:12px">${tr("Esta sesión no tiene series que anotar. Cuando termines, cuéntame cómo ha ido y valórala: con eso ya cuenta como hecha.")}</p>`}
   </div>
@@ -3443,7 +3530,7 @@ function vSesion(){
   ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
     <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
   ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
-  ${ejerciciosConCambios(bl, dia, ejs)}
+  ${interfazNueva() && !S.verTodos ? sesionFoco(bl, dia, ejs) : (interfazNueva() ? `<div class="card flat"><button class="btn sm2" onclick="S.verTodos=false; pinta()">${tr('Ver de uno en uno')}</button></div>` : '') + ejerciciosConCambios(bl, dia, ejs)}
   ${extras.length?`<div class="extra-sep">
     <b>${tr("Si te sobran minutos")}</b>
     <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.
