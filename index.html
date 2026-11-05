@@ -537,7 +537,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.49';   // D-227: Actualizar trae siempre la version nueva
+const VERSION = 'v5.50';   // D-233: perfil secuencia (Belen) · D-234: Carmen sin fotos
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -647,13 +647,13 @@ const semanaVista = () => S.mirando || S.semana;
    quedaba para siempre en las graficas. Solo lectura queda para las que vienen.
    Lo que se corrige cuelga de ESA semana: SEM() da la semana que se mira. */
 const esFutura = w => { const ini = w && fechaIni(w.FECHAS); return ini ? ini > new Date() : true; };
-const corrigiendo = () => !!S.mirando && !esFutura(S.mirando);
+const corrigiendo = () => !!S.mirando && (!esFutura(S.mirando) || enCola());
 /* v5.11: la semana 00 es de preparacion y no cuenta en ningun total. Antes
    solo la quitaban la cabecera y la semana en lectura; el titulo de Mi plan y
    la barra de Progreso la contaban (aviso de la sesion de Jorge). */
 const esPrep = w => !!w && /^0+$/.test(String(w.SEMANA).trim());
 const semanasReales = () => ((S.d && S.d.SEMANAS) || []).filter(w=>!esPrep(w));
-const soloLectura = () => !!S.mirando && esFutura(S.mirando);
+const soloLectura = () => !!S.mirando && esFutura(S.mirando) && !enCola();
 
 const campo = k => {
   const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
@@ -1032,6 +1032,66 @@ const ajuste = k => {
   const f = ((S.d&&S.d.FICHA)||[]).find(x=>norm(x.CAMPO)===norm(k));
   return f ? norm(f.CONTENIDO) : '';
 };
+/* v5.50 (D-233, Salvador 2 nov, Belen): perfil «secuencia». El plan es UNA cola:
+   S01 Sesion 1..4, S02 Sesion 1..4... Hoy ensena siempre las 4 primeras sin hacer,
+   la primera delante, da igual la semana del calendario. Lo que se anota va a la
+   semana DEL PLAN de esa sesion (SEM() la da S.mirando). Nada caduca: ni «No hecha»
+   por vieja ni el aviso de sesiones sin registrar. El seguimiento sigue por semana
+   de calendario. Si el perfil no es secuencia, nada cambia. */
+const enCola = () => ajuste('perfil') === 'secuencia';
+const HECHA_COLA = ['hecha','parcial','sindatos','omitida','nohecha'];
+function cola(){
+  const out = [];
+  semanasReales().forEach(w=>{
+    enSemana(w, ()=>{
+      const bl = bloqueDe(w); if(!bl) return;
+      diasDeBloque(bl).forEach(x=>{
+        if(esDescanso(x) || esOpcional(x) || !sesionDe(bl, x['DÍA']).length) return;
+        out.push({w: w, bl: bl, x: x, dia: x['DÍA'], est: estadoSesion(bl, x['DÍA'])});
+      });
+    });
+  });
+  return out;
+}
+function abrirCola(sem, dia){
+  const w = semanaPorNum(sem);
+  S.mirando = (w && S.semana && w.SEMANA !== S.semana.SEMANA) ? w : null;
+  S.desdeCola = true;
+  abrir(dia);
+}
+function vHoyCola(){
+  const c = cola(), pend = c.filter(s=>!HECHA_COLA.includes(s.est)), hechas = c.length - pend.length;
+  const ver = pend.slice(0, 4), sinEnviar = pendientes();
+  const tarjeta = (s, i) => { const p = partir(s.x['SESIÓN']); const pri = i === 0;
+    const A = `'${esc(String(s.w.SEMANA))}','${esc(s.dia)}'`;
+    return `<div class="diarow"><button class="dia${pri?' hoy':''}" onclick="abrirCola(${A})">
+      <span style="flex:1">${pri?`<span class="lbl">${tr('Te toca')}</span><br>`:''}
+        <span class="sm">${tr('Semana')} ${esc(numSem(s.w))} · ${esc(s.dia)}</span><br>
+        <span class="n">${esc(p.t)}</span>${p.sub?`<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>`:''}
+        <div class="row wrap" style="gap:6px;margin-top:5px">
+          <span class="sem ${semColor(s.x['SEMÁFORO'])}"><i>${semForma(s.x['SEMÁFORO'])}</i>${esc(s.x['SEMÁFORO']||'—')}</span>
+          ${fmtMin(s.x.MIN)?`<span class="sm">${esc(fmtMin(s.x.MIN))}</span>`:''}
+          ${s.est==='parcial'?chipEstado(s.est):''}</div></span></button>
+      <button class="mas" aria-label="${tr('Saltar o marcar')} · ${esc(s.dia)}" onclick="abreCierre('${esc(String(s.w.SEMANA))}','${esc(s.bl)}','${esc(s.dia)}')">⋯</button></div>`; };
+  return `
+  <div class="card">
+    <div class="lbl">${tr('Tu plan')}</div>
+    <h2 style="margin-top:6px;font-size:19px">${pend.length ? tr('Tus próximas sesiones') : tr('Plan terminado')}</h2>
+    <p class="mut" style="margin-top:8px">${tr('Van en orden. Haz la primera; cuando la registres, entra la siguiente.')}</p>
+    <div class="row sp" style="margin-top:14px"><span class="sm">${tr('Completadas')}</span>
+      <b class="mono">${hechas} / ${c.length}</b></div>
+    <div class="bar"><i style="width:${c.length?Math.round(hechas/c.length*100):0}%"></i></div>
+  </div>
+  <div class="card">${ver.length ? ver.map(tarjeta).join('')
+    : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}</div>
+  <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
+    <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
+    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
+  ${sinEnviar?`<div class="card"><div class="row sp"><div><b style="font-size:14.5px">${sinEnviar} ${tr(sinEnviar>1?'series':'serie')} ${tr('sin enviar')}</b>
+    <p class="sm" style="margin-top:3px">${tr("Guardadas en tu móvil.")}</p></div>
+    <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>`:''}
+  <p class="sm" style="text-align:center;margin-top:16px">SALVA ${VERSION}</p>`;
+}
 const diasDeBloque = b => (S.d.SEMANA||[]).filter(r=>r.BLOQUE===b);
 const sesionDe = (b,d) => (S.d.SESIONES||[])
   .filter(r=>r.BLOQUE===b && norm(r['DÍA'])===norm(d))
@@ -1844,6 +1904,7 @@ const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['
    como No hecha. Solo se ve; no se manda. v5.46 (D-221, Salvador): desde la semana
    antepasada (la semana pasada aun se pregunta en Hoy). */
 function viejaSinCerrar(){
+  if(enCola()) return false;
   const w = corrigiendo() ? S.mirando : null; if(!w) return false;
   const ini = fechaIni(w.FECHAS); if(!ini) return false;
   return (Date.now() - ini.getTime()) / 86400000 >= 14;
@@ -2330,6 +2391,7 @@ function avisoCheckin(){
    ninguna sesion: avisa de que el bloque ha terminado. Lo anterior se puede
    seguir mirando y corrigiendo en Mi plan, como cualquier semana pasada. */
 function finBloque(){
+  if(enCola()){ const c = cola(); return c.length > 0 && c.every(s=>HECHA_COLA.includes(s.est)); }
   const ss = semanasReales(); const ult = ss[ss.length-1];
   const ini = ult && fechaIni(ult.FECHAS); if(!ini) return false;
   const fin = new Date(ini); fin.setDate(fin.getDate() + 7);
@@ -2352,6 +2414,7 @@ function vHoy(){
   const fase = S.semana ? (S.semana['FASE / TÍTULO']||'') : '';
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
+  if(enCola()) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyCola();
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
   if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyLibre(bl, fase, nota);
 
@@ -2402,7 +2465,7 @@ function vHoy(){
       </div>
       ${mat?`<hr><div class="lbl">${tr("Qué vas a hacer")}</div>${mat}`:''}
       ${mapaCuerpo(bl, d['DÍA'], true)}
-      ${cal?`<div class="calent" style="margin-top:12px"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+      ${cal?`<div class="calent" style="margin-top:12px"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
       <button class="btn pri big" style="margin-top:6px" onclick="abrir('${esc(d['DÍA'])}')">
         ${est==='sin'?tr('Empezar sesión'):tr('Continuar sesión')}</button></div>`;
   }
@@ -3077,7 +3140,8 @@ function abrir(dia){
   S.dia=dia; S.vista='sesion'; S.video=null;
   const bl=bloqueDe(semanaVista());
   // En modo lectura no se marca nada: mirar una semana futura no es hacerla.
-  if(!S.mirando && modoLibre(bl)) marcaFecha(bl,dia);
+  if((!S.mirando || S.desdeCola) && modoLibre(bl)) marcaFecha(bl,dia);
+  S.desdeCola = false;
   window.scrollTo(0,0); pinta();
 }
 
@@ -3120,7 +3184,7 @@ function vSesion(){
       ${mapaCuerpo(bl, dia)}
       <p class="mut" style="margin-top:10px">${tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")}</p>
     </div>
-    ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+    ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
     ${ejerciciosConCambios(bl, dia, ejs)}
     ${extras.length?`<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
       <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.</p></div>
@@ -3128,7 +3192,8 @@ function vSesion(){
     <div class="card flat"><button class="btn big" onclick="atras('semana')">${tr("← Volver a la semana")}</button></div>`;
   }
 
-  return `${botonAtras()}${corrigiendo() ? `<div class="aviso corrige"><b>${tr('Estás en la semana')} ${esc(numSem(S.mirando))}, ${tr('que ya pasó.')}</b>
+  return `${botonAtras()}${corrigiendo() && enCola() ? `<div class="aviso corrige"><b>${tr('Semana')} ${esc(numSem(S.mirando))} ${tr('de tu plan')}</b>
+    <p class="sm" style="margin-top:4px">${tr('Lo que anotes aquí se guarda en esa semana del plan.')}</p></div>` : corrigiendo() ? `<div class="aviso corrige"><b>${tr('Estás en la semana')} ${esc(numSem(S.mirando))}, ${tr('que ya pasó.')}</b>
     <p class="sm" style="margin-top:4px">${tr('Lo que cambies aquí se corrige en esa semana. Toca Guardar y enviar al terminar.')}</p></div>` : ''}
   <div class="card">${cabeceraSesion(bl, dia)}<div class="row sp">
       <div><div class="lbl">${esc(dia)}${modoLibre(bl)&&fechaDe(bl,dia)?' · '+esc(fechaDe(bl,dia)):''}</div>
@@ -3151,7 +3216,7 @@ function vSesion(){
     <button class="btn sm2" style="margin-top:10px" onclick="atras('${S.mirando?'semana':'hoy'}')">${tr("Volver")}</button></div>`:''}
   ${omitida?`<div class="aviso"><b>${tr("Marcaste esta sesión como omitida.")}</b>
     <button class="btn sm2" style="margin-top:10px" onclick="desomitir('${esc(bl)}','${esc(dia)}')">${tr("Deshacer")}</button></div>`:''}
-  ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||'')}</div>`:''}
+  ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
   ${ejerciciosConCambios(bl, dia, ejs)}
   ${extras.length?`<div class="extra-sep">
     <b>${tr("Si te sobran minutos")}</b>
@@ -4080,7 +4145,7 @@ function pintaCierre(){
       ? `<p class="mut2">${tr(ya.tipo === 'hecha' ? 'La marcaste como hecha sin apuntar.' : 'La marcaste como no hecha.')}${ya.motivo ? ' ' + esc(textoMotivo(ya)) : ''}</p>
          <button class="op" onclick="quitaCierre('${esc(c.bl)}','${esc(c.dia)}', 1)">${tr('Quitar la marca')}<small>${tr('Vuelve a quedar pendiente.')}</small></button>`
       : `<button class="op pri" onclick="marcaCierre('hecha')">✓ ${tr('La hice (sin apuntar)')}<small>${tr('Cuenta como hecha; no hace falta poner pesos.')}</small></button>
-         <button class="op" onclick="CIERRE.paso='motivo'; pintaCierre()">⊘ ${tr('No la hice / no la voy a hacer')}<small>${tr('Deja de salir como pendiente.')}</small></button>
+         <button class="op" onclick="CIERRE.paso='motivo'; pintaCierre()">⊘ ${enCola() ? tr('Saltar esta sesión') : tr('No la hice / no la voy a hacer')}<small>${enCola() ? tr('Sale de tu cola y entra la siguiente. Si cambias de idea, la recuperas en Mi plan.') : tr('Deja de salir como pendiente.')}</small></button>
          <button class="op" onclick="cierraCierre(); abrirDe('${esc(String(c.w && c.w.SEMANA || ''))}','${esc(c.dia)}')">✎ ${tr('Apuntarla ahora')}</button>`;
     html += `<button class="op" style="text-align:center" onclick="cierraCierre()">${tr('Cancelar')}</button>`;
   } else {
@@ -4130,7 +4195,7 @@ function abrirDe(sem, dia){
 const idxDia = d => { const n = norm(d); let i = DIAS.findIndex(x=>n.startsWith(norm(x))); if(i < 0) i = DIAS_EN.findIndex(x=>n.startsWith(norm(x)));
   return i < 0 ? -1 : (i + 6) % 7; };   // lunes = 0
 function sesionesPorCerrar(){
-  if(!S.d || !S.semana) return [];
+  if(!S.d || !S.semana || enCola()) return [];
   const ss = S.d.SEMANAS || [], i = ss.findIndex(w=>w.SEMANA === S.semana.SEMANA);
   const hoy = (new Date().getDay() + 6) % 7, apl = LS.get('aplazadas', {}), ahora = Date.now();
   const out = [];
@@ -4786,12 +4851,14 @@ function vSeg(){
 /* 2 oct: para todas menos Ignacio, que nunca empezo. Una clienta nueva las
    tiene sin tocar nada. Tambien quien aun no ha empezado su plan (Madelina,
    Ana): asi hay una foto de partida antes del primer entrenamiento. */
-const FOTOS_SIN = ['ignacio'];
+/* v5.50 (D-234): Carmen tampoco quiere fotos («mídeme el culo»). Y desde ahora una
+   hoja puede apagarlas sola con la fila de FICHA «fotos = no», sin publicar nada. */
+const FOTOS_SIN = ['ignacio','carmen'];
 const FOTOS_DIAS = 28;
 const POSES = [['frontal','Frontal','de frente al móvil, pies a la anchura de las caderas'],
                ['lateral','Lateral','de perfil, siempre con el lado derecho hacia el móvil'],
                ['posterior','Posterior','de espaldas, en la misma postura que la frontal']];
-const fotosActivas = () => FOTOS_SIN.indexOf(String(CID||'').toLowerCase()) < 0
+const fotosActivas = () => FOTOS_SIN.indexOf(String(CID||'').toLowerCase()) < 0 && ajuste('fotos') !== 'no'
                            && !!(S.d && S.d.VIDEO);
 const diasDesde = f => Math.floor((new Date(hoyISO()) - new Date(String(f).slice(0,10))) / 86400000);
 /* Todas las fotos de progreso que constan: las del servidor y las que este
