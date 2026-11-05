@@ -25,6 +25,9 @@
     var c = (new URLSearchParams(location.search).get('c') || '').trim().toLowerCase();
     var t = JSON.parse(localStorage.getItem('salva_' + c + '_tema'));
     if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    var nueva = (c === 'salva' || c === 'alexia') && JSON.parse(localStorage.getItem('salva_' + c + '_interfaz')) === 'nueva';
+    var e = JSON.parse(localStorage.getItem('salva_' + c + '_estilo')) || 'deportivo';
+    if(nueva) document.documentElement.setAttribute('data-estilo', e === 'clasico' ? 'deportivo' : e);
   }catch(e){}
 })();
 </script>
@@ -63,6 +66,66 @@
   --m-base:#222A25; --m-off:#3B4640; --m-on:#8FD0A6; --m-ay:#4F8566;
   color-scheme:dark;
 }
+/* v5.52 (D-239): ESTILOS a elegir. Van despues de claro/oscuro y mandan sobre ellos;
+   el Clasico es el de siempre, con su claro, oscuro y automatico. */
+:root[data-estilo="deportivo"]{
+  --verde:#2BD47D; --verde-c:#2BD47D; --verde-s:#1F5A3B; --verde-b:#13261B;
+  --papel:#0E1110; --sup:#1A201D; --sup2:#141917; --linea:#26302B; --linea2:#35413A;
+  --txt:#F2F5F3; --txt2:#C9D3CE; --txt3:#8FA39A;
+  --rojo:#FF6B6B; --rojo-s:#3A1D1D; --rojo-l:#6E3030; --ambar:#F2C14E; --ambar-s:#33291A; --ambar-l:#6A5424;
+  --portada:#13261B; --sobre:#F2F5F3; --on-verde:#06210F; --tinta:#F2F5F3;
+  --m-base:#222A25; --m-off:#35413A; --m-on:#2BD47D; --m-ay:#2E7A50; --r:16px;
+  color-scheme:dark;
+}
+:root[data-estilo="claro"]{
+  --verde:#0F8A47; --verde-c:#2BA864; --verde-s:#CDEBD9; --verde-b:#EEF8F2;
+  --papel:#F4F6F5; --sup:#FFFFFF; --sup2:#F1F3F2; --linea:#E3E7E5; --linea2:#D3D9D6;
+  --txt:#121614; --txt2:#3B433F; --txt3:#6B7570;
+  --rojo:#C0362C; --rojo-s:#FCE4E4; --rojo-l:#F0B2AC; --ambar:#9A6A00; --ambar-s:#FFF2D6; --ambar-l:#EBCB86;
+  --portada:#0F8A47; --sobre:#FFFFFF; --on-verde:#FFFFFF; --tinta:#121614;
+  --m-base:#C9D0CC; --m-off:#E6EAE8; --m-on:#0F8A47; --m-ay:#8CCBA6; --r:16px;
+  color-scheme:light;
+}
+:root[data-estilo="calido"]{
+  --verde:#2F5D46; --verde-c:#4F7D63; --verde-s:#CFDDD2; --verde-b:#EEF2EA;
+  --papel:#F6F0E6; --sup:#FFFBF4; --sup2:#EFE7DA; --linea:#E6DCCB; --linea2:#D9CDB9;
+  --txt:#2A2420; --txt2:#4E443B; --txt3:#8A7B6C;
+  --rojo:#C4623F; --rojo-s:#F7E2D8; --rojo-l:#E7B39F; --ambar:#9A6A1E; --ambar-s:#F6EAD2; --ambar-l:#E2C58A;
+  --portada:#2F5D46; --sobre:#FFFBF4; --on-verde:#FFFBF4; --tinta:#2A2420;
+  --m-base:#CFC4B3; --m-off:#E6DCCB; --m-on:#2F5D46; --m-ay:#93B29E; --r:18px;
+  color-scheme:light;
+}
+:root[data-estilo="calido"] h1,:root[data-estilo="calido"] h2,:root[data-estilo="calido"] h3{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+:root[data-estilo="facil"]{
+  --verde:#1F5C3B; --txt:#1A1A17; --txt2:#2C2A25; --txt3:#4A463C; --linea:#BDB5A6; --linea2:#A59C8B;
+  --papel:#FFFFFF; --sup:#FFFFFF; --sup2:#F3F0EA; color-scheme:light;
+}
+:root[data-estilo="facil"] body{font-size:19px;line-height:1.55}
+:root[data-estilo="facil"] button{min-height:46px}
+:root[data-estilo="facil"] input{font-size:19px !important;min-height:46px}
+:root[data-estilo="deportivo"] .dg,:root[data-estilo="claro"] .dg{font-size:26px;font-weight:600;letter-spacing:-.3px}
+/* tira de dias de la interfaz nueva */
+.tira{display:flex;justify-content:space-between;gap:4px;margin:12px 0 6px}
+.tira button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;color:var(--txt3);font-size:11px}
+.tira i{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:600;
+  background:var(--sup2);color:var(--txt3);border:2px solid transparent}
+.tira .hecho i{background:var(--verde);color:var(--on-verde)}
+.tira .medio i{background:linear-gradient(90deg,var(--verde) 50%,var(--sup2) 50%);color:var(--txt)}
+.tira .hoy i{border-color:var(--verde);color:var(--verde)}
+.tira .hoy.hecho i{color:var(--on-verde)}
+.tira .fut i{background:transparent;border:1px dashed var(--linea2)}
+.tira .sel b{color:var(--txt)}
+.tira i small{font-size:9px;margin-left:1px}
+.ritmo-c{font-size:14px;margin-top:4px;text-align:center}
+.ritmo-c.ok{color:var(--verde)} .ritmo-c.justo{color:var(--ambar)} .ritmo-c.tarde{color:var(--rojo)}
+.toca{border:2px solid var(--verde) !important}
+.estilos{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;margin-top:10px}
+.estilos button{border:1px solid var(--linea2);border-radius:12px;padding:8px 6px;background:var(--sup);text-align:left;font-size:12.5px;line-height:1.25}
+.estilos button.on{border:2px solid var(--verde)}
+.estilos .mues{display:flex;gap:3px;margin-bottom:6px}.estilos .mues span{width:16px;height:16px;border-radius:50%}
+.intro-nueva{position:fixed;inset:0;z-index:60;background:var(--papel);overflow:auto;padding:28px 20px calc(28px + env(safe-area-inset-bottom))}
+.intro-nueva .pasos{display:flex;gap:6px;justify-content:center;margin:14px 0}
+.intro-nueva .pasos span{width:8px;height:8px;border-radius:50%;background:var(--linea2)} .intro-nueva .pasos span.on{background:var(--verde);width:22px;border-radius:4px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{font-family:var(--f);background:var(--papel);color:var(--txt);font-size:16px;line-height:1.5;
@@ -220,6 +283,14 @@ button.cronom-b{background:none!important;border:1px solid var(--linea2)!importa
 .diarow > .dia{border-bottom:0;padding-right:46px}
 .diarow > .mas{position:absolute;right:0;top:9px;width:40px;height:36px;border:1px solid var(--linea2);border-radius:10px;
   background:none;color:var(--txt2);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
+.ajej{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ajej button{background:none;border:1px solid var(--line,#2b332e);color:var(--mut,#9aa59f);border-radius:10px;padding:7px 10px;font:inherit;font-size:13px}
+.ajej .ajs{display:flex;gap:6px}
+.cambiado{font-size:12.5px;color:var(--verde,#2BD47D);margin-top:4px}
+.cambiado button{background:none;border:0;color:var(--mut,#9aa59f);text-decoration:underline;font:inherit;font-size:12px;margin-left:6px}
+.cb-q{width:100%;box-sizing:border-box;margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#2b332e);background:transparent;color:inherit;font:inherit}
+.cb-lista{max-height:52vh;overflow:auto}
+.cb-t{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut,#9aa59f);margin:10px 0 4px}
 .cierre-fondo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .cierre{background:var(--card,#1b211d);color:var(--txt);width:100%;max-width:560px;border-radius:18px 18px 0 0;
   padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:85vh;overflow:auto}
@@ -537,7 +608,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.50';   // D-233: perfil secuencia (Belen) · D-234: Carmen sin fotos
+const VERSION = 'v5.52';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -684,6 +755,16 @@ const EN = {
   "Foco de esta semana": "This week's focus",
   "Foco de esa semana": "That week's focus",
   "Te quedan": "Still to do",
+  "Cambiar ejercicio": "Swap exercise", "Cambiar": "Swap", "En lugar de": "Instead of", "Deshacer": "Undo",
+  "Solo para hoy. Lo que anotes se guarda con el ejercicio nuevo.": "Just for today. What you log is saved under the new exercise.",
+  "Busca un ejercicio": "Search an exercise", "Usar": "Use", "Si no está en la lista": "If it is not on the list",
+  "Mismo músculo": "Same muscle", "Otros": "Others", "Hoy haces": "Today you do",
+  "No hay ninguno con ese nombre. Toca «Usar» para ponerlo tal cual.": "Nothing with that name. Tap «Use» to add it as it is.",
+  "serie": "set", "series": "sets", "sobre el plan": "vs. the plan", "Quitar una serie": "Remove a set", "Añadir una serie": "Add a set",
+  "Tu plan lleva": "Your plan has",
+  "por algo: el volumen está calculado para que progreses sin pasarte. Añádela solo si de verdad te sobra.": "for a reason: the volume is set so you progress without overdoing it. Add one only if you really have something left.",
+  "¿Añadir una serie más?": "Add one more set?",
+  "La última serie tiene datos: vacíala primero con la ✕.": "The last set has data: clear it first with the ✕.",
   "Semana": "Week",
   "de": "of",
   "Te falta el seguimiento de la semana": "Your check-in for week",
@@ -1809,6 +1890,7 @@ function idYoutube(url){
 function partesBiserie(bl, dia, f){
   if(!f || alternativasDe(f) || esCorrer(f) || camposDe(f).length || !(parseInt(f.SERIES)||0)) return null;
   const nombre = f['EJERCICIO / ELEMENTO'] || '';
+  if(cambioDe(bl, dia, nombre)) return null;
   const p = partesBusqueda(nombre); if(p.length < 2) return null;
   const n = parseInt(f.SERIES)||0;
   for(let i=0;i<n;i++){ const v = LOG[idSerie(bl,dia,nombre,i)]; if(v && (v.ok || v.r || v.c)) return null; }
@@ -1854,7 +1936,7 @@ function estadoSesion(b,d){
   });
   conReg.forEach(f=>{
     ejercicios++;
-    const id = idReg(b,d,alternativasDe(f) ? nombreEf(b,d,f) : f['EJERCICIO / ELEMENTO']), v = LOG[id];
+    const id = idReg(b,d,nombreEf(b,d,f)), v = LOG[id];
     if(v && v.ok){ anotadas++; conAlgo++; usados.push(id); }
   });
   if(!anotadas) return viejaSinCerrar() ? 'nohecha' : 'sin';
@@ -1880,7 +1962,7 @@ function cierraSesion(bl, dia){
   let hay = vale(LOG[idVal(bl,dia)]) || !!(LOG[idObs(bl,dia)] && LOG[idObs(bl,dia)].obs);
   const faltan = [];
   fs.forEach(f=>{
-    const orig = f['EJERCICIO / ELEMENTO'] || '', nom = alternativasDe(f) ? nombreEf(bl,dia,f) : orig;
+    const orig = f['EJERCICIO / ELEMENTO'] || '', nom = nombreEf(bl,dia,f);
     const n = parseInt(f.SERIES)||0, cs = camposDe(f);
     if(!cs.length && !n) return;                         // fila sin nada que anotar
     if(saltado(bl,dia,orig)) return;
@@ -2095,6 +2177,12 @@ function fusionarRegistros(filas){
         }
       } else if(id.endsWith('~salto')){
         if(String(f.ESTADO||'').toLowerCase() === 'omitida') LOG[id] = {salto:true, ok:true, sent:true};
+      } else if(id.endsWith('~cambio')){
+        if(String(f.NOTAS||'').trim())      // el puente no devuelve el ESTADO «cambio»: manda NOTAS
+          LOG[id] = {nom:String(f.NOTAS).trim(), orig:String(f.EJERCICIO||'').replace(/^CAMBIO\s*·\s*/,'').split(' → ')[0], ok:true, sent:true, ts:f.FECHA||''};
+      } else if(id.endsWith('~nser')){
+        const m = /→\s*(\d+)/.exec(String(f.NOTAS||'')), b0 = /Series:\s*(\d+)/.exec(String(f.NOTAS||''));
+        if(parseInt(f.REPS)) LOG[id] = {n:parseInt(f.REPS)||0, base: b0 ? parseInt(b0[1]) : 0, ok:true, sent:true};
       } else if(id.endsWith('~reg')){
         // v5.0: el test de VAM viaja en REPS, con "VAM" en RITMO para reconocerlo
         const esVAM = /^VAM\b/.test(String(f.RITMO||''));
@@ -2142,7 +2230,7 @@ function pinta(){
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
   const v = {hoy:vHoy, mensajes:vMensajes, novedades:vNovedades, resumen:vResumen, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos, comparar:vComparar}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '');
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '') + introNueva();
   if(S.listaSem){ const L = document.querySelector('.lista-sem'), a = L && (L.querySelector('.on') || L.querySelector('.aqui'));
     if(a) L.scrollTop = Math.max(0, a.offsetTop - L.clientHeight/2 + a.offsetHeight/2); }
 }
@@ -2415,6 +2503,7 @@ function vHoy(){
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
   if(enCola()) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + vHoyCola();
+  if(interfazNueva() && modoLibre(bl)) return avisoMensajes() + bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyNueva(bl, fase, nota);
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
   if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyLibre(bl, fase, nota);
 
@@ -2674,13 +2763,146 @@ function vSemana(){
 
 /* ---------- aspecto: claro, oscuro o automatico ---------- */
 function aplicaTema(){
-  const t = LS.get('tema', 'auto'), r = document.documentElement;
+  const t = LS.get('tema', 'auto'), r = document.documentElement, e = estilo();
+  if(e !== 'clasico') r.setAttribute('data-estilo', e); else r.removeAttribute('data-estilo');
+  if(e === 'deportivo'){ const m = document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', '#0E1110'); }
   if(t === 'light' || t === 'dark') r.setAttribute('data-theme', t); else r.removeAttribute('data-theme');
+  if(e === 'deportivo') return;
   const oscuro = t === 'dark' || (t !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   const m = document.querySelector('meta[name="theme-color"]');
   if(m) m.setAttribute('content', oscuro ? '#1E4A33' : '#2F6B4A');
 }
 function ponTema(t){ LS.set('tema', t); aplicaTema(); pinta(); }
+/* v5.52 (D-239, Salvador 5 nov): ESTILOS e INTERFAZ NUEVA. De momento solo en el
+   piloto (Salvador y Alexia); con su visto bueno se abre a todas quitando PILOTO. */
+const PILOTO = ['salva','alexia'];
+const enPiloto = () => PILOTO.indexOf(String(CID||'').toLowerCase()) > -1;
+const ESTILOS = [['clasico','Clásico',['#2F6B4A','#F1EDE6','#4A463C']], ['deportivo','Deportivo',['#2BD47D','#0E1110','#1A201D']],
+  ['claro','Claro',['#0F8A47','#FFFFFF','#121614']], ['calido','Cálido',['#2F5D46','#F6F0E6','#C4623F']], ['facil','Fácil de leer',['#1F5C3B','#FFFFFF','#1A1A17']]];
+const interfazNueva = () => enPiloto() && LS.get('interfaz', 'siempre') === 'nueva';
+/* Salvador 5 nov: la interfaz nueva va con los estilos nuevos (Deportivo por defecto);
+   el Clasico solo vive con la de siempre, y la de siempre solo con el Clasico. */
+const estilo = () => { if(!interfazNueva()) return 'clasico';
+  const e = LS.get('estilo', 'deportivo'); return (!e || e === 'clasico') ? 'deportivo' : e; };
+function ponEstilo(e){ LS.set('estilo', e); aplicaTema(); pinta(); }
+function ponInterfaz(i){ LS.set('interfaz', i); S.introNueva = false; aplicaTema(); pinta(); window.scrollTo(0,0); }
+function bloqueEstilos(){
+  if(!enPiloto()) return '';
+  const e = estilo(), i = LS.get('interfaz', 'siempre');
+  return `<div class="sec"><div class="lbl">${tr('Interfaz')}</div>
+    <div class="tema">${[['nueva','Nueva'],['siempre','La de siempre']].map(([k,n])=>
+      `<button class="${i===k?'on':''}" aria-pressed="${i===k}" onclick="ponInterfaz('${k}')">${tr(n)}</button>`).join('')}</div>
+    ${i !== 'nueva' ? '' : `<div class="lbl" style="margin-top:14px">${tr('Estilo')}</div>
+    <div class="estilos">${ESTILOS.filter(([k])=>k !== 'clasico').map(([k,n,c])=>`<button class="${e===k?'on':''}" aria-pressed="${e===k}" onclick="ponEstilo('${k}')">
+      <div class="mues">${c.map(x=>`<span style="background:${x};border:1px solid rgba(128,128,128,.35)"></span>`).join('')}</div>${tr(n)}</button>`).join('')}</div>`}
+    <button class="op" style="margin-top:8px" onclick="cierraMenu(); S.introNueva = true; S.introPaso = 0; pinta()">${tr('Ver la presentación otra vez')}</button></div>`;
+}
+/* fecha local AAAA-MM-DD (toISOString da la de Londres y a medianoche cambia de dia) */
+const fLocal = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0') + '-' + String(x.getDate()).padStart(2,'0'); };
+/* que dias de la semana se entreno y que sesiones: por la hora de lo anotado */
+function diasEntrenados(bl){
+  const pre = SEM() + '~' + slug(bl) + '~', out = {};
+  Object.keys(LOG).forEach(k=>{
+    if(k.indexOf(pre) !== 0) return; const v = LOG[k];
+    if(!v || !v.ok || v.borrada || !v.ts) return;
+    if(/~(fecha|alt|omitida|salto|nota|obs|nser|cambio|valoracion)$/.test(k)) return;
+    if(/~cierre$/.test(k) && v.tipo !== 'hecha') return;
+    const dia = k.slice(pre.length).split('~')[0], f = fLocal(v.ts);
+    (out[f] = out[f] || new Set()).add(dia);
+  });
+  return out;
+}
+function vHoyNueva(bl, fase, nota){
+  const ses = diasDeBloque(bl).filter(x=>!esDescanso(x) && sesionDe(bl, x['DÍA']).length);
+  const cuentan = ses.filter(x=>!esOpcional(x));
+  const hecha = x => ['hecha','sindatos','parcial'].indexOf(estadoSesion(bl, x['DÍA'])) > -1;
+  const pend = ses.filter(x=>!hecha(x) && ['omitida','nohecha'].indexOf(estadoSesion(bl, x['DÍA'])) < 0);
+  const pendC = pend.filter(x=>!esOpcional(x)), nHechas = cuentan.filter(hecha).length;
+  const ini = fechaIni(S.semana && S.semana.FECHAS) || new Date(), lun = new Date(ini); lun.setHours(0,0,0,0);
+  lun.setDate(lun.getDate() - ((lun.getDay() + 6) % 7));
+  const hoy = fLocal(new Date()), ent = diasEntrenados(bl), DL = enIngles() ? ['M','T','W','T','F','S','S'] : ['L','M','X','J','V','S','D'];
+  let quedan = 0;
+  const tira = Array.from({length:7}, (_, i)=>{ const d = new Date(lun); d.setDate(lun.getDate() + i); const f = fLocal(d);
+    if(f >= hoy && !(f === hoy && ent[f])) quedan++;
+    const s = ent[f] ? [...ent[f]] : [];
+    const comp = s.some(sd=>{ const x = ses.find(y=>slug(y['DÍA']) === sd); return x && ['hecha','sindatos'].indexOf(estadoSesion(bl, x['DÍA'])) > -1; });
+    const cls = [f === hoy ? 'hoy' : '', s.length ? (comp ? 'hecho' : 'medio') : '', f > hoy ? 'fut' : '', S.diaTira === f ? 'sel' : ''].join(' ');
+    return `<button class="${cls}" onclick="S.diaTira = (S.diaTira === '${f}' ? null : '${f}'); pinta()" aria-label="${esc(d.toLocaleDateString(enIngles()?'en-GB':'es-ES',{weekday:'long', day:'numeric'}))}">
+      <i>${s.length > 1 ? s.length + '<small>×</small>' : d.getDate()}</i><b>${DL[i]}</b></button>`; }).join('');
+  const P = pendC.length;
+  const ritmo = !P ? ['ok', tr('Semana completa') + ' ✓']
+    : P > quedan ? ['tarde', P + ' ' + tr(P === 1 ? 'pendiente' : 'pendientes') + ' · ' + tr('ya no da tiempo a todas')]
+    : P === quedan ? ['justo', nHechas + ' ' + tr('de') + ' ' + cuentan.length + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días') + ' · ' + tr('vas justo')]
+    : ['', nHechas + ' ' + tr('de') + ' ' + cuentan.length + ' ' + tr('esta semana') + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días')];
+  let detalle = '';
+  if(S.diaTira && S.diaTira !== hoy){
+    const s = ent[S.diaTira] ? [...ent[S.diaTira]] : [];
+    const dd = new Date(S.diaTira + 'T12:00:00').toLocaleDateString(enIngles()?'en-GB':'es-ES',{weekday:'long', day:'numeric', month:'long'});
+    detalle = `<div class="card"><div class="lbl">${esc(dd)}</div>${s.length ? s.map(sd=>{ const x = ses.find(y=>slug(y['DÍA']) === sd);
+      return x ? `<div class="diarow"><button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
+        <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(estadoSesion(bl, x['DÍA']))}</div></span></button></div>` : ''; }).join('')
+      : `<p class="mut" style="margin-top:6px">${S.diaTira > hoy ? tr('Todavía no ha llegado.') : tr('Ese día no entrenaste. Si hiciste algo y no lo apuntaste, ábrelo abajo y anótalo.')}</p>`}</div>`;
+  }
+  const tarjeta = (x, pri) => { const p = partir(x['SESIÓN']), es = estadoSesion(bl, x['DÍA']);
+    return `<div class="diarow"><button class="dia${pri ? ' toca' : ''}" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1">
+      ${pri ? `<span class="lbl">${tr('Siguiente')}</span><br>` : ''}<span class="n">${esc(x['DÍA'])} · ${esc(p.t)}</span>
+      ${p.sub ? `<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>` : ''}
+      <div class="row wrap" style="gap:6px;margin-top:5px"><span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
+        ${fmtMin(x.MIN) ? `<span class="sm">${esc(fmtMin(x.MIN))}</span>` : ''}${esOpcional(x) ? `<span class="tag">${tr('opcional')}</span>` : ''}${es === 'parcial' ? chipEstado(es) : ''}</div></span></button>${botonMas(bl, x['DÍA'])}</div>`; };
+  const orden = pendC.concat(pend.filter(esOpcional)), sinEnviar = pendientes();
+  const nombre = String(S.d.NOMBRE || '').split(' ')[0];
+  return `<div class="card">
+    <div class="sm">${esc(sinRepetir(fase))}</div>
+    <h2 style="margin-top:2px">${tr('Hola')}${nombre ? ', ' + esc(nombre) : ''}</h2>
+    <div class="tira">${tira}</div>
+    <div class="ritmo-c ${ritmo[0]}">${esc(ritmo[1])}</div></div>
+  ${detalle}
+  ${nota ? `<div class="card"><div class="lbl">${tr('Foco de esta semana')}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>` : ''}
+  <div class="card"><h3 style="margin-bottom:6px">${orden.length ? tr('¿Qué haces hoy?') : tr('Todo hecho')}</h3>
+    ${orden.length ? orden.map((x,i)=>tarjeta(x, i === 0)).join('') : `<p class="mut">${tr('Has hecho todas las sesiones de la semana. Descansa y nos vemos en la siguiente.')}</p>`}
+    <p class="sm" style="margin-top:8px">${tr('Elige la que quieras: se apunta en el día que la hagas.')}</p></div>
+  ${ses.filter(x=>orden.indexOf(x) < 0).length ? `<div class="card"><h3 style="margin-bottom:6px">${tr('Ya hechas esta semana')}</h3>
+    ${ses.filter(x=>orden.indexOf(x) < 0).map(x=>`<div class="diarow"><button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
+      <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(estadoSesion(bl, x['DÍA']))}</div></span></button>${botonMas(bl, x['DÍA'])}</div>`).join('')}</div>` : ''}
+  <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
+    <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
+    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
+  ${sinEnviar ? `<div class="card"><div class="row sp"><div><b style="font-size:14.5px">${sinEnviar} ${tr(sinEnviar>1?'series':'serie')} ${tr('sin enviar')}</b>
+    <p class="sm" style="margin-top:3px">${tr("Guardadas en tu móvil.")}</p></div>
+    <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>` : ''}
+  <p class="sm" style="text-align:center;margin-top:16px">SALVA ${VERSION} · ${tr('interfaz nueva')}</p>`;
+}
+/* presentacion a pantalla completa: la primera vez en el piloto, y desde el menu */
+const PASOS_INTRO = [
+  ['Hay una versión nueva de tu app', 'Más clara, con números grandes y tu semana de un vistazo. Pruébala: si no te convence, vuelves a la de siempre desde el menú ☰ → Interfaz.', 'nueva'],
+  ['Tu semana, día a día', 'Arriba, un círculo por día. Verde = entrenaste. Gris = no; y no pasa nada, porque tu plan es flexible. El de hoy lleva anillo. Toca un día para ver qué hiciste.', 'tira'],
+  ['Debajo te dice cómo vas', '«2 de 4 · quedan 4 días». Se pone en ámbar si vas justo y en rojo solo si ya no da tiempo a todas. Con todas hechas: «Semana completa ✓».', 'ritmo'],
+  ['¿Qué haces hoy?', 'Tus sesiones pendientes, la siguiente marcada. Elige la que quieras: se apunta en el día que la hagas. Con ⋯ la marcas como hecha sin apuntar o la saltas.', 'lista'],
+  ['Elige tu estilo', 'Deportivo, Claro, Cálido o Fácil de leer (letra grande). Lo cambias cuando quieras en el menú ☰.', 'estilos']
+];
+function introNueva(){
+  if(!enPiloto()) return '';
+  if(!S.introNueva && LS.get('intro_d239', false)) return '';
+  const i = S.introPaso || 0, p = PASOS_INTRO[i], ult = i === PASOS_INTRO.length - 1;
+  const ejemplo = {
+    nueva: `<div class="card" style="text-align:center"><div style="font-size:44px">✨</div></div>`,
+    tira: `<div class="card"><div class="tira">${['hecho','','hecho','hoy','fut','fut','fut'].map((c,j)=>`<button class="${c}"><i>${j+2}</i><b>${(enIngles()?['M','T','W','T','F','S','S']:['L','M','X','J','V','S','D'])[j]}</b></button>`).join('')}</div></div>`,
+    ritmo: `<div class="card"><div class="ritmo-c">2 ${tr('de')} 4 ${tr('esta semana')} · ${tr('quedan')} 4 ${tr('días')}</div><div class="ritmo-c justo">1 ${tr('de')} 4 · ${tr('quedan')} 3 ${tr('días')} · ${tr('vas justo')}</div><div class="ritmo-c ok">${tr('Semana completa')} ✓</div></div>`,
+    lista: `<div class="card"><div class="diarow"><button class="dia toca"><span style="flex:1"><span class="lbl">${tr('Siguiente')}</span><br><span class="n">${tr('Sesión')} 3 · ${tr('Pierna + trineos')}</span></span></button><button class="mas">⋯</button></div></div>`,
+    estilos: `<div class="estilos">${ESTILOS.filter(([k])=>k !== 'clasico').map(([k,n,c])=>`<button class="${estilo()===k?'on':''}" onclick="ponEstilo('${k}')"><div class="mues">${c.map(x=>`<span style="background:${x};border:1px solid rgba(128,128,128,.35)"></span>`).join('')}</div>${tr(n)}</button>`).join('')}</div>`
+  }[p[2]];
+  return `<div class="intro-nueva" role="dialog" aria-modal="true">
+    <div class="pasos">${PASOS_INTRO.map((_,j)=>`<span class="${j===i?'on':''}"></span>`).join('')}</div>
+    <h2 style="font-size:24px;margin:10px 0 8px">${tr(p[0])}</h2>
+    <p class="mut" style="font-size:16px;margin-bottom:14px">${tr(p[1])}</p>
+    ${ejemplo}
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+      ${i === 0 ? `<button class="btn pri big" onclick="LS.set('interfaz','nueva'); aplicaTema(); S.introPaso = 1; S.introNueva = true; pinta()">${tr('Probarla')}</button>
+        <button class="btn big" onclick="LS.set('intro_d239', true); S.introNueva = false; ponInterfaz('siempre')">${tr('Seguir con la de siempre')}</button>`
+      : `<button class="btn pri big" onclick="${ult ? `LS.set('intro_d239', true); S.introNueva = false; S.introPaso = 0; pinta(); window.scrollTo(0,0)` : `S.introPaso = ${i+1}; S.introNueva = true; pinta()`}">${tr(ult ? 'Empezar' : 'Siguiente')}</button>
+        <button class="btn big" onclick="S.introPaso = ${i-1}; S.introNueva = true; pinta()">${tr('Atrás')}</button>`}
+    </div></div>`;
+}
 if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicaTema); }catch(e){} }
 
 
@@ -2806,10 +3028,11 @@ function vMenu(){
   const t = LS.get('tema', 'auto');
   return `<div class="menu-fondo" onclick="cierraMenu()"></div>
   <div class="menu" role="dialog" aria-label="${tr('Menú')}">
-    <div class="sec" style="padding-top:0"><div class="lbl">${tr("Aspecto")}</div>
+    ${bloqueEstilos()}
+    ${estilo() !== 'clasico' ? '' : `<div class="sec" style="padding-top:0"><div class="lbl">${tr("Aspecto")}</div>
       <div class="tema">${[['light','Claro'],['dark','Oscuro'],['auto','Automático']].map(([k,n])=>
         `<button class="${t===k?'on':''}" aria-pressed="${t===k}" onclick="ponTema('${k}')">${tr(n)}</button>`).join('')}</div>
-      <p class="sm" style="margin-top:8px">${tr("Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.")}</p></div>
+      <p class="sm" style="margin-top:8px">${tr("Automático sigue a tu móvil: claro de día, oscuro si lo tienes en oscuro.")}</p></div>`}
     <div class="sec">
       <button class="op" onclick="irMenu('mensajes')">${tr("Mensajes")}${noLeidos().length ? `<span class="cuenta">${noLeidos().length}</span>` : ''}</button>
       <button class="op" onclick="irMenu('novedades')">${tr("Novedades")}</button>
@@ -3347,7 +3570,91 @@ function altElegida(bl, dia, f){
   return [0,1,2,3,4,5].some(i=>{ const x = LOG[idSerie(bl,dia,alts[1].id,i)]; return x && (x.ok || x.r || x.c); }) ? 1 : 0;
 }
 /* el nombre con el que se anota hoy */
-const nombreEf = (bl, dia, f) => { const a = alternativasDe(f); return a ? a[altElegida(bl,dia,f)].id : (f['EJERCICIO / ELEMENTO'] || ''); };
+const nombreEf = (bl, dia, f) => { const c = cambioDe(bl, dia, f['EJERCICIO / ELEMENTO'] || ''); if(c) return c;
+  const a = alternativasDe(f); return a ? a[altElegida(bl,dia,f)].id : (f['EJERCICIO / ELEMENTO'] || ''); };
+/* v5.51 (D-240, Salvador 5 nov): CAMBIAR EJERCICIO y SERIES DE MAS O DE MENOS.
+   El gimnasio esta lleno, la maquina ocupada: se elige otro de la biblioteca (todos
+   los que Salva ha programado, agrupados por musculo) y las series se guardan con
+   el nombre NUEVO, con su historial y su «la ultima vez». Solo para ese dia: la
+   semana siguiente vuelve el del plan. A la hoja va una fila «CAMBIO · A → B».
+   Las series de mas o de menos tambien van a la hoja («Series: 4 → 5»), y al anadir
+   se avisa de que el volumen esta pensado. */
+const idCambio = (bl,dia,n) => `${SEM()}~${slug(bl)}~${slug(dia)}~${slug(n)}~cambio`;
+const idNser   = (bl,dia,n) => `${SEM()}~${slug(bl)}~${slug(dia)}~${slug(n)}~nser`;
+function cambioDe(bl, dia, orig){ const v = LOG[idCambio(bl,dia,orig)]; return v && v.nom && !v.borrada ? v.nom : ''; }
+function masSeries(bl, dia, orig){ const v = LOG[idNser(bl,dia,orig)]; return v && !v.borrada ? (parseInt(v.n)||0) : 0; }
+let BIBLIO = null, CB = null;
+async function cargaBiblio(){
+  if(BIBLIO) return BIBLIO;
+  let l = [];
+  try { const r = await fetch('biblioteca.json', {cache:'no-cache'}); if(r.ok) l = await r.json(); } catch(e){}
+  const lang = enIngles() ? 'en' : 'es', vistos = new Set(), out = [];
+  const mete = n => { n = String(n||'').trim(); const k = norm(n); if(!n || vistos.has(k)) return; vistos.add(k); out.push(n); };
+  (S.d.SESIONES||[]).filter(f=>['fuerza','hibrido'].indexOf(norm(f.TIPO))>-1 && parseInt(f.SERIES)>0 && parseInt(f.ORDEN)>0)
+    .forEach(f=>mete(f['EJERCICIO / ELEMENTO']));
+  l.filter(x=>x.l === lang).forEach(x=>mete(x.n));
+  BIBLIO = out; return out;
+}
+const musculosDe = n => { const t = limpiaEj(n); const m = MUSCULOS.filter(([,r])=>r.test(t)).map(([k])=>k);
+  if(esCurlBrazo(t) && m.indexOf('brazos') < 0) m.push('brazos'); return m; };
+async function abreCambio(bl, dia, orig){
+  const l = await cargaBiblio(), mo = musculosDe(orig), p = mo[0];
+  CB = {bl:bl, dia:dia, orig:orig, todos:l.filter(n=>norm(n) !== norm(orig)), mo:mo, p:p};
+  let f = document.getElementById('cierre'); if(f) f.remove();
+  f = document.createElement('div'); f.id = 'cierre'; f.className = 'cierre-fondo';
+  f.onclick = e => { if(e.target === f) cierraCierre(); }; document.body.appendChild(f);
+  f.innerHTML = `<div class="cierre" role="dialog" aria-modal="true"><h3>${tr('Cambiar')} «${esc(orig)}»</h3>
+    <p class="mut2">${tr('Solo para hoy. Lo que anotes se guarda con el ejercicio nuevo.')}</p>
+    <input id="cb_q" class="cb-q" placeholder="${tr('Busca un ejercicio')}" oninput="pintaListaCambio()" autocomplete="off">
+    <div id="cb_lista" class="cb-lista"></div>
+    <button class="op" style="text-align:center" onclick="cierraCierre()">${tr('Cancelar')}</button></div>`;
+  pintaListaCambio();
+}
+function pintaListaCambio(){
+  if(!CB) return; const q = norm((document.getElementById('cb_q')||{}).value||'').trim();
+  let l = CB.todos;
+  if(q) l = l.filter(n=>q.split(/\s+/).every(w=>norm(n).indexOf(w) > -1));
+  const mismo = CB.p ? l.filter(n=>musculosDe(n).indexOf(CB.p) > -1) : [];
+  const resto = l.filter(n=>mismo.indexOf(n) < 0);
+  CB.vista = mismo.concat(resto).slice(0, q ? 40 : 60);
+  const nm = CB.p ? tr(NOMBRE_MUSCULO[CB.p]) : '';
+  const btn = (n, i) => `<button class="op" onclick="cambiaEj(${i})">${esc(n)}<small>${esc(musculosDe(n).map(k=>tr(NOMBRE_MUSCULO[k])).slice(0,3).join(' · '))}</small></button>`;
+  const enMismo = CB.vista.filter(n=>mismo.indexOf(n) > -1).length;
+  document.getElementById('cb_lista').innerHTML =
+    (q ? `<button class="op pri" onclick="cambiaLibre()">✎ ${tr('Usar')} «${esc((document.getElementById('cb_q')||{}).value.trim())}»<small>${tr('Si no está en la lista')}</small></button>` : '') +
+    (enMismo ? `<div class="cb-t">${tr('Mismo músculo')}${nm ? ' · ' + esc(nm) : ''}</div>` : '') +
+    CB.vista.map((n,i)=>(i === enMismo && enMismo ? `<div class="cb-t">${tr('Otros')}</div>` : '') + btn(n,i)).join('') +
+    (!CB.vista.length ? `<p class="mut2">${tr('No hay ninguno con ese nombre. Toca «Usar» para ponerlo tal cual.')}</p>` : '');
+}
+function cambiaEj(i){ if(CB && CB.vista && CB.vista[i]) aplicaCambio(CB.vista[i]); }
+function cambiaLibre(){ const v = ((document.getElementById('cb_q')||{}).value||'').trim(); if(v) aplicaCambio(v.charAt(0).toUpperCase() + v.slice(1)); }
+function aplicaCambio(nuevo){
+  const c = CB; if(!c) return;
+  LOG[idCambio(c.bl,c.dia,c.orig)] = {nom:nuevo, orig:c.orig, ok:true, ts:new Date().toISOString()};
+  recordarNombre(idCambio(c.bl,c.dia,c.orig), c.orig);
+  LS.set('log', LOG); cierraCierre(); CB = null;
+  toast(tr('Hoy haces') + ' ' + nuevo + '.'); pinta();
+}
+function deshazCambio(bl, dia, orig){
+  const id = idCambio(bl,dia,orig), v = LOG[id]; if(!v) return;
+  if(v.sent){ LOG[id] = Object.assign({}, v, {borrada:true, corregido:true, ts:new Date().toISOString()}); } else delete LOG[id];
+  LS.set('log', LOG); pinta();
+}
+function ajustaSeries(bl, dia, orig, nombre, base, d){
+  const ahora = masSeries(bl,dia,orig), total = base + ahora;
+  if(d > 0 && !confirm(tr('Tu plan lleva') + ' ' + base + ' ' + tr(base === 1 ? 'serie' : 'series') + ' ' + tr('por algo: el volumen está calculado para que progreses sin pasarte. Añádela solo si de verdad te sobra.') + '\n\n' + tr('¿Añadir una serie más?'))) return;
+  if(d < 0){
+    if(total <= 1) return;
+    const v = LOG[idSerie(bl,dia,nombre,total-1)];
+    if(v && (v.ok || String(v.r||'').trim() || String(v.c||'').trim())){ toast(tr('La última serie tiene datos: vacíala primero con la ✕.')); return; }
+  }
+  const n = ahora + d, id = idNser(bl,dia,orig), v0 = LOG[id];
+  LOG[id] = n === 0 ? Object.assign({}, v0 || {}, {n:0, base:base, ok:true, borrada: !!(v0 && v0.sent), corregido: !!(v0 && v0.sent), ts:new Date().toISOString()})
+                    : {n:n, base:base, ok:true, ts:new Date().toISOString(), corregido: !!(v0 && v0.sent)};
+  if(n === 0 && !(v0 && v0.sent)) delete LOG[id];
+  recordarNombre(id, orig);
+  LS.set('log', LOG); pinta();
+}
 function eligeAlt(bl, dia, n, i){ LOG[idAlt(bl,dia,n)] = {alt:i}; LS.set('log', LOG); pinta(); }
 
 function ejercicio(bl,dia,f){
@@ -3368,7 +3675,12 @@ function ejercicio(bl,dia,f){
       ${f.CUES?`<div class="cue">${pintaCue(f.CUES)}</div>`:''}
       <div class="nohecho"><button onclick="salta(${A},'${esc(orig)}')">⊘ ${tr("Al final no me da tiempo")}</button></div></div>`;
   }
-  const alts = soloLectura() ? null : alternativasDe(f), elegida = alts ? altElegida(bl,dia,f) : 0;
+  const ejOrig = f['EJERCICIO / ELEMENTO'] || '', serBase = parseInt(f.SERIES) || 0;
+  const camb = (soloLectura() || ops) ? '' : cambioDe(bl, dia, ejOrig);
+  const nMas = (soloLectura() || ops) ? 0 : masSeries(bl, dia, ejOrig);
+  if(camb) f = Object.assign({}, f, {'EJERCICIO / ELEMENTO': camb});
+  if(nMas && serBase) f = Object.assign({}, f, {SERIES: String(Math.max(1, serBase + nMas))});
+  const alts = (soloLectura() || camb) ? null : alternativasDe(f), elegida = alts ? altElegida(bl,dia,f) : 0;
   const botonesAlt = alts ? `<div class="alt" role="group" aria-label="${tr('Qué ejercicio haces')}">
       <span class="sm">${tr('Hoy haces')}</span>${alts.map((x,i)=>`<button class="${i===elegida?'on':''}" aria-pressed="${i===elegida}"
         onclick="eligeAlt('${esc(bl)}','${esc(dia)}','${esc(alts[0].id)}',${i})">${esc(x.txt)}</button>`).join('')}</div>` : '';
@@ -3377,7 +3689,7 @@ function ejercicio(bl,dia,f){
   const series = parseInt(f.SERIES)||0;
   const ficha = fichaEj(nombre);
   const vid = ficha ? idYoutube(ficha['VÍDEO']) : null;
-  const cues = f.CUES || (ficha ? ficha.CUES : '') || '';
+  const cues = camb ? ((ficha ? ficha.CUES : '') || '') : (f.CUES || (ficha ? ficha.CUES : '') || '');   // v5.51: las del ejercicio viejo no valen
   /* v4.6: la hoja de un corredor trae ritmos donde la de fuerza trae RIR.
      Un "5:55-6:20/km" no es un RIR y no se le pone esa etiqueta delante; un
      "RPE 3-4" tampoco es un ritmo. Y si el MAIN SET dice lo mismo que la dosis,
@@ -3498,7 +3810,8 @@ function ejercicio(bl,dia,f){
   }
 
   return `<div class="ej">
-    <div class="h"><div><div class="nm">${esc(alts ? alts[elegida].txt : nombre)}</div>${botonesAlt}${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
+    <div class="h"><div><div class="nm">${esc(alts ? alts[elegida].txt : nombre)}</div>${camb ? `<div class="cambiado">⇄ ${tr('En lugar de')} ${esc(ejOrig)}
+        <button onclick="deshazCambio('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}')">${tr('Deshacer')}</button></div>` : ''}${botonesAlt}${nMas && serBase ? `<div class="cambiado">${nMas > 0 ? '+' : '−'}${Math.abs(nMas)} ${tr(Math.abs(nMas) === 1 ? 'serie' : 'series')} ${tr('sobre el plan')} (${serBase})</div>` : ''}${dg}${ds?`<div class="ds">${esc(conLb(conVAM(ds),uni))}</div>`:''}
       ${extra?`<div class="ds">${esc(conLb(extra,uni))}</div>`:''}</div></div>
     ${(function(){ const sg = (!campos.length && series>0 && !aguantePorTiempo(f)) ? sugerencia(bl,dia,f) : '';
         return sg || lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni); })()}
@@ -3535,7 +3848,11 @@ function ejercicio(bl,dia,f){
       return sal
         ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
              <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
-        : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(ops ? origNom : nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`;
+        : `${(series>0 && !campos.length && !ops && ['fuerza','hibrido'].indexOf(norm(f.TIPO)) > -1 && !esCalentamiento(f)) ? `<div class="ajej">
+             <button onclick="abreCambio('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}')">⇄ ${tr('Cambiar ejercicio')}</button>
+             <span class="ajs"><button onclick="ajustaSeries('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}','${esc(nombre)}',${serBase},-1)" aria-label="${tr('Quitar una serie')}">− ${tr('serie')}</button>
+             <button onclick="ajustaSeries('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}','${esc(nombre)}',${serBase},1)" aria-label="${tr('Añadir una serie')}">+ ${tr('serie')}</button></span></div>` : ''}
+           <div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(ops ? origNom : nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`;
     })()}</div>`;
 }
 /* v5.3 ponia "toca aqui" al final de estas lineas porque no se veia que eran
@@ -4305,6 +4622,17 @@ async function enviar(opc){
       return;
     }
     if(id.endsWith('~obs')){ reg.push(Object.assign(base,{ejercicio:'OBSERVACIONES', notas:v.obs||''})); return; }
+    if(id.endsWith('~cambio')){            // v5.51 (D-240)
+      const o = v.orig || nombreDe(id) || p[3] || '';
+      reg.push(Object.assign(base,{ejercicio:'CAMBIO · ' + o + ' → ' + (v.nom||''), notas: v.borrada ? '' : (v.nom||''), estado: v.borrada ? '' : 'cambio'}));
+      return;
+    }
+    if(id.endsWith('~nser')){
+      const o = nombreDe(id) || p[3] || '', b0 = parseInt(v.base)||0, n = parseInt(v.n)||0;
+      reg.push(Object.assign(base,{ejercicio:o, reps: n > 0 ? '+' + n : String(n),
+        notas: 'Series: ' + b0 + ' → ' + (b0 + n), estado: v.borrada ? '' : 'cambio'}));
+      return;
+    }
     if(id.endsWith('~nota')){
       reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'', notas:v.nota||'', estado:'nota'}));
       return;
