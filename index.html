@@ -118,7 +118,10 @@
 .tira i small{font-size:9px;margin-left:1px}
 .ritmo-c{font-size:14px;margin-top:4px;text-align:center}
 .ritmo-c.ok{color:var(--verde)} .ritmo-c.justo{color:var(--ambar)} .ritmo-c.tarde{color:var(--rojo)}
-.toca{border:2px solid var(--verde) !important}
+.diarow:has(.toca){border-bottom:0;margin:2px 0 8px}
+.diarow > .dia.toca{background:var(--verde-b);border-radius:14px;padding:12px 56px 12px 14px;border-bottom:0}
+.dia.toca .lbl{color:var(--verde)}
+.diarow:has(.toca) .mas{top:12px;right:10px}
 .estilos{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;margin-top:10px}
 .estilos button{border:1px solid var(--linea2);border-radius:12px;padding:8px 6px;background:var(--sup);text-align:left;font-size:12.5px;line-height:1.25}
 .estilos button.on{border:2px solid var(--verde)}
@@ -608,7 +611,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.52';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
+const VERSION = 'v5.52.1';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
