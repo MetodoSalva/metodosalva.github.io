@@ -25,7 +25,7 @@
     var c = (new URLSearchParams(location.search).get('c') || '').trim().toLowerCase();
     var t = JSON.parse(localStorage.getItem('salva_' + c + '_tema'));
     if(t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-    var nueva = (c === 'salva' || c === 'alexia') && JSON.parse(localStorage.getItem('salva_' + c + '_interfaz')) === 'nueva';
+    var nueva = JSON.parse(localStorage.getItem('salva_' + c + '_interfaz')) === 'nueva';
     var e = JSON.parse(localStorage.getItem('salva_' + c + '_estilo')) || 'deportivo';
     if(nueva) document.documentElement.setAttribute('data-estilo', e === 'clasico' ? 'deportivo' : e);
   }catch(e){}
@@ -634,7 +634,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.53.1';   // D-240 cambiar ejercicio · D-239 estilos e interfaz nueva (piloto: salva, alexia)
+const VERSION = 'v5.54';   // D-239 interfaz nueva y estilos abiertos a todas (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1123,7 +1123,69 @@ const EN = {
   "en el plan": "on plan",
   "más lento que el plan": "slower than the plan",
   "Sólo los tramos rápidos (series, tempo, ritmo de maratón), no los rodajes: si un tramo no tiene tiempo anotado, no sale.": "Only the fast parts (intervals, tempo, marathon pace), not the easy running: a part without a logged time doesn't show.",
-  "Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.": "It comes from what you log in each run. A run you don't log doesn't count."
+  "Sale de lo que anotas en cada carrera. Si un día no lo anotas, ese día no suma.": "It comes from what you log in each run. A run you don't log doesn't count.",
+  "Hay una versión nueva de tu app": "There's a new version of your app",
+  "Más clara, con números grandes y tu semana de un vistazo. Pruébala: si no te convence, vuelves a la de siempre desde el menú ☰ → Interfaz.": "Cleaner, with big numbers and your week at a glance. Try it: if you don't like it, go back to the usual one from the ☰ menu → Interface.",
+  "Más clara, con números grandes y los ejercicios de uno en uno. Pruébala: si no te convence, vuelves a la de siempre desde el menú ☰ → Interfaz.": "Cleaner, with big numbers and one exercise at a time. Try it: if you don't like it, go back to the usual one from the ☰ menu → Interface.",
+  "Tu semana, día a día": "Your week, day by day",
+  "Arriba, un círculo por día. Verde = entrenaste. Gris = no; y no pasa nada, porque tu plan es flexible. El de hoy lleva anillo. Toca un día para ver qué hiciste.": "At the top, one circle per day. Green = you trained. Grey = you didn't, and that's fine, because your plan is flexible. Today has a ring. Tap a day to see what you did.",
+  "Debajo te dice cómo vas": "Below, it tells you how you're doing",
+  "«2 de 4 · quedan 4 días». Se pone en ámbar si vas justo y en rojo solo si ya no da tiempo a todas. Con todas hechas: «Semana completa ✓».": "“2 of 4 · 4 days left”. It turns amber if you're cutting it close and red only if there's no longer time for all of them. With all done: “Week complete ✓”.",
+  "¿Qué haces hoy?": "What are you doing today?",
+  "Tus sesiones pendientes, la siguiente marcada. Elige la que quieras: se apunta en el día que la hagas. Con ⋯ la marcas como hecha sin apuntar o la saltas.": "Your pending sessions, with the next one highlighted. Pick any: it's logged on the day you do it. With ⋯ you can mark it done without logging, or skip it.",
+  "Dentro de la sesión": "Inside the session",
+  "Arriba, la lista de ejercicios: ✓ los hechos y «ahora» el que toca. Debajo, uno cada vez: pon el peso y las repeticiones con − y +, ya vienen rellenos con lo sugerido, y toca «Serie hecha». Arranca el descanso solo.": "At the top, the exercise list: ✓ the ones done and “now” the current one. Below, one at a time: set the weight and reps with − and + (they come pre-filled with the suggestion) and tap “Set done”. The rest timer starts on its own.",
+  "Elige tu estilo": "Pick your style",
+  "Deportivo, Claro, Cálido o Fácil de leer (letra grande). Lo cambias cuando quieras en el menú ☰.": "Sporty, Light, Warm or Easy to read (large text). Change it whenever you like from the ☰ menu.",
+  "Probarla": "Try it",
+  "Seguir con la de siempre": "Keep the usual one",
+  "Siguiente": "Next",
+  "Atrás": "Back",
+  "Empezar": "Start",
+  "Anterior": "Previous",
+  "Interfaz": "Interface",
+  "Nueva": "New",
+  "La de siempre": "The usual one",
+  "Estilo": "Style",
+  "Deportivo": "Sporty",
+  "Cálido": "Warm",
+  "Fácil de leer": "Easy to read",
+  "Clásico": "Classic",
+  "Ver la presentación otra vez": "See the introduction again",
+  "Ver todos a la vez": "See all at once",
+  "Ver de uno en uno": "See one at a time",
+  "Serie hecha": "Set done",
+  "Sesión": "Session",
+  "Ejercicio": "Exercise",
+  "ahora": "now",
+  "hecha": "done",
+  "Todas las series hechas": "All sets done",
+  "Pon las repeticiones con el + o en la casilla.": "Enter the reps with + or in the box.",
+  "Más peso": "More weight",
+  "Menos peso": "Less weight",
+  "Más repeticiones": "More reps",
+  "Menos repeticiones": "Fewer reps",
+  "Semana completa": "Week complete",
+  "esta semana": "this week",
+  "quedan": "left",
+  "días": "days",
+  "vas justo": "cutting it close",
+  "ya no da tiempo a todas": "no longer time for all",
+  "Elige la que quieras: se apunta en el día que la hagas.": "Pick any: it's logged on the day you do it.",
+  "Ese día no entrenaste. Si hiciste algo y no lo apuntaste, ábrelo abajo y anótalo.": "You didn't train that day. If you did something and didn't log it, open it below and log it.",
+  "Has hecho todas las sesiones de la semana. Descansa y nos vemos en la siguiente.": "You've done every session this week. Rest and see you next week.",
+  "Saltar o marcar": "Skip or mark",
+  "Te toca": "You're up",
+  "Tus próximas sesiones": "Your next sessions",
+  "Van en orden. Haz la primera; cuando la registres, entra la siguiente.": "They go in order. Do the first one; once you log it, the next one comes in.",
+  "Has hecho todas las sesiones del plan.": "You've done every session in the plan.",
+  "Plan terminado": "Plan finished",
+  "Se guarda solo. Al terminar, «Guardar y enviar» abajo del todo.": "It saves on its own. When you finish, “Save and send” at the very bottom.",
+  "Hola": "Hi",
+  "Tu plan": "Your plan",
+  "Todavía no ha llegado.": "It hasn't arrived yet.",
+  "Pierna + trineos": "Legs + sleds",
+  "las que te quedaban": "the ones you had left"
 };
 /* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
    hay ficha, asi que se mira el enlace (&lang=en) y lo que se guardo la
@@ -2799,10 +2861,11 @@ function aplicaTema(){
   if(m) m.setAttribute('content', oscuro ? '#1E4A33' : '#2F6B4A');
 }
 function ponTema(t){ LS.set('tema', t); aplicaTema(); pinta(); }
-/* v5.52 (D-239, Salvador 5 nov): ESTILOS e INTERFAZ NUEVA. De momento solo en el
-   piloto (Salvador y Alexia); con su visto bueno se abre a todas quitando PILOTO. */
-const PILOTO = ['salva','alexia'];
-const enPiloto = () => PILOTO.indexOf(String(CID||'').toLowerCase()) > -1;
+/* v5.52 (D-239, Salvador 5 nov): ESTILOS e INTERFAZ NUEVA. Piloto con Salvador y
+   Alexia; v5.54 (6 nov): con su visto bueno, abierta a todas. Sigue siendo opcional. */
+const enPiloto = () => true;
+/* «2 de 4» cuenta; el EN['de'] es «from» (rangos de carga), aqui va «of» */
+const deN = () => enIngles() ? 'of' : 'de';
 const ESTILOS = [['clasico','Clásico',['#2F6B4A','#F1EDE6','#4A463C']], ['deportivo','Deportivo',['#2BD47D','#0E1110','#1A201D']],
   ['claro','Claro',['#0F8A47','#FFFFFF','#121614']], ['calido','Cálido',['#2F5D46','#F6F0E6','#C4623F']], ['facil','Fácil de leer',['#1F5C3B','#FFFFFF','#1A1A17']]];
 const interfazNueva = () => enPiloto() && LS.get('interfaz', 'siempre') === 'nueva';
@@ -2858,8 +2921,8 @@ function vHoyNueva(bl, fase, nota){
   const P = pendC.length;
   const ritmo = !P ? ['ok', tr('Semana completa') + ' ✓']
     : P > quedan ? ['tarde', P + ' ' + tr(P === 1 ? 'pendiente' : 'pendientes') + ' · ' + tr('ya no da tiempo a todas')]
-    : P === quedan ? ['justo', nHechas + ' ' + tr('de') + ' ' + cuentan.length + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días') + ' · ' + tr('vas justo')]
-    : ['', nHechas + ' ' + tr('de') + ' ' + cuentan.length + ' ' + tr('esta semana') + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días')];
+    : P === quedan ? ['justo', nHechas + ' ' + deN() + ' ' + cuentan.length + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días') + ' · ' + tr('vas justo')]
+    : ['', nHechas + ' ' + deN() + ' ' + cuentan.length + ' ' + tr('esta semana') + ' · ' + tr('quedan') + ' ' + quedan + ' ' + tr(quedan === 1 ? 'día' : 'días')];
   let detalle = '';
   if(S.diaTira && S.diaTira !== hoy){
     const s = ent[S.diaTira] ? [...ent[S.diaTira]] : [];
@@ -2921,11 +2984,11 @@ function sesionFoco(bl, dia, ejs){
     return `<button class="lc ${ahora ? 'ahora' : ''} ${e}" onclick="S.foco['${esc(clave)}']=${j}; pinta(); document.getElementById('foco').scrollIntoView({behavior:'smooth'})">
       <span class="pt"></span><span class="nm2">${esc(nombreEf(bl, dia, g))}</span>
       <span class="ds2">${ahora ? tr('ahora') : esc((parseInt(g.SERIES)||0) ? (parseInt(g.SERIES) + masSeries(bl,dia,g['EJERCICIO / ELEMENTO']||'')) + '×' + (g['REPS / DOSIS']||'') : (g['REPS / DOSIS']||''))}</span></button>`; };
-  return `<div class="card lista-c"><div class="row sp"><b>${tr('Tu sesión')}</b><span class="sm">${hechos} ${tr('de')} ${lista.length}</span></div>
+  return `<div class="card lista-c"><div class="row sp"><b>${tr('Tu sesión')}</b><span class="sm">${hechos} ${deN()} ${lista.length}</span></div>
       <div class="bar" style="margin:8px 0 6px"><i style="width:${Math.round(hechos/lista.length*100)}%"></i></div>
       ${lista.map(fila).join('')}
       <button class="btn sm2" style="margin-top:8px" onclick="S.verTodos=true; pinta()">${tr('Ver todos a la vez')}</button></div>
-    <div id="foco" class="foco"><div class="sm" style="margin:4px 2px 6px">${tr('Ejercicio')} ${i+1} ${tr('de')} ${lista.length}</div>
+    <div id="foco" class="foco"><div class="sm" style="margin:4px 2px 6px">${tr('Ejercicio')} ${i+1} ${deN()} ${lista.length}</div>
       ${panelSerie(bl, dia, f)}${ejercicio(bl, dia, f)}
       <div class="row sp" style="margin:10px 0 18px;gap:8px">
         <button class="btn" style="flex:1" ${i === 0 ? 'disabled' : ''} onclick="S.foco['${esc(clave)}']=${i-1}; pinta(); document.getElementById('foco').scrollIntoView()">← ${tr('Anterior')}</button>
@@ -2946,7 +3009,7 @@ function panelSerie(bl, dia, f){
   const manc = /mancuerna|dumbbell|\bdb\b/i.test(nom), paso = manc ? 1 : 2.5;
   const obj = rirObjetivo(f), rir = v.rir || ant.rir || ((String(obj).match(/\d+/)||[''])[0]);
   S.pf = {id: id, c: c, r: r, rir: rir, paso: paso};
-  return `<div class="panelf"><div class="lbl">${tr('Serie')} ${k+1} ${tr('de')} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)} × ${esc(u.reps)}</span>` : ''}</div>
+  return `<div class="panelf"><div class="lbl">${tr('Serie')} ${k+1} ${deN()} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)} × ${esc(u.reps)}</span>` : ''}</div>
     <div class="pf2">
       <div><small>${esc(unidadDe(slug(nom)))}</small><div class="pv"><button onclick="pasoF('c',-1)" aria-label="${tr('Menos peso')}">−</button><b id="pf_c">${esc(c||'—')}</b><button onclick="pasoF('c',1)" aria-label="${tr('Más peso')}">+</button></div></div>
       <div><small>reps</small><div class="pv"><button onclick="pasoF('r',-1)" aria-label="${tr('Menos repeticiones')}">−</button><b id="pf_r">${esc(r||'—')}</b><button onclick="pasoF('r',1)" aria-label="${tr('Más repeticiones')}">+</button></div></div></div>
@@ -2984,20 +3047,28 @@ const PASOS_INTRO = [
   ['Dentro de la sesión', 'Arriba, la lista de ejercicios: ✓ los hechos y «ahora» el que toca. Debajo, uno cada vez: pon el peso y las repeticiones con − y +, ya vienen rellenos con lo sugerido, y toca «Serie hecha». Arranca el descanso solo.', 'sesion'],
   ['Elige tu estilo', 'Deportivo, Claro, Cálido o Fácil de leer (letra grande). Lo cambias cuando quieras en el menú ☰.', 'estilos']
 ];
+/* plan fijo o en cola: la tira de la semana y «¿Qué haces hoy?» son solo del flexible */
+const PASO0_FIJO = ['Hay una versión nueva de tu app', 'Más clara, con números grandes y los ejercicios de uno en uno. Pruébala: si no te convence, vuelves a la de siempre desde el menú ☰ → Interfaz.', 'nueva'];
+function pasosIntro(){
+  let flex = false;
+  try{ flex = !enCola() && modoLibre(bloqueDe(S.semana)); }catch(e){}
+  return flex ? PASOS_INTRO : [PASO0_FIJO].concat(PASOS_INTRO.filter(p=>['sesion','estilos'].indexOf(p[2]) > -1));
+}
 function introNueva(){
-  if(!enPiloto()) return '';
+  if(!enPiloto() || !S.d) return '';
   if(!S.introNueva && LS.get('intro_d239', false)) return '';
-  const i = S.introPaso || 0, p = PASOS_INTRO[i], ult = i === PASOS_INTRO.length - 1;
+  const PASOS = pasosIntro();
+  const i = Math.min(S.introPaso || 0, PASOS.length - 1), p = PASOS[i], ult = i === PASOS.length - 1;
   const ejemplo = {
     nueva: `<div class="card" style="text-align:center"><div style="font-size:44px">✨</div></div>`,
     tira: `<div class="card"><div class="tira">${['hecho','','hecho','hoy','fut','fut','fut'].map((c,j)=>`<button class="${c}"><i>${j+2}</i><b>${(enIngles()?['M','T','W','T','F','S','S']:['L','M','X','J','V','S','D'])[j]}</b></button>`).join('')}</div></div>`,
-    ritmo: `<div class="card"><div class="ritmo-c">2 ${tr('de')} 4 ${tr('esta semana')} · ${tr('quedan')} 4 ${tr('días')}</div><div class="ritmo-c justo">1 ${tr('de')} 4 · ${tr('quedan')} 3 ${tr('días')} · ${tr('vas justo')}</div><div class="ritmo-c ok">${tr('Semana completa')} ✓</div></div>`,
+    ritmo: `<div class="card"><div class="ritmo-c">2 ${deN()} 4 ${tr('esta semana')} · ${tr('quedan')} 4 ${tr('días')}</div><div class="ritmo-c justo">1 ${deN()} 4 · ${tr('quedan')} 3 ${tr('días')} · ${tr('vas justo')}</div><div class="ritmo-c ok">${tr('Semana completa')} ✓</div></div>`,
     lista: `<div class="card"><div class="diarow"><button class="dia toca"><span style="flex:1"><span class="lbl">${tr('Siguiente')}</span><br><span class="n">${tr('Sesión')} 3 · ${tr('Pierna + trineos')}</span></span></button><button class="mas">⋯</button></div></div>`,
-    sesion: `<div class="panelf"><div class="lbl">${tr('Serie')} 1 ${tr('de')} 3</div><div class="pf2"><div><small>kg</small><div class="pv"><button>−</button><b>21</b><button>+</button></div></div><div><small>reps</small><div class="pv"><button>−</button><b>12</b><button>+</button></div></div></div><button class="btn pri big" style="margin-top:10px">${tr('Serie hecha')}</button></div>`,
+    sesion: `<div class="panelf"><div class="lbl">${tr('Serie')} 1 ${deN()} 3</div><div class="pf2"><div><small>kg</small><div class="pv"><button>−</button><b>21</b><button>+</button></div></div><div><small>reps</small><div class="pv"><button>−</button><b>12</b><button>+</button></div></div></div><button class="btn pri big" style="margin-top:10px">${tr('Serie hecha')}</button></div>`,
     estilos: `<div class="estilos">${ESTILOS.filter(([k])=>k !== 'clasico').map(([k,n,c])=>`<button class="${estilo()===k?'on':''}" onclick="ponEstilo('${k}')"><div class="mues">${c.map(x=>`<span style="background:${x};border:1px solid rgba(128,128,128,.35)"></span>`).join('')}</div>${tr(n)}</button>`).join('')}</div>`
   }[p[2]];
   return `<div class="intro-nueva" role="dialog" aria-modal="true">
-    <div class="pasos">${PASOS_INTRO.map((_,j)=>`<span class="${j===i?'on':''}"></span>`).join('')}</div>
+    <div class="pasos">${PASOS.map((_,j)=>`<span class="${j===i?'on':''}"></span>`).join('')}</div>
     <h2 style="font-size:24px;margin:10px 0 8px">${tr(p[0])}</h2>
     <p class="mut" style="font-size:16px;margin-bottom:14px">${tr(p[1])}</p>
     ${ejemplo}
