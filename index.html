@@ -635,7 +635,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.56';   // D-244 huecos editables · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.57';   // D-244 huecos: series y reps en blanco que escribe ella (v5.57) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -766,8 +766,9 @@ const bloqueDe = s => s ? (s['BLOQUE (apunta a SESIONES)'] || s.BLOQUE || '') : 
 const esExtra = f => norm(f && f.EXTRA) === 'si';
 /* v5.56 (D-244, Mariana 6 nov): EXTRA = editable. Un hueco «Ejercicio N» de una rutina
    que la clienta hace pero no sabe nombrar (la del fisio). Le pone nombre si lo sabe
-   (va como un cambio: «CAMBIO · Ejercicio 3 → Monster walk»), apunta sus series (3 de
-   salida, con + y - sin aviso), se graba, y puede anadir huecos. */
+   (va como un cambio: «CAMBIO · Ejercicio 3 → Monster walk»), se graba, comenta y puede
+   anadir huecos. v5.57 (Salvador): series, repeticiones y peso/goma EN BLANCO, que los
+   escribe ella; van a la hoja en SERIE, REPS y CARGA de una fila de registro. */
 const esEditable = f => norm(f && f.EXTRA) === 'editable';
 const RX_HUECO = /^(.*?)\s*(\d+)\s*$/;
 function conHuecos(b, d, filas){
@@ -780,7 +781,7 @@ function conHuecos(b, d, filas){
     const n = parseInt(k.slice(pre.length)); if(n > top) top = n; });
   const out = [];
   filas.forEach(f=>{
-    const g = esEditable(f) && !String(f.SERIES||'').trim() ? Object.assign({}, f, {SERIES: '3'}) : f;
+    const g = esEditable(f) ? Object.assign({}, f, {SERIES: '', REGISTRO: 'nseries,metros,carga'}) : f;
     out.push(f === ult ? Object.assign({}, g, {_ultimoHueco: top === maxN}) : g);
     if(f === ult) for(let n = maxN + 1; n <= top; n++)
       out.push(Object.assign({}, g, {'EJERCICIO / ELEMENTO': base + ' ' + n, _ultimoHueco: n === top, _anadido: true}));
@@ -1236,7 +1237,12 @@ const EN = {
   "Ponerle nombre": "Name it",
   "Añadir ejercicio": "Add exercise",
   "Antes de empezar": "Before you start",
-  "Si quieres entrenar antes de que empiece tu plan. No cuentan para nada.": "If you want to train before your plan starts. They don't count for anything."
+  "Si quieres entrenar antes de que empiece tu plan. No cuentan para nada.": "If you want to train before your plan starts. They don't count for anything.",
+  "Si no sabes cómo se llama, grábalo y yo le pongo nombre": "If you don't know what it's called, film it and I'll name it",
+  "Comentarios sobre este ejercicio": "Comments on this exercise",
+  "repeticiones": "reps",
+  "peso o goma (si hay)": "weight or band (if any)",
+  "kg o color": "kg or colour"
 };
 /* El idioma sale de la ficha del cliente. Antes de que llegue su plan no
    hay ficha, asi que se mira el enlace (&lang=en) y lo que se guardo la
@@ -1622,6 +1628,7 @@ const CAMPOS = {
   piernas: {et:'cómo quedaron las piernas', ph:'1-5', modo:'numeric', escala:5,
             ayuda:'1 = destrozadas · 5 = frescas'},
   carga:   {et:'carga',       ph:'kg',      modo:'decimal'},
+  nseries: {et:'series',      ph:'3',       modo:'numeric'},   // v5.57: huecos editables (D-244)
   metros:  {et:'metros / reps',ph:'m o reps',modo:'text'},
   vam:     {et:'metros totales que marca la cinta al acabar', ph:'2150', modo:'decimal',
             ayuda:'con el kilómetro de calentamiento incluido'},
@@ -2349,7 +2356,7 @@ function fusionarRegistros(filas){
         // v5.0: el test de VAM viaja en REPS, con "VAM" en RITMO para reconocerlo
         const esVAM = /^VAM\b/.test(String(f.RITMO||''));
         LOG[id] = {d:{km:f.KM||'', tiempo:f.TIEMPO||'', rpe:f.RPE||'', piernas:f.PIERNAS||'',
-                      carga:f.CARGA||'', metros:esVAM?'':(f.REPS||''), vam:esVAM?String(f.REPS||''):''},
+                      carga:f.CARGA||'', metros:esVAM?'':(f.REPS||''), vam:esVAM?String(f.REPS||''):'', nseries:String(f.SERIE||'')},
                    ok:true, sent:true, ts:f.FECHA||''};
       } else if(id.endsWith('~valoracion')){
         LOG[id] = {val:parseInt(f.VALORACION)||0, ok:true, sent:true};
@@ -2374,7 +2381,7 @@ function fusionarRegistros(filas){
       const anu = anulada(f);
       const nuevo = id.endsWith('~reg')
         ? Object.assign({}, v, {d:Object.assign({}, v.d, {km:f.KM||'', tiempo:f.TIEMPO||'', rpe:f.RPE||'', piernas:f.PIERNAS||'',
-                                carga:f.CARGA||''})})
+                                carga:f.CARGA||'', nseries:String(f.SERIE||'') || (v.d||{}).nseries || ''})})
         : /~e\d+$/.test(id) ? Object.assign({}, v, {t:f.TIEMPO||'', c:f.CARGA||''})
         : (/\blb\s*$/i.test(String(f.NOTAS||'')) ? v : Object.assign({}, v, {r:f.REPS||'', c:f.CARGA||'', rir:f.RIR||'', t:f.TIEMPO||'', e:f.RPE||''}));
       if(anu) nuevo.borrada = true; else delete nuevo.borrada;
@@ -3100,7 +3107,7 @@ function tiraCola(){
 function hechoEj(bl, dia, f){
   const nom = nombreEf(bl, dia, f), n = (parseInt(f.SERIES)||0) + masSeries(bl, dia, f['EJERCICIO / ELEMENTO']||''), cs = camposDe(f);
   if(saltado(bl, dia, f['EJERCICIO / ELEMENTO']||'') || saltado(bl, dia, nom)) return 'salto';
-  if(cs.length) return (LOG[idReg(bl,dia,nom)]||{}).ok ? 'hecho' : 'no';
+  if(cs.length) return (LOG[idReg(bl,dia,esEditable(f) ? (f['EJERCICIO / ELEMENTO']||'') : nom)]||{}).ok ? 'hecho' : 'no';
   let k = 0; for(let i=0;i<n;i++) if(idsSerie(bl,dia,f,i).some(id=>(LOG[id]||{}).ok && !(LOG[id]||{}).borrada)) k++;
   return !k ? 'no' : (k >= n ? 'hecho' : 'medio');
 }
@@ -3637,7 +3644,7 @@ function progresoSesion(bl, dia){
     total++;
     if(saltado(bl, dia, nombre)){ hechos++; return; }
     const vale = v => v && !v.borrada && (v.ok || tieneAlgo(v));
-    if(cs.length){ if(vale(LOG[idReg(bl,dia,nombre)])) { hechos++; return; } }
+    if(cs.length){ if(vale(LOG[idReg(bl,dia,esEditable(f) ? (f['EJERCICIO / ELEMENTO']||'') : nombre)])) { hechos++; return; } }
     for(let i=0;i<n;i++){ if(idsSerie(bl,dia,f,i).some(id=>vale(LOG[id]))){ hechos++; return; } }
   });
   return {total, hechos};
@@ -4033,7 +4040,10 @@ function ejercicio(bl,dia,f){
     etiqueta(f.TEMPO, 'Tempo'), etiqueta(f.DESCANSO, tr('Descanso'))].filter(Boolean).join(' · ');
   const dg = grande ? `<div class="dg">${esc(grande)}</div>` : '';
   const eid = slug(nombre);
-  recordarNombre(idNota(bl,dia,nombre), nombre);
+  /* v5.57: en un hueco editable lo anotado va con el hueco («Ejercicio 2»), no con el
+     nombre que le ponga: asi no se pierde nada si lo nombra despues de anotar. */
+  const clave = edit ? ejOrig : nombre;
+  recordarNombre(idNota(bl,dia,clave), nombre);
 
   /* v5.4: mirando otra semana se ve la tarjeta entera (nombre, dosis,
      indicaciones y el buscador de vídeo) y NADA que escriba: ni casillas, ni
@@ -4053,14 +4063,14 @@ function ejercicio(bl,dia,f){
   const uni = unidadDe(eid);
   let registro = '';
   if(campos.length && !saltado(bl,dia,nombre)){
-    const rid = idReg(bl,dia,nombre);
+    const rid = idReg(bl,dia,clave);
     recordarNombre(rid, nombre);
     const v = LOG[rid] || {}, cs = campos.join('-');
     let d = v.d || {};
     if(!d.tiempo && tramoPorTiempo(f) && campos.indexOf('tiempo') > -1) d = Object.assign({}, d, {tiempo: tiempoDosis(f)});   // v5.37
     registro = `<div class="reg ${v.ok?'ok':''}" id="reg_${rid}">
       ${esCorrer(f) && series>1 ? `<div class="totales">${tr('Totales de la sesión')}</div>` : ''}
-      ${campos.map(k=>casilla(rid, k, d, cs, nombre, k === 'km' && tramoPorTiempo(f) ? {et: 'Distancia de este tramo (km)', ayuda: 'Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.'}
+      ${campos.map(k=>casilla(rid, k, d, cs, nombre, edit && k === 'metros' ? {et: 'repeticiones', ph: '12', modo: 'text'} : edit && k === 'carga' ? {et: 'peso o goma (si hay)', ph: 'kg o color', modo: 'text'} : k === 'km' && tramoPorTiempo(f) ? {et: 'Distancia de este tramo (km)', ayuda: 'Solo este tramo, lo que marca el reloj. El tiempo ya viene puesto: cámbialo si hiciste más o menos.'}
         : k === 'tiempo' && conCronom(f) ? {cronom: 1} : null)).join('')}
       ${campos.indexOf('km')>-1 && campos.indexOf('tiempo')>-1
         ? `<div class="ritmo${d.km && aSegundos(d.tiempo) && !ritmoCreible(d) ? ' mal' : ''}" id="ritmo_${rid}">${esc(textoRitmo(d))}</div>` : ''}
@@ -4126,12 +4136,12 @@ function ejercicio(bl,dia,f){
         return sg || lineaUltima(campos.length ? ultimaVezReg(bl,dia,nombre) : (series>0 ? ultimaVez(bl,dia,nombre) : null), uni); })()}
     ${cues?`<div class="cue">${pintaCue(conLb(conVAM(cues),uni))}</div>`:''}
     ${(series || campos.length || pideVideo(f)) ? (function(){
-      const idn = idNota(bl,dia,nombre); const txt = textoNota(idn);
+      const idn = idNota(bl,dia,clave); const txt = textoNota(idn);
       const ab = S.nota===idn || !!txt;
       return `<div class="notaej">
         ${reacDe(idn) ? `<div class="reacs">${reacDe(idn)}</div>` : ''}
-        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${tr("¿Algo que contarme de este ejercicio?")}</button>`}
-        ${bloqueVideo(bl,dia,nombre,f)}${bloqueFoto(bl,dia,nombre,f)}
+        ${ab?'':`<button class="abrir" onclick="abrirNota('${idn}')">💬 ${edit ? tr("Comentarios sobre este ejercicio") : tr("¿Algo que contarme de este ejercicio?")}</button>`}
+        ${bloqueVideo(bl,dia,clave,f)}${bloqueFoto(bl,dia,clave,f)}
         ${ab?`<button class="abrir con" onclick="cerrarNota()">💬 ${tr("Tu nota para Salva")}</button>
           <textarea id="n_${idn}" oninput="guardaNota('${idn}',this.value)"
             placeholder="${tr("Dudas, sensaciones, si te ha gustado o no, molestias, la máquina estaba ocupada…")}">${esc(txt)}</textarea>
@@ -4157,7 +4167,8 @@ function ejercicio(bl,dia,f){
       return sal
         ? `<div class="saltado">⊘ ${tr("No lo has hecho.")}
              <button onclick="quitaSalto('${esc(bl)}','${esc(dia)}','${esc(nombre)}')">${tr("Deshacer")}</button></div>`
-        : `${(series>0 && !campos.length && !ops && ['fuerza','hibrido'].indexOf(norm(f.TIPO)) > -1 && !esCalentamiento(f)) ? `<div class="ajej">
+        : `${edit ? `<div class="ajej"><button onclick="nombraHueco('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}')">✎ ${tr(camb ? 'Cambiar el nombre' : 'Ponerle nombre')}</button></div>`
+          : (series>0 && !campos.length && !ops && ['fuerza','hibrido'].indexOf(norm(f.TIPO)) > -1 && !esCalentamiento(f)) ? `<div class="ajej">
              ${edit ? `<button onclick="nombraHueco('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}')">✎ ${tr(camb ? 'Cambiar el nombre' : 'Ponerle nombre')}</button>`
                     : `<button onclick="abreCambio('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}')">⇄ ${tr('Cambiar ejercicio')}</button>`}
              <span class="ajs"><button onclick="ajustaSeries('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}','${esc(nombre)}',${serBase},-1)" aria-label="${tr('Quitar una serie')}">− ${tr('serie')}</button>
@@ -4326,7 +4337,7 @@ function bloqueVideo(bl, dia, nombre, f){
       ? `<p class="pista">⏳ ${tr("Enviando el vídeo…")}</p>`
       : `<button class="abrir" onclick="avisoVideo('${id}')">📹 ${!enviado && pideVideo(f)
           ? `<span class="clic">${tr("Clic aquí")}</span> ${tr("para grabar o subir el vídeo")}`   /* palabras de Salvador (c186e3f): no se tocan */
-          : (enviado ? tr("Grabar otro") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
+          : (enviado ? tr("Grabar otro") : esEditable(f) ? tr("Si no sabes cómo se llama, grábalo y yo le pongo nombre") : tr("¿No sabes si lo estás haciendo bien? Grábate haciéndolo"))}</button>
          ${S.videoAviso === id ? `<div class="calent" style="margin:6px 0">${esc(aviso)}</div>
            <div class="stack" style="margin:0 0 10px;gap:8px">
              <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
@@ -4962,7 +4973,7 @@ async function enviar(opc){
         notas: d.fuel ? tr('Avituallamiento') + ': ' + d.fuel : '',
         ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + paso(vamDe(d.vam)) + ' min/km' : '')
                      : (d.ritmo || (ritmoCreible(d) ? ritmoDe(d).replace('Ritmo ','') : '')),
-        rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'',
+        rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'', serie:d.nseries||'',
         estado: v.borrada ? '' : (v.ok?'realizada':'')}));
       return;
     }
