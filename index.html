@@ -638,7 +638,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.60';   // v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.61';   // v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -719,12 +719,37 @@ function toast(msg){
   clearTimeout(toast.t); toast.t = setTimeout(()=>{ t.style.display = 'none'; }, 3000);
 }
 
-function fechaIni(txt){
+function diaMes(txt){
   const s = String(txt||'');
   const n = s.match(/(\d{1,2})/), m = s.match(/([a-záéíóúñ]{3,})/i);
   if(!n||!m) return null;
   const x = MESES[norm(m[1]).slice(0,3)];
-  return x===undefined ? null : new Date(ANIO, x, parseInt(n[1]));
+  return x===undefined ? null : {d: parseInt(n[1]), m: x};
+}
+/* v5.61 (9 nov, D-250 Ruth): EL AÑO DE CADA SEMANA. Antes todo era 2026 (ANIO) y un
+   bloque que pasaba de diciembre a enero ponía enero en 2026: semanaActual() se iba a
+   la última semana. Ahora se recorre SEMANAS en orden: la primera semana toma el año
+   más cercano a hoy y, cada vez que el mes va hacia atrás (dic -> ene), se suma uno.
+   Un texto que no es de SEMANAS toma el año más cercano a hoy. */
+function anioCercano(d, m){
+  const h = new Date(), y = h.getFullYear();
+  return [y - 1, y, y + 1].reduce((a, b) => Math.abs(new Date(b, m, d) - h) < Math.abs(new Date(a, m, d) - h) ? b : a);
+}
+function anioDe(txt){
+  const ss = (S.d && S.d.SEMANAS) || [];
+  if(anioDe.d !== ss){
+    anioDe.d = ss; anioDe.m = {};
+    let y = null, mAnt = -1;
+    ss.forEach(w=>{ const p = diaMes(w.FECHAS); if(!p) return;
+      if(y === null) y = anioCercano(p.d, p.m); else if(p.m < mAnt) y++;
+      mAnt = p.m; if(!(String(w.FECHAS) in anioDe.m)) anioDe.m[String(w.FECHAS)] = y; });
+  }
+  if(String(txt) in anioDe.m) return anioDe.m[String(txt)];
+  const p = diaMes(txt); return p ? anioCercano(p.d, p.m) : ANIO;
+}
+function fechaIni(txt){
+  const p = diaMes(txt);
+  return p ? new Date(anioDe(txt), p.m, p.d) : null;
 }
 function semanaActual(){
   const ss = S.d.SEMANAS||[]; if(!ss.length) return null;
@@ -1220,6 +1245,14 @@ const EN = {
   "Semana completa": "Week complete",
   "esta semana": "this week",
   "quedan": "left",
+  "una semana": "one week", "Vas": "You are", "por detrás de tu plan.": "behind your plan.",
+  "Tu próxima sesión es de la semana": "Your next session is from week", "y el calendario ya va por la": "and the calendar is already on week",
+  "No hiciste ninguna sesión de": "You did no sessions in", "la semana": "week", "las semanas": "weeks",
+  "Si quieres, muevo tu plan para que la semana": "If you like, I will move your plan so week",
+  "empiece ahora. No pierdes nada y Salva recibe un aviso. Tu bloque terminaría el": "starts now. You lose nothing and Salva gets a note. Your block would end on",
+  "Mover mi plan": "Move my plan", "No, sigo así": "No, keep it as is", "¿Muevo tu plan": "Move your plan",
+  "La semana": "Week", "pasa a empezar": "will start on", "Hecho. Tu plan se ha movido.": "Done. Your plan has moved.",
+  "No se ha podido mover el plan.": "Could not move the plan.", "El servidor no ha movido nada. Actualiza la app.": "The server did not move anything. Update the app.",
   "pendiente": "to do", "pendientes": "to do", "día": "day", "objetivo": "target", "interfaz nueva": "new layout",
   "de tu plan": "of your plan", "Lo que anotes aquí se guarda en esa semana del plan.": "What you log here is saved in that week of the plan.",
   "Saltar esta sesión": "Skip this session", "Sale de tu cola y entra la siguiente. Si cambias de idea, la recuperas en Mi plan.": "It leaves your queue and the next one comes in. If you change your mind, get it back in My plan.",
@@ -2294,6 +2327,7 @@ async function cargar(){
     const d = await r.json();
     if(d.error) throw new Error(d.error);
     S.d=d; S.semana=semanaActual(); migrarSemana(); S.err=null; S.cache=null;
+    interfazInicial();
     LS.set('idioma', ajuste('idioma') || 'es');   // para la pantalla de carga de la proxima vez
     LS.set('plan', {d:d, ts:Date.now()});
     fusionarRegistros(d.MIS_REGISTROS||[]);
@@ -2660,6 +2694,125 @@ function avisoCheckin(){
   </div>`;
 }
 
+/* ---------- v5.61 (9 nov, Salvador): VAS N SEMANAS POR DETRAS ----------
+   Antes, quien se atrasaba (enfermedad, viaje) seguia con el calendario y se
+   saltaba semanas del plan, o Salva tenia que mover las fechas a mano (Ana
+   Perez, 6 nov). Ahora la app lo ve y ofrece mover las semanas atrasadas a la
+   actual: reescribe FECHAS en SEMANAS (puente v4.13) y le deja un aviso a Salva
+   en Mensajes. No se borra nada y lo anotado no se mueve (va por numero de
+   semana, no por fecha).
+     - Plan en orden (cola): NUNCA (Salvador, 9 nov: la cola es justo para no
+       ir por detras ni acumular sesiones).
+     - Dias fijos o libres: las semanas justo antes de esta en las que no se
+       hizo ninguna sesion y todas estan cerradas como «No la hice» (las que
+       siguen sin registrar se preguntan antes en su tarjeta).
+   No se ofrece en planes de carrera (tienen fecha de competicion) salvo que la
+   FICHA diga «mover semanas = si»; con «no» no se ofrece nunca. */
+const MES_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MES_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* «9-15 nov», «26 oct-1 nov», «31 Aug–6 Sep», «7 – 13 sep» -> lo mismo, N dias despues,
+   con el mismo guion, idioma y mayusculas. null si no se entiende. */
+function moverFechas(txt, dias){
+  const s = String(txt||'').trim();
+  const m = s.match(/^(\d{1,2})(?:\s*([A-Za-z]{3,}))?(\s*[–-]\s*)(\d{1,2})\s*([A-Za-z]{3,})$/);
+  if(!m) return null;
+  const mf = MESES[norm(m[5]).slice(0,3)], mi = m[2] ? MESES[norm(m[2]).slice(0,3)] : mf;
+  if(mf === undefined || mi === undefined) return null;
+  const y = anioDe(s), ini = new Date(y, mi, parseInt(m[1])), fin = new Date(y + (mf < mi ? 1 : 0), mf, parseInt(m[4]));
+  ini.setDate(ini.getDate() + dias); fin.setDate(fin.getDate() + dias);
+  const tok = m[5], may = tok[0] === tok[0].toUpperCase();
+  const ing = may || ['jan','apr','aug','dec'].indexOf(norm(tok).slice(0,3)) > -1;
+  const nom = k => { const t = (ing ? MES_EN : MES_ES)[k]; return may ? t[0].toUpperCase() + t.slice(1) : t.toLowerCase(); };
+  return ini.getMonth() === fin.getMonth()
+    ? `${ini.getDate()}${m[3]}${fin.getDate()} ${nom(fin.getMonth())}`
+    : `${ini.getDate()} ${nom(ini.getMonth())}${m[3]}${fin.getDate()} ${nom(fin.getMonth())}`;
+}
+function planDeCarrera(){
+  return (S.d.SESIONES||[]).some(f=>norm(f.TIPO)==='running')
+      || (S.d.SEMANAS||[]).some(w=>String(w['KM PLAN']||'').trim());
+}
+function atraso(){
+  if(!S.d || !S.semana || S.cache || S.mirando || !KEY) return null;
+  const pm = ajuste('mover semanas');
+  if(pm === 'no' || (planDeCarrera() && pm !== 'si')) return null;
+  const ss = semanasReales(), i = ss.findIndex(w=>w.SEMANA === S.semana.SEMANA);
+  if(i < 1) return null;
+  let desde = -1;
+  if(enCola()) return null;      // Salvador 9 nov: la cola existe para no acumular sesiones; ahi no hay atraso
+  {
+    for(let j = i - 1; j >= 0; j--){
+      const w = ss[j], bl = bloqueDe(w); if(!bl) break;
+      const est = enSemana(w, ()=>sesionesContables(bl).filter(x=>sesionDe(bl, x['DÍA']).length).map(x=>estadoSesion(bl, x['DÍA'])));
+      if(!est.length || !est.every(e=>e === 'nohecha' || e === 'omitida')) break;
+      desde = j;
+    }
+  }
+  if(desde < 0 || desde >= i) return null;
+  const n = i - desde, fechas = [];
+  for(let k = desde; k < ss.length; k++){
+    const f = moverFechas(ss[k].FECHAS, 7 * n);
+    if(!f) return null;                    // una fecha que no se entiende: mejor no tocar nada
+    fechas.push({semana: String(ss[k].SEMANA), antes: String(ss[k].FECHAS), fechas: f});
+  }
+  return {n: n, desde: ss[desde], hoy: S.semana, ult: ss[ss.length - 1], fechas: fechas};
+}
+function avisoAtraso(){
+  const a = atraso(); if(!a) return '';
+  const clave = 'atraso_visto~' + a.desde.SEMANA + '~' + a.hoy.SEMANA;
+  if(LS.get(clave, false)) return '';
+  const nd = numSem(a.desde), sem = a.n === 1 ? tr('una semana') : a.n + ' ' + tr('semanas');
+  const finNuevo = a.fechas[a.fechas.length - 1].fechas;
+  return `<div class="aviso">
+    <b>${tr('Vas')} ${sem} ${tr('por detrás de tu plan.')}</b>
+    <p class="mut" style="margin-top:6px;font-size:14px">${enCola()
+      ? tr('Tu próxima sesión es de la semana') + ' ' + esc(nd) + ' ' + tr('y el calendario ya va por la') + ' ' + esc(numSem(a.hoy)) + '.'
+      : tr('No hiciste ninguna sesión de') + ' ' + (a.n === 1 ? tr('la semana') + ' ' + esc(nd) : tr('las semanas') + ' ' + esc(nd) + '–' + esc(numSem(ss_ant(a))) ) + '.'}
+      ${tr('Si quieres, muevo tu plan para que la semana')} ${esc(nd)} ${tr('empiece ahora. No pierdes nada y Salva recibe un aviso. Tu bloque terminaría el')} ${esc(finNuevo.split(/[–-]/).pop().trim())}.</p>
+    <div class="row wrap" style="gap:8px;margin-top:10px">
+      <button class="btn sm2 pri" onclick="moverPlan()">${tr('Mover mi plan')} ${sem}</button>
+      <button class="btn sm2" onclick="LS.set('${clave}', true); pinta()">${tr('No, sigo así')}</button></div>
+  </div>`;
+}
+const ss_ant = a => { const ss = semanasReales(), i = ss.findIndex(w=>w.SEMANA === a.hoy.SEMANA); return ss[i - 1]; };
+async function moverPlan(){
+  const a = atraso(); if(!a || S.moviendo) return;
+  const sem = a.n === 1 ? tr('una semana') : a.n + ' ' + tr('semanas');
+  if(!confirm(tr('¿Muevo tu plan') + ' ' + sem + '? ' + tr('La semana') + ' ' + numSem(a.desde) + ' ' + tr('pasa a empezar') + ' ' + a.fechas[0].fechas + '.')) return;
+  S.moviendo = true;
+  const d = new Date(), p = x => String(x).padStart(2,'0');
+  const fecha = d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  const texto = '[Aviso automático] He movido mi plan ' + (a.n === 1 ? '1 semana' : a.n + ' semanas') + ': la semana ' + numSem(a.desde)
+    + ' pasa de ' + a.fechas[0].antes + ' a ' + a.fechas[0].fechas + ' y las siguientes igual. El bloque termina ahora el '
+    + a.fechas[a.fechas.length - 1].fechas + ' (antes ' + a.fechas[a.fechas.length - 1].antes + ').'
+    + (enCola() ? '' : ' Las sesiones que había marcado como no hechas en esas semanas vuelven a quedar pendientes.');
+  const id = 'mc~mover~s' + slug(String(a.desde.SEMANA)) + '~' + d.getTime();
+  try{
+    const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente:CID, token:KEY, moverSemanas:{id: id, fecha: fecha, texto: texto,
+        fechas: a.fechas.map(x=>({semana: x.semana, fechas: x.fechas}))}})});
+    const j = await r.json(); if(j.error) throw new Error(j.error);
+    if(!j.movidas) throw new Error(tr('El servidor no ha movido nada. Actualiza la app.'));
+    /* Las «No la hice» de las semanas que vuelven: fuera, como si se quitara la marca
+       a mano, para que salgan pendientes. Se envian solas. */
+    if(!enCola()){
+      const mov = semanasReales().slice(semanasReales().findIndex(w=>w.SEMANA === a.desde.SEMANA),
+                                        semanasReales().findIndex(w=>w.SEMANA === a.hoy.SEMANA));
+      mov.forEach(w=>enSemana(w, ()=>{ const bl = bloqueDe(w);
+        diasDeBloque(bl).forEach(x=>{ [idCierre(bl, x['DÍA']), idOmit(bl, x['DÍA'])].forEach(k=>{
+          const v = LOG[k]; if(!v || (k.endsWith('~cierre') && v.tipo === 'hecha')) return;
+          if(v.sent) LOG[k] = Object.assign({}, v, {ok:false, borrada:true, corregido:true}); else delete LOG[k]; }); }); }));
+      LS.set('log', LOG);
+    }
+    const ms = LS.get('msj_mios', []); ms.push({ID: id, FECHA: fecha, DE: 'cliente', TEXTO: texto}); LS.set('msj_mios', ms);
+    toast(tr('Hecho. Tu plan se ha movido.'));
+    S.moviendo = false;
+    await cargar(); if(!enCola()) enviar({auto: true});
+  }catch(e){
+    S.moviendo = false;
+    toast(tr('No se ha podido mover el plan.') + ' ' + (e && e.message ? e.message : ''));
+  }
+}
+
 /* ---------- HOY ---------- */
 /* v5.33 (15 oct): cuando se acaba el bloque la app se quedaba en la ultima
    semana para siempre, y lo que se anotaba encima PISABA lo de esa semana
@@ -2690,10 +2843,10 @@ function vHoy(){
   const fase = S.semana ? (S.semana['FASE / TÍTULO']||'') : '';
   const nota = S.semana ? (S.semana['NOTA DE LA SEMANA']||'') : '';
 
-  if(enCola()) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + (interfazNueva() ? tiraCola() : '') + vHoyCola();
-  if(interfazNueva() && modoLibre(bl)) return avisoMensajes() + bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyNueva(bl, fase, nota);
+  if(enCola()) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoAtraso() + (interfazNueva() ? tiraCola() : '') + vHoyCola();
+  if(interfazNueva() && modoLibre(bl)) return avisoMensajes() + bienvenida() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoAtraso() + avisoPendientes() + vHoyNueva(bl, fase, nota);
   // Modo libre: no hay "día de hoy", hay sesiones pendientes que él elige.
-  if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + vHoyLibre(bl, fase, nota);
+  if(modoLibre(bl)) return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoAtraso() + avisoPendientes() + vHoyLibre(bl, fase, nota);
 
   let bloqueHoy;
   /* v5.47 (24 oct, alta de Christian): antes de que empiece la primera semana,
@@ -2748,7 +2901,7 @@ function vHoy(){
   }
 
   const pend = pendientes();
-  return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoPendientes() + (interfazNueva() && !(ini && cero < ini) ? tiraFija(bl, fase) : '') + bloqueHoy + `
+  return avisoMensajes() + bienvenida() + novedades() + avisoSemana() + avisoFotos() + avisoCheckin() + avisoAtraso() + avisoPendientes() + (interfazNueva() && !(ini && cero < ini) ? tiraFija(bl, fase) : '') + bloqueHoy + `
   ${nota?`<div class="card"><div class="lbl">${tr("Foco de esta semana")}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>`:''}
   <div class="card"><div class="row sp" style="margin-bottom:10px"><h3>${tr("Tu semana")}</h3>
     <div class="row" style="gap:6px">${flechasSem(S.semana)}<button class="btn sm2" onclick="abreSemanas()" aria-haspopup="listbox">${tr("Ver todo")}</button></div></div>
@@ -3210,7 +3363,21 @@ const PASO0_FIJO = ['Hay una versión nueva de tu app', 'Más clara, con número
 function pasosIntro(){
   let flex = false;
   try{ flex = !enCola() && modoLibre(bloqueDe(S.semana)); }catch(e){}
-  return flex ? PASOS_INTRO : [PASO0_FIJO].concat(PASOS_INTRO.filter(p=>['sesion','estilos'].indexOf(p[2]) > -1));
+  const ps = flex ? PASOS_INTRO : [PASO0_FIJO].concat(PASOS_INTRO.filter(p=>['sesion','estilos'].indexOf(p[2]) > -1));
+  return LS.get('interfaz_auto', false) ? ps.filter(p=>p[2] !== 'nueva') : ps;   // para la clienta nueva no es «nueva»
+}
+/* v5.61 (Salvador 9 nov): las clientas nuevas empiezan con la interfaz nueva.
+   Nueva = su plan empieza el 9 nov o despues y aun no ha registrado nada. La FICHA
+   puede forzarlo con «interfaz = nueva» o «siempre». Se decide una vez, al cargar, y
+   se guarda; despues ella la cambia en el menu como cualquiera. */
+function interfazInicial(){
+  if(!S.d || LS.get('interfaz', null) !== null) return;
+  const f = ajuste('interfaz');
+  if(f === 'siempre') return;
+  let n = f === 'nueva';
+  if(!f){ const w = semanasReales()[0], ini = w && fechaIni(w.FECHAS);
+    n = !(S.d.MIS_REGISTROS||[]).length && !!ini && ini >= new Date(2026, 10, 9); }
+  if(n){ LS.set('interfaz', 'nueva'); LS.set('interfaz_auto', true); aplicaTema(); }
 }
 function introNueva(){
   if(!enPiloto() || !S.d) return '';
@@ -3231,10 +3398,10 @@ function introNueva(){
     <p class="mut" style="font-size:16px;margin-bottom:14px">${tr(p[1])}</p>
     ${ejemplo}
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
-      ${i === 0 ? `<button class="btn pri big" onclick="LS.set('interfaz','nueva'); aplicaTema(); S.introPaso = 1; S.introNueva = true; pinta()">${tr('Probarla')}</button>
+      ${p[2] === 'nueva' ? `<button class="btn pri big" onclick="LS.set('interfaz','nueva'); aplicaTema(); S.introPaso = 1; S.introNueva = true; pinta()">${tr('Probarla')}</button>
         <button class="btn big" onclick="LS.set('intro_d239', true); S.introNueva = false; ponInterfaz('siempre')">${tr('Seguir con la de siempre')}</button>`
       : `<button class="btn pri big" onclick="${ult ? `LS.set('intro_d239', true); S.introNueva = false; S.introPaso = 0; pinta(); window.scrollTo(0,0)` : `S.introPaso = ${i+1}; S.introNueva = true; pinta()`}">${tr(ult ? 'Empezar' : 'Siguiente')}</button>
-        <button class="btn big" onclick="S.introPaso = ${i-1}; S.introNueva = true; pinta()">${tr('Atrás')}</button>`}
+        ${i > 0 ? `<button class="btn big" onclick="S.introPaso = ${i-1}; S.introNueva = true; pinta()">${tr('Atrás')}</button>` : ''}`}
     </div></div>`;
 }
 if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicaTema); }catch(e){} }
