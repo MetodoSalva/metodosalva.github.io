@@ -638,7 +638,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.59';   // v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.60';   // v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1220,6 +1220,9 @@ const EN = {
   "Semana completa": "Week complete",
   "esta semana": "this week",
   "quedan": "left",
+  "pendiente": "to do", "pendientes": "to do", "día": "day", "objetivo": "target", "interfaz nueva": "new layout",
+  "de tu plan": "of your plan", "Lo que anotes aquí se guarda en esa semana del plan.": "What you log here is saved in that week of the plan.",
+  "Saltar esta sesión": "Skip this session", "Sale de tu cola y entra la siguiente. Si cambias de idea, la recuperas en Mi plan.": "It leaves your queue and the next one comes in. If you change your mind, get it back in My plan.",
   "días": "days",
   "vas justo": "cutting it close",
   "ya no da tiempo a todas": "no longer time for all",
@@ -1402,7 +1405,7 @@ function fechaDe(b,d){ const v=LOG[idFecha(b,d)]; return v?v.fecha:''; }
 function marcaFecha(b,d){
   const id=idFecha(b,d);
   if(LOG[id]) return;
-  LOG[id]={fecha:new Date().toISOString().slice(0,10), ok:true};
+  LOG[id]={fecha:fLocal(new Date()), ok:true};
   LS.set('log', LOG);
 }
 /* Sesiones de la semana que aún no se han registrado */
@@ -2055,7 +2058,7 @@ function extrasDe(b,d){
     .sort().map(k=>({id:k, v:LOG[k].extra || {}}));
 }
 const saltado = (b,d,n) => { const v = LOG[idSalto(b,d,n)]; return !!(v && v.ok); };
-const hoyISO  = () => new Date().toISOString().slice(0,10);
+const hoyISO  = () => fLocal(new Date());   // v5.60: hora local (antes Londres: lo de medianoche caia en otro dia)
 
 /* ---------- biblioteca de ejercicios ---------- */
 const fichaEj = nombre => (S.d.EJERCICIOS||[]).find(e=>norm(e.EJERCICIO)===norm(nombre)) || null;
@@ -2130,7 +2133,7 @@ function estadoSesion(b,d){
      enviado, esta terminada aunque no se marcara cada ejercicio. Asi se cierran
      tambien las que se enviaron antes de este cambio. La de hoy sigue en
      «Parcial» hasta que se toque Guardar y enviar. */
-  const ult = usados.map(id=>String(LOG[id].ts||'').slice(0,10)).sort().pop() || '';
+  const ult = usados.map(id=>LOG[id].ts ? fLocal(LOG[id].ts) : '').sort().pop() || '';
   const pasada = !/^\d{4}-\d\d-\d\d$/.test(ult) || ult < hoyISO();
   if(pasada && usados.every(id=>LOG[id].sent && !LOG[id].corregido)) return 'hecha';
   return 'parcial';
@@ -3103,8 +3106,8 @@ function tarjetaTira(fase, plan, linea){
 function tiraFija(bl, fase){
   const ses = diasDeBloque(bl).filter(x=>!esDescanso(x) && !esOpcional(x) && sesionDe(bl, x['DÍA']).length);
   const plan = [];
-  for(let i = 0; i < 7; i++){ const nm = norm(DIAS[(i + 1) % 7]).slice(0, 3);
-    if(ses.some(x=>norm(x['DÍA']).startsWith(nm))) plan.push(i); }
+  for(let i = 0; i < 7; i++){ const nm = norm(DIAS[(i + 1) % 7]).slice(0, 3), ne = norm(DIAS_EN[(i + 1) % 7]).slice(0, 3);
+    if(ses.some(x=>norm(x['DÍA']).startsWith(nm) || norm(x['DÍA']).startsWith(ne))) plan.push(i); }
   const h = ses.filter(x=>['hecha','sindatos','parcial'].indexOf(estadoSesion(bl, x['DÍA'])) > -1).length;
   const linea = ses.length && h >= ses.length ? ['ok', tr('Semana completa') + ' ✓'] : ['', h + ' ' + deN() + ' ' + ses.length + ' ' + tr('esta semana')];
   return tarjetaTira(fase, plan, linea);
@@ -3151,7 +3154,7 @@ function sesionFoco(bl, dia, ejs){
 }
 /* el panel grande: solo en fuerza con series (no carrera, no biserie, no registro por campos) */
 function panelSerie(bl, dia, f){
-  if(soloLectura() || camposDe(f).length || esCorrer(f) || !(parseInt(f.SERIES) > 0) || partesBiserie(bl, dia, f) || cardioOpciones(f)) return '';
+  if(soloLectura() || camposDe(f).length || aguantePorTiempo(f) || esCorrer(f) || !(parseInt(f.SERIES) > 0) || partesBiserie(bl, dia, f) || cardioOpciones(f)) return '';
   const orig = f['EJERCICIO / ELEMENTO'] || '', nom = nombreEf(bl, dia, f);
   if(saltado(bl, dia, orig) || saltado(bl, dia, nom)) return '';
   const n = (parseInt(f.SERIES)||0) + masSeries(bl, dia, orig);
@@ -4926,7 +4929,7 @@ async function enviar(opc){
     const blS = bloqueDe(semanaVista()), diaS = S.dia || (diaDeHoy(blS)||{})['DÍA'];
     cerrados = cierraSesion(blS, diaS);
   }
-  const reg = [], hoy = new Date().toISOString().slice(0,10);
+  const reg = [], hoy = fLocal(new Date());
   /* v5.11: lo que sale, tal como sale. Al volver la respuesta solo se marca
      como enviado lo que no ha cambiado mientras tanto: con el autoenvio se
      sigue escribiendo mientras viaja el envio, y antes eso se daba por enviado
@@ -4942,7 +4945,7 @@ async function enviar(opc){
     foto[id] = JSON.stringify(v);
 
     const p = id.split('~');
-    const base = {id:id, fecha:(v.ts||'').slice(0,10)||hoy,
+    const base = {id:id, fecha:(v.ts ? fLocal(v.ts) : '')||hoy,
                   semana:(p[0]||'').replace(/^s/,''), bloque:p[1]||'', dia:p[2]||'',
                   sesion:'', ejercicio:'', serie:'', reps:'', carga:'', rir:'', notas:'', estado:'',
                   km:'', tiempo:'', ritmo:'', rpe:'', piernas:'', valoracion:''};
