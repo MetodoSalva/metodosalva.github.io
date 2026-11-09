@@ -638,7 +638,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.62';   // v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.63';   // v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -943,7 +943,7 @@ const EN = {
   "Ahora está vacío, y es normal: esto se llena solo, con lo que vas anotando mientras entrenas.": "It is empty for now, and that is normal: it fills itself with what you write down while you train.",
   "Anota las series según las haces, aunque sea rápido y a ojo. Con dos semanas ya veo por dónde vas y puedo ajustarte el plan.": "Log your sets as you go, even roughly. After two weeks I can already see where you are and adjust your plan.",
   "No busques el número perfecto. Busca no fallar.": "Do not chase the perfect number. Just do not miss sessions.",
-  "Ir a lo de hoy": "Go to today",
+  "Ir a lo de hoy": "Go to today", "Ya hechas": "Already done", "Las sesiones de esta semana de tu plan. Toca una para verla, hacerla o corregir lo que anotaste.": "The sessions in this week of your plan. Tap one to see it, do it or fix what you logged.", "Tócala para verla o corregir lo que anotaste. Las demás, en Mi plan.": "Tap one to see it or fix what you logged. The rest are in My plan.",
   "Lo que llevas": "What you have done so far",
   "Sesiones anotadas": "Sessions logged",
   "Series anotadas": "Sets logged",
@@ -1388,6 +1388,14 @@ function vHoyCola(){
   </div>
   <div class="card">${ver.length ? ver.map(tarjeta).join('')
     : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}</div>
+  ${(function(){   /* v5.62 (Salvador 9 nov): las ya hechas se pueden abrir, para verlas o corregirlas */
+    const ya = c.filter(s=>HECHA_COLA.includes(s.est)).slice(-3).reverse(); if(!ya.length) return '';
+    return `<div class="card"><div class="lbl">${tr('Ya hechas')}</div>
+      <p class="sm" style="margin:4px 0 8px">${tr('Tócala para verla o corregir lo que anotaste. Las demás, en Mi plan.')}</p>
+      ${ya.map(s=>{ const p = partir(s.x['SESIÓN']); return `<div class="diarow"><button class="dia hecha" onclick="abrirCola('${esc(String(s.w.SEMANA))}','${esc(s.dia)}')">
+        <span style="flex:1"><span class="sm">${tr('Semana')} ${esc(numSem(s.w))} · ${esc(s.dia)}</span><br><span class="n">${esc(p.t)}</span>
+        <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(s.est)}</div></span></button></div>`; }).join('')}</div>`;
+  })()}
   <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
     <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
     <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
@@ -2574,7 +2582,7 @@ function ir(v){
 function verSemana(num){
   const w = (S.d.SEMANAS||[]).find(x=>String(x.SEMANA)===String(num));
   if(!w) return;
-  if(S.semana && String(w.SEMANA)===String(S.semana.SEMANA)){ ir('hoy'); return; }
+  if(S.semana && String(w.SEMANA)===String(S.semana.SEMANA) && !enCola()){ ir('hoy'); return; }   // v5.62: en cola, Hoy solo ensena lo pendiente
   if(S.vista !== 'semana') entra();                     // las flechas entre semanas no apilan
   S.mirando = w; S.dia = null; S.vista = 'semana'; S.video = null;
   window.scrollTo(0,0); pinta();
@@ -3052,7 +3060,7 @@ function vPlan(){
             ${rep?(act?`<div class="sm" style="margin-top:3px">${tr("estás aquí")}</div>`:'')
                  :`<div class="sm" style="margin-top:3px">${esc(s.FECHAS)}${act?' · '+tr("estás aquí"):''}</div>`}
             ${s['NOTA DE LA SEMANA']?`<div class="sm" style="margin-top:4px">${esc(s['NOTA DE LA SEMANA'])}</div>`:''}
-            <div class="sm" style="margin-top:4px">${act?tr("Ir a lo de hoy"):tr("Ver sus sesiones")}</div></span></button>`;
+            <div class="sm" style="margin-top:4px">${act && !enCola()?tr("Ir a lo de hoy"):tr("Ver sus sesiones")}</div></span></button>`;
         }).join('');
       })()}</div>`;
   }).join('')}
@@ -3081,7 +3089,9 @@ function vSemana(){
       <div class="row" style="gap:8px">${futura ? `<span class="sem verde"><i>◔</i>${tr("solo lectura")}</span>` : `<span class="sem ambar"><i>✎</i>${tr("se puede corregir")}</span>`}${flechasSem(w)}</div></div>
     <h2 style="margin-top:6px;font-size:19px">${esc(sinRepetir(w['FASE / TÍTULO']||''))}</h2>
     ${w.FECHAS?`<p class="sm" style="margin-top:4px">${esc(w.FECHAS)}</p>`:''}
-    <p class="mut" style="margin-top:10px">${futura
+    <p class="mut" style="margin-top:10px">${enCola()
+      ? tr("Las sesiones de esta semana de tu plan. Toca una para verla, hacerla o corregir lo que anotaste.")
+      : futura
       ? tr("Esto es lo que te viene, para que te organices. Se anota cuando llegue la semana.")
       : tr("Esta semana ya pasó. Si anotaste algo mal o se te olvidó una sesión, entra y corrígelo: se guarda en esta semana.")}</p>
     ${w['NOTA DE LA SEMANA']?`<div class="calent" style="margin-top:12px">${esc(w['NOTA DE LA SEMANA'])}</div>`:''}
