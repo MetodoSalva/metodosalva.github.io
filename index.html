@@ -638,7 +638,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.61';   // v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.62';   // v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1317,7 +1317,10 @@ const ajuste = k => {
    por vieja ni el aviso de sesiones sin registrar. El seguimiento sigue por semana
    de calendario. Si el perfil no es secuencia, nada cambia. */
 const enCola = () => ajuste('perfil') === 'secuencia';
-const HECHA_COLA = ['hecha','parcial','sindatos','omitida','nohecha'];
+/* v5.62 (9 nov, Mariana): «parcial» NO es hecha. Una sesion a medias salia de la cola en
+   cuanto se salia de ella (a Mensajes, por ejemplo) y no habia forma de volver a terminarla.
+   Al cerrarla con «Guardar y enviar», lo no anotado se marca como saltado y pasa a «hecha». */
+const HECHA_COLA = ['hecha','sindatos','omitida','nohecha'];
 function cola(){
   const out = [];
   semanasReales().forEach(w=>{
