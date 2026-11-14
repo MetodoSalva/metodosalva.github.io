@@ -644,7 +644,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.65';   // v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.66';   // v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1135,6 +1135,7 @@ const EN = {
   "Techo conseguido": "Top of the range reached", "cuando te resulte fácil, añade lastre": "when it feels easy, add weight",
   "la siguiente kettlebell": "the next kettlebell up", "o hasta": "or up to", "si te ves fuerte": "if you feel strong",
   "Intenta las mismas repeticiones con el peso nuevo; si no salen, quédate en el rango y ve subiendo.": "Try the same reps with the new weight; if they don't come, stay in the range and build back up.",
+  "Hiciste": "You did", "en todas: toca subir.": "in every set: time to go up.", "sube un": "go up", "unos": "about", "Con un": "With", "más deberías volver a unas": "more you should drop back to about", "repeticiones.": "reps.", "Pon el peso más cercano que tenga tu máquina o tus discos.": "Use the closest weight your machine or plates allow.", "Si el siguiente peso es demasiado salto, haz una o dos repeticiones más antes de subir.": "If the next weight up is too big a jump, do one or two more reps before going up.",
   "el menor salto de peso que tengas": "the smallest weight jump you have", "Hasta llegar a": "Until you reach",
   "en todas las series.": "in every set.", "una repetición más": "one more rep",
   "Con el mismo RIR. Cuando hagas el techo en todas, sube.": "Same RIR. When you hit the top in every set, go up.", "Ahora toca correr": "Now it's time to run", "Ahora toca fuerza": "Now it's strength time", "Cada estación": "Each station", "Peso de cada estación": "Weight for each station",
@@ -1650,19 +1651,18 @@ function sugerencia(bl, dia, f){
         KB = /kettlebell|\bkb\b|pesa rusa/,
         INF = /sentadilla|squat|peso muerto|deadlift|hip thrust|zancada|lunge|bulgar|rdl|rumano|romanian|buenos dias|good morning|step|prensa/;
   const ult = `${tr('La última vez')}: ${carga ? fmtKg(carga)+' '+uni+' × ' : ''}${reps.map(x=>fmtKg(x)).join(' / ')}`;
-  let hoy = '', por = '';
+  let hoy = '', por = '', ejemplo = 0;
   if(fallo){
     hoy = carga ? `${tr('mantén')} ${fmtKg(carga)} ${uni}` : tr('mismas repeticiones');
     por = tr('La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.');
   } else if(minR >= hi){
-    /* v5.17.1 (Salvador, 2 oct): siempre en PESO, nunca en placas (en su gym las
-       maquinas Technogym son digitales). Subida de alrededor del 2,5-5 %, al
-       menor salto practico, y abierta: "o hasta X si te ves fuerte".
-       v5.22 (3 oct, Salvador): con mancuernas se anota la SUMA de las dos, asi
-       que el salto minimo es de 2 kg (1 por mano).
-       Despues, intentar las mismas repeticiones (el metodo: "volver quiza" a la
-       parte baja, no obligatorio). */
-    por = `${tr('Techo conseguido')} (${hi}).`;
+    /* v5.66 (14 nov, Salva): la subida sale del RANGO, no de un salto fijo. Se sube lo que
+       hace falta para volver a la parte baja (fuerza.md §6: 100 × 12 -> 105 × 10), calculado
+       con la relacion repeticiones-carga de Epley: 8-12 ~ 10 %, 8-10 o 10-12 ~ 5 %, 12-15 ~ 7 %.
+       Se da el PORCENTAJE y un peso de EJEMPLO redondeado a lo que suelen permitir barra,
+       maquina y mancuernas: cada maquina va distinta y la clienta pone el mas cercano.
+       Antes: +2,5-5 % al kilo («prensa 80 -> 82 kg»), que no movia nada y sonaba a robot. */
+    por = `${tr('Hiciste')} ${hi} ${tr('en todas: toca subir.')}`;
     if(!carga) hoy = ASISTIDA.test(n) ? tr('una banda más fina') : tr('cuando te resulte fácil, añade lastre');
     else if(KB.test(n)) hoy = tr('la siguiente kettlebell');
     else if(ASISTIDA.test(n)){
@@ -1671,15 +1671,16 @@ function sugerencia(bl, dia, f){
       por += ' ' + tr('En la asistida, menos ayuda es más difícil.');
     }
     else {
+      const pct = Math.min(12, Math.max(3, Math.round(((1 + hi/30) / (1 + lo/30) - 1) * 100)));
       const barra = BARRA.test(n), manc = MANC.test(n) && !MAQ.test(n) && !barra;
-      const paso = barra ? (lb ? 5 : 2.5) : (manc && !UNA_MANC(n)) ? (lb ? 4 : 2) : (lb ? 2 : 1);
-      const minimo = barra ? (INF.test(n) ? (lb ? 10 : 5) : (lb ? 5 : 2.5)) : paso;
-      const redondea = x => Math.round(x / paso) * paso;
-      const bajo = carga + Math.max(minimo, redondea(carga * 0.025));
-      const alto = Math.max(bajo, carga + Math.max(minimo, redondea(carga * 0.05)));
-      hoy = `${fmtKg(bajo)} ${uni}` + (alto > bajo ? ` (${tr('o hasta')} ${fmtKg(alto)} ${tr('si te ves fuerte')})` : '');
+      const paso = manc ? (lb ? 5 : 2) : (lb ? 5 : 2.5);   // mancuernas: 2 kg (la suma o una sola); barra y maquina: 2,5
+      const ej = Math.max(carga + paso, Math.round(carga * (1 + pct/100) / paso) * paso);
+      ejemplo = ej;
+      hoy = `${tr('sube un')} ${pct} % (${tr('unos')} ${fmtKg(ej)} ${uni})`;
+      por += ` ${tr('Con un')} ${pct} % ${tr('más deberías volver a unas')} ${lo} ${tr('repeticiones.')} ${tr('Pon el peso más cercano que tenga tu máquina o tus discos.')}`;
+      if(manc && (ej - carga) / carga * 100 > pct * 1.6)
+        por += ' ' + tr('Si el siguiente peso es demasiado salto, haz una o dos repeticiones más antes de subir.');
     }
-    por += ' ' + tr('Intenta las mismas repeticiones con el peso nuevo; si no salen, quédate en el rango y ve subiendo.');
   } else if(minR < lo){
     hoy = carga ? `${tr('mantén')} ${fmtKg(carga)} ${uni}` : tr('mismas repeticiones');
     por = `${tr('Hasta llegar a')} ${lo} ${tr('en todas las series.')}`;
@@ -1687,7 +1688,7 @@ function sugerencia(bl, dia, f){
     hoy = `${carga ? fmtKg(carga)+' '+uni+' · ' : ''}${tr('una repetición más')} (${fmtKg(minR)} → ${fmtKg(Math.min(hi, minR+1))})`;
     por = tr('Con el mismo RIR. Cuando hagas el techo en todas, sube.');
   }
-  return `<div class="sug"><span class="u">${esc(ult)}</span><b>${tr('Hoy intenta')}: ${esc(hoy)}</b>${por ? `<small>${esc(por)}</small>` : ''}</div>`;
+  return `<div class="sug"${ejemplo ? ` data-c="${ejemplo}"` : ''}><span class="u">${esc(ult)}</span><b>${tr('Hoy intenta')}: ${esc(hoy)}</b>${por ? `<small>${esc(por)}</small>` : ''}</div>`;
 }
 
 function lineaUltima(u, uni){
@@ -3423,7 +3424,8 @@ function panelSerie(bl, dia, f){
   let k = -1; for(let i=0;i<n;i++){ const v = LOG[idSerie(bl,dia,nom,i)]; if(!(v && v.ok)){ k = i; break; } }
   if(k < 0) return `<div class="panelf hecho"><b>✓ ${tr('Todas las series hechas')}</b></div>`;
   const id = idSerie(bl, dia, nom, k), v = LOG[id] || {}, ant = k ? (LOG[idSerie(bl,dia,nom,k-1)] || {}) : {}, u = ultimaVez(bl, dia, nom) || {};
-  const sg = (sugerencia(bl, dia, f) || '').match(/<b>[^<:]*:\s*([\d.,]+)/);   // «Hoy intenta: 21 kg» manda sobre la ultima vez
+  const sgt = sugerencia(bl, dia, f) || '';
+  const sg = sgt.match(/data-c="([\d.]+)"/) || sgt.match(/<b>[^<:]*:\s*([\d.,]+)/);   // el peso de ejemplo («sube un 10 % (unos 88 kg)») o «mantén 21 kg» manda sobre la ultima vez
   const sgR = (sugerencia(bl, dia, f) || '').match(/<b>[^<]*\(\s*\d+\s*→\s*(\d+)\s*\)/);   // «una repeticion mas (8 → 9)»
   const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || (sgR ? sgR[1] : '') || u.reps || ((String(f['REPS / DOSIS']||'').match(/\d+/)||[''])[0]);
   const manc = /mancuerna|dumbbell|\bdb\b/i.test(nom), paso = manc ? 1 : 2.5;
