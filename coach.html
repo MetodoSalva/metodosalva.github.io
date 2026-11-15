@@ -44,7 +44,7 @@ textarea{min-height:76px;margin-top:8px}
 .fil button.on{background:var(--verde-s);color:var(--tinta);border-color:var(--verde)}
 .msj{border:1px solid var(--linea);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--sup)}
 .msj.cliente{background:var(--sup2)}
-.msj .cita{font-size:12.5px;color:var(--txt3);border-left:3px solid var(--linea);padding-left:8px;margin-bottom:6px;white-space:pre-line}
+.msj .cita,.it .cita{font-size:12.5px;color:var(--txt3);border-left:3px solid var(--linea);padding-left:8px;margin-bottom:6px;white-space:pre-line}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--fondo);
   padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw}
 a{color:var(--verde)}
@@ -156,8 +156,8 @@ function vCliente(){
           <div class="sm" style="margin-top:4px">${m.DE === 'cliente' ? esc(c.nombre || 'Ella') : 'Tú'} · ${esc(m.FECHA)}${m.DE === 'salva' ? (m.LEIDO ? ' · leído ' + esc(m.LEIDO) : ' · sin leer') : ''}</div></div>`).join('')
         : '<div class="card"><p class="mut">Todavía no hay mensajes.</p></div>')
       : (items.length ? items.map((it, n) => `<div class="card it ${it.respondido ? 'hecho' : ''}">
-          <div class="tipo">${esc(TIPO[it.tipo] || it.tipo)} · ${esc(fecha(it.fecha))}</div>
-          ${it.que ? `<div class="que">${esc(it.que)}</div>` : ''}
+          <div class="tipo">${esc(tipoDe(it))} · ${esc(fecha(it.fecha))}</div>
+          ${it.que ? (it.tipo === 'mensaje' ? `<div class="cita">${esc(it.que)}</div>` : `<div class="que">${esc(it.que)}</div>`) : ''}
           <div class="tx">${esc(it.texto || '(sin texto)')}</div>
           ${it.tipo === 'foto' ? `<div id="f_${n}" style="margin:8px 0 0"><button class="btn" onclick="verFoto(${n})">Ver la foto aquí</button>${it.enlace ? ` <a href="${esc(it.enlace)}" target="_blank" rel="noopener">o en Drive</a>` : ''}</div>`
             : (it.enlace ? `<p style="margin:6px 0 0"><a href="${esc(it.enlace)}" target="_blank" rel="noopener">Ver el vídeo</a></p>` : '')}
@@ -185,7 +185,11 @@ async function verFoto(n){
     caja.innerHTML = `<img src="data:${esc(a.MIME)};base64,${a.DATOS}" alt="Foto del reloj" style="width:100%;border-radius:10px">`;
   }catch(e){ caja.innerHTML = `<p class="sm">No se ha podido cargar: ${esc(e.message || e)}</p>`; }
 }
-const REACCIONES = ['❤️', '💪', '🔥', '😂', '👍', '😢'];   // 👍 y 😢 desde el 20 oct
+const REACCIONES = ['❤️', '💪', '🔥', '😂', '👍', '😢'];
+/* 15 nov (Salvador): ella puede contestar a un mensaje tuyo o al mensaje de la
+   semana desde su app (v5.67). Llega con tu mensaje citado encima. */
+const tipoDe = it => it.tipo !== 'mensaje' || !it.que ? (TIPO[it.tipo] || it.tipo)
+  : /^Mensaje de la semana/.test(it.que) ? 'Pregunta sobre tu mensaje de la semana' : 'Te responde';   // 👍 y 😢 desde el 20 oct
 async function responder(n, emo){
   const c = (S.datos || []).find(x => x.cliente === S.cliente); if(!c) return;
   const items = S.filtro === 'pend' ? pendItems(c) : (c.items || []);
@@ -195,7 +199,7 @@ async function responder(n, emo){
   const d = new Date(), p = x => String(x).padStart(2,'0');
   const m = { id: 'ms~' + d.getTime(), fecha: d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),
               de: 'salva', para: it ? it.id : '', texto: tx,
-              cita: it ? (TIPO_CITA[it.tipo] || '') + (it.que ? ' · ' + it.que : '') + ' · ' + fecha(it.fecha) + '\n«' + String(it.texto || '').slice(0, 280) + '»' : '' };
+              cita: it ? (TIPO_CITA[it.tipo] || '') + (it.que && it.tipo !== 'mensaje' ? ' · ' + it.que : '') + ' · ' + fecha(it.fecha) + '\n«' + String(it.texto || '').slice(0, 280) + '»' : '' };
   if(el) el.disabled = true;
   try{
     const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},

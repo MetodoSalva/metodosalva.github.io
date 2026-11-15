@@ -523,6 +523,10 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .msj .tx{font-size:15px;line-height:1.5}
 .msj .f{font-size:11.5px;color:var(--txt3);margin-top:6px}
 .aviso-msj{border-color:var(--verde-s)}
+.resp-btn{background:none;border:0;padding:8px 0 0;color:var(--verde,#2e7d4f);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.resp-caja{margin-top:10px}
+.resp-caja textarea{min-height:80px;width:100%;box-sizing:border-box}
+.msj:has(.resp-caja){align-self:stretch;max-width:100%}
 .msj-reac{align-self:flex-start;display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--txt2);padding:2px 4px}
 .msj-reac .e{font-size:20px}
 .msj-reac .f{color:var(--txt3)}
@@ -644,7 +648,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.66';   // v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.67';   // v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1124,6 +1128,11 @@ const EN = {
   "¿Qué te pareció este seguimiento?": "How useful was this check-in?",
   "1 = no me sirve · 5 = me sirve mucho": "1 = not useful · 5 = very useful",
   "Mensaje de Salva": "Message from Salva",
+  "Escribe tu respuesta": "Write your reply", "Pregúntale lo que no te haya quedado claro": "Ask him anything that wasn't clear",
+  "Preguntarle algo": "Ask him something", "Le has escrito. La respuesta te llega a Mensajes.": "You wrote to him. His answer will come to Messages.",
+  "Salva te ha hecho una pregunta": "Salva asked you something", "Leer todo": "Read all", "Ver mensajes": "See messages", "mensaje más": "more message", "mensajes más": "more messages",
+  "Enviado. Salva lo verá en sus mensajes.": "Sent. Salva will see it in his messages.",
+  "Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. Toca Responder debajo de un mensaje mío para contestarme a eso, o escríbeme abajo.": "This is where I answer what you tell me in your exercise notes, your session comments and your check-in, and where I leave you notes. Tap Reply under one of my messages to answer it, or write to me below.",
   "Entendido": "Got it",
   /* v5.12: diseno */
   "Aspecto": "Appearance",
@@ -2780,7 +2789,10 @@ function avisoSemana(){
     <div class="lbl">${tr("Mensaje de Salva")}</div>
     ${t['TÍTULO']?`<h2 style="margin-top:6px;font-size:19px">${esc(t['TÍTULO'])}</h2>`:''}
     <p class="mut" style="margin-top:8px;white-space:pre-line">${esc(t.CONTENIDO)}</p>
-    <button class="btn sm2 pri" style="margin-top:12px" onclick="avisoVisto('${clave}')">${tr("Entendido")}</button></div>`;
+    ${S.respA === 'aviso~' + clave ? cajaRespuesta('aviso~' + clave, 'semana')
+      : `<div class="row" style="gap:8px;margin-top:12px"><button class="btn sm2 pri" onclick="avisoVisto('${clave}')">${tr("Entendido")}</button>
+      <button class="btn sm2" onclick="abreRespuesta('aviso~${clave}')">${tr("Preguntarle algo")}</button></div>`}
+    ${misMensajes().some(m=>m.PARA === 'aviso~' + clave && m.DE !== 'salva') ? `<p class="sm" style="margin-top:8px">✓ ${tr('Le has escrito. La respuesta te llega a Mensajes.')}</p>` : ''}</div>`;
 }
 function avisoVisto(clave){ LS.set('aviso_visto~'+clave, true); pinta(); }
 
@@ -3062,6 +3074,7 @@ function vHoyLibre(bl, fase, nota){
       return `<div class="diarow"><button class="dia" onclick="abrir('${esc(x['DÍA'])}')">
         <span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(p.t)}</span>
           ${p.sub?`<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>`:''}
+          ${x.FRASE?`<div class="sm" style="margin-top:3px;font-style:italic">${esc(x.FRASE)}</div>`:''}
           <div class="row wrap" style="gap:6px;margin-top:5px">
             <span class="sem ${semColor(x['SEMÁFORO'])}"><i>${semForma(x['SEMÁFORO'])}</i>${esc(x['SEMÁFORO']||'—')}</span>
             ${fmtMin(x.MIN)?`<span class="sm">${esc(fmtMin(x.MIN))}</span>`:''}
@@ -3595,13 +3608,50 @@ const noLeidos = () => { const l = LS.get('msj_leidos', {});
   return misMensajes().filter(m=>m.DE==='salva' && !m.LEIDO && !l[m.ID]); };
 function avisoMensajes(){
   const n = noLeidos().length; if(!n) return '';
-  return `<div class="card aviso-msj"><div class="row sp" style="gap:10px;align-items:center">
-    <div>${noLeidos().every(esReac)
-        ? `<b>${esc(noLeidos().map(m=>String(m.TEXTO).trim()).join(' '))} ${tr(REAC[String(noLeidos()[n-1].TEXTO).trim()])}</b>
-           <p class="sm" style="margin-top:3px">${esc(textoReac(noLeidos()[n-1]))}</p>`
-        : `<b>${tr(n === 1 ? 'Tienes un mensaje de Salva' : 'Tienes mensajes de Salva')}</b>
-      <p class="sm" style="margin-top:3px">${esc(String(noLeidos()[n-1].TEXTO||'').slice(0,90))}${String(noLeidos()[n-1].TEXTO||'').length>90?'…':''}</p>`}</div>
+  if(noLeidos().every(esReac)) return `<div class="card aviso-msj"><div class="row sp" style="gap:10px;align-items:center">
+    <div><b>${esc(noLeidos().map(m=>String(m.TEXTO).trim()).join(' '))} ${tr(REAC[String(noLeidos()[n-1].TEXTO).trim()])}</b>
+      <p class="sm" style="margin-top:3px">${esc(textoReac(noLeidos()[n-1]))}</p></div>
     <button class="btn sm2" onclick="ir('mensajes')">${tr('Leer')}</button></div></div>`;
+  /* v5.67 (15 nov, Salvador): el ultimo mensaje se lee entero aqui y se le
+     contesta sin salir de Hoy. Si acaba en pregunta, se dice. */
+  const ult = noLeidos().filter(m=>!esReac(m)).pop(), tx = String(ult.TEXTO||'');
+  const corto = tx.length > 420 ? tx.slice(0, 400).replace(/\s+\S*$/, '') + '…' : tx;
+  return `<div class="card aviso-msj">
+    <b>${tr(esPregunta(tx) ? 'Salva te ha hecho una pregunta' : (n === 1 ? 'Tienes un mensaje de Salva' : 'Tienes mensajes de Salva'))}</b>
+    <p style="margin-top:6px;font-size:15px;line-height:1.5;white-space:pre-line">${esc(corto)}</p>
+    <p class="sm" style="margin-top:4px">${esc(fechaMsj(ult.FECHA))}${n > 1 ? ' · ' + tr('y') + ' ' + (n-1) + ' ' + tr(n === 2 ? 'mensaje más' : 'mensajes más') : ''}</p>
+    ${S.respA === ult.ID ? cajaRespuesta(ult.ID, 'hoy') : `<div class="row" style="gap:8px;margin-top:10px">
+      <button class="btn sm2 pri" onclick="abreRespuesta('${esc(ult.ID)}')">${tr('Responder')}</button>
+      <button class="btn sm2" onclick="ir('mensajes')">${tr(n > 1 || corto !== tx ? 'Leer todo' : 'Ver mensajes')}</button></div>`}</div>`;
+}
+/* v5.67 (15 nov, Salvador): contestar a un mensaje concreto. Salva pregunta o
+   explica algo y ella responde ahi mismo: la respuesta sale con su mensaje
+   citado encima, aqui y en la bandeja de Salva (PARA = el ID de su mensaje;
+   el puente ya lo guardaba). Sirve tambien para el mensaje de la semana. */
+const esPregunta = t => /\?\s*[\u{1F300}-\u{1FAFF}\u2600-\u27BF\s]*$/u.test(String(t||'').trim()) || /¿[^?]*\?/.test(String(t||''));
+function abreRespuesta(id){ S.respA = id; pinta();
+  setTimeout(()=>{ const t = document.getElementById('resp_txt'); if(t){ t.focus(); t.scrollIntoView({block:'center', behavior:'smooth'}); } }, 40); }
+function cierraRespuesta(){ S.respA = null; pinta(); }
+function cajaRespuesta(id, donde){
+  return `<div class="resp-caja"><textarea id="resp_txt" data-id="${esc(id)}" placeholder="${tr(donde === 'semana' ? 'Pregúntale lo que no te haya quedado claro' : 'Escribe tu respuesta')}">${esc(LS.get('resp_borrador~' + id, ''))}</textarea>
+    <div class="row" style="gap:8px;margin-top:8px"><button class="btn sm2 pri" onclick="enviaRespuesta('${esc(id)}')">${tr('Enviar')}</button>
+    <button class="btn sm2" onclick="cierraRespuesta()">${tr('Cancelar')}</button></div></div>`;
+}
+function citaDe(id){
+  if(/^aviso~/.test(id)){
+    const t = (S.d.TEXTOS||[]).find(x=>'aviso~' + slug(x.CLAVE) === id) || {};
+    return 'Mensaje de la semana' + (t['TÍTULO'] ? ' · ' + t['TÍTULO'] : '') + '\n«' + String(t.CONTENIDO||'').slice(0, 240) + (String(t.CONTENIDO||'').length > 240 ? '…' : '') + '»';
+  }
+  const m = misMensajes().find(x=>x.ID === id) || {};
+  const tx = String(m.TEXTO||'');
+  return 'Salva · ' + fechaMsj(m.FECHA) + '\n«' + tx.slice(0, 240) + (tx.length > 240 ? '…' : '') + '»';
+}
+function enviaRespuesta(id){
+  const t = document.getElementById('resp_txt'); const tx = t ? t.value.trim() : '';
+  if(!tx){ toast(tr('Escribe algo primero.')); return; }
+  LS.set('resp_borrador~' + id, ''); S.respA = null;
+  enviaMensaje(tx, id, citaDe(id));
+  if(!/^aviso~/.test(id)) marcaLeidos(id);
 }
 const fechaMsj = f => { const m = String(f||'').match(/^(\d{4})-(\d\d)-(\d\d)(?:\s+(\d\d:\d\d))?/);
   if(!m) return String(f||''); return (+m[3]) + ' ' + tr(['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+m[2]-1]) + (m[4] ? ' · ' + m[4] : ''); };
@@ -3609,38 +3659,41 @@ function vMensajes(){
   const ms = misMensajes();
   setTimeout(marcaLeidos, 400);
   return `<div class="card flat"><h2 style="font-size:20px">${tr('Mensajes')}</h2>
-    <p class="sm" style="margin-top:4px">${tr('Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. También puedes escribirme.')}</p></div>
+    <p class="sm" style="margin-top:4px">${tr('Aquí te respondo a lo que me cuentas en las notas de los ejercicios, en las observaciones y en el seguimiento, y te dejo avisos. Toca Responder debajo de un mensaje mío para contestarme a eso, o escríbeme abajo.')}</p></div>
   ${ms.length ? `<div class="msjs">${ms.map(m=> esReac(m) ? `<div class="msj-reac"><span class="e">${esc(String(m.TEXTO).trim())}</span>
       <span>${esc(textoReac(m))}<span class="f"> · ${esc(fechaMsj(m.FECHA))}</span></span></div>` : `<div class="msj ${m.DE==='salva'?'salva':'mio'}">
       ${m.CITA ? `<div class="cita">${esc(m.CITA)}</div>` : ''}
       <div class="tx">${esc(m.TEXTO||'').replace(/\n/g,'<br>')}</div>
-      <div class="f">${m.DE==='salva' ? 'Salva' : tr('Tú')} · ${esc(fechaMsj(m.FECHA))}${m.pendiente ? ' · ' + tr('enviando…') : ''}</div></div>`).join('')}</div>`
+      <div class="f">${m.DE==='salva' ? 'Salva' : tr('Tú')} · ${esc(fechaMsj(m.FECHA))}${m.pendiente ? ' · ' + tr('enviando…') : ''}</div>
+      ${m.DE!=='salva' ? '' : S.respA === m.ID ? cajaRespuesta(m.ID, 'msj')
+        : `<button class="resp-btn" onclick="abreRespuesta('${esc(m.ID)}')">↩ ${tr('Responder')}</button>`}</div>`).join('')}</div>`
     : `<div class="card"><p class="mut">${tr('Todavía no hay mensajes.')}</p></div>`}
   <div class="card"><div class="lbl">${tr('Escribir a Salva')}</div>
     <textarea id="msj_txt" placeholder="${tr('Una duda, cómo te ha ido, lo que quieras')}">${esc(LS.get('msj_borrador',''))}</textarea>
     <button class="btn pri big" style="margin-top:10px" onclick="enviaMensaje()">${tr('Enviar')}</button></div>`;
 }
-document.addEventListener('input', e=>{ if(e.target && e.target.id === 'msj_txt') LS.set('msj_borrador', e.target.value); });
-async function marcaLeidos(){
-  const nl = noLeidos(); if(!nl.length) return;
+document.addEventListener('input', e=>{ if(e.target && e.target.id === 'msj_txt') LS.set('msj_borrador', e.target.value);
+  if(e.target && e.target.id === 'resp_txt') LS.set('resp_borrador~' + e.target.dataset.id, e.target.value); });
+async function marcaLeidos(solo){
+  const nl = noLeidos().filter(m=>!solo || m.ID === solo); if(!nl.length) return;
   const l = LS.get('msj_leidos', {}); nl.forEach(m=>{ l[m.ID] = 1; }); LS.set('msj_leidos', l);
   const y = window.scrollY; pinta(); window.scrollTo(0, y);      // fuera el punto rojo y el contador
   try{ await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({cliente:CID, token:KEY, leidos: nl.map(m=>m.ID)})}); }catch(e){}
 }
-async function enviaMensaje(){
-  const t = document.getElementById('msj_txt'); const tx = t ? t.value.trim() : '';
+async function enviaMensaje(txR, para, cita){
+  const t = txR ? null : document.getElementById('msj_txt'); const tx = txR || (t ? t.value.trim() : '');
   if(!tx){ toast(tr('Escribe algo primero.')); return; }
   const d = new Date(), p = n => String(n).padStart(2,'0');
   const m = {ID:'mc~' + d.getTime(), FECHA: d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),
-             DE:'cliente', TEXTO: tx, pendiente: true};
-  const mios = LS.get('msj_mios', []); mios.push(m); LS.set('msj_mios', mios); LS.set('msj_borrador', ''); pinta();
+             DE:'cliente', TEXTO: tx, PARA: para || '', CITA: cita || '', pendiente: true};
+  const mios = LS.get('msj_mios', []); mios.push(m); LS.set('msj_mios', mios); if(!txR) LS.set('msj_borrador', ''); pinta();
   try{
     const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({cliente:CID, token:KEY, mensajes:[{id:m.ID, fecha:m.FECHA, de:'cliente', texto:tx}]})});
+      body: JSON.stringify({cliente:CID, token:KEY, mensajes:[{id:m.ID, fecha:m.FECHA, de:'cliente', para:m.PARA, cita:m.CITA, texto:tx}]})});
     const j = await r.json(); if(j.error) throw new Error(j.error);
     const ls = LS.get('msj_mios', []); ls.forEach(x=>{ if(x.ID===m.ID) delete x.pendiente; }); LS.set('msj_mios', ls);
-    toast(tr('Enviado. Salva lo verá.'));
+    toast(tr(para ? 'Enviado. Salva lo verá en sus mensajes.' : 'Enviado. Salva lo verá.'));
   }catch(e){ toast(tr('No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.')); }
   pinta();
 }
