@@ -648,7 +648,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.68';   // v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.69';   // v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -3818,7 +3818,7 @@ const MUSCULOS = [
   ['hombro', /hombro|shoulder|militar|overhead press|press overhead|elevaci\w* lateral|lateral raise|arnold|face pull|pajaro|reverse pec|rotacion externa|rotacion interna|external rotation|\bt e y\b|\by boca abajo|wall ?ball|landmine|pike|handstand|^banda\b|pull-?apart|aperturas? inversas?|press por encima|serrato/],   // v5.48: «banda» sola ya no es hombro (pasos laterales, abducción, almeja con banda)
   ['espalda', /remo|row|jalon|pulldown|dominada|pull.?up|chin.?up|face pull|pullover|retraccion|escapular|reverse pec|pajaro|sled pull|farmer|granjero|encogimiento|shrug|skierg|\bski\b|colgarse|\bt e y\b|\by boca abajo/],
   ['brazos', /biceps|triceps|pushdown|fondos|\bdip|press frances|skull|martillo|hammer|farmer|granjero|colgarse/],
-  ['core', /core|plancha|plank|dead ?bug|bicho|pallof|crunch|hollow|\boso\b|bear|abdominal|ab wheel|rueda|rollout|bird ?dog|transverso|antirrotacion|anti.?rot|lenador|woodchop|russian|copenhag|v-up|elevacion de piernas|leg raise|farmer|suitcase|maleta|carry|sit.?up|serrato/],
+  ['core', /core|plancha|plank|dead ?bug|bicho|pallof|crunch|hollow|\boso\b|bear|abdom|ab wheel|rueda|rollout|bird ?dog|transverso|antirrotacion|anti.?rot|lenador|woodchop|russian|copenhag|v-up|elevacion de piernas|leg raise|farmer|suitcase|maleta|carry|sit.?up|serrato/],
   ['aductor', /aduct|aducc|copenhag/],
   ['lumbar', /peso muerto|deadlift|rdl|rumano|romanian|good morning|hiperextension|back extension|extension lumbar|superman|bird ?dog|swing/]
 ];
@@ -4461,7 +4461,7 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
     /* v5.2: una carrera no se anota con kilos. Si son series o cuestas,
        cada una tiene su fila (tiempo y esfuerzo) y los totales van debajo;
        plegado, porque la mayoria de dias solo hace falta el total. */
-    sets = (aguantePorTiempo(f) ? botonCrono(f) : '') + setsCorre(bl, dia, nombre, series, campos.length>0, descansoSeg(f), f);
+    sets = (aguantePorTiempo(f) ? botonCrono(f) : '') + setsCorre(bl, dia, nombre, series, campos.length>0, descansoCrono(f), f);
   }
   else if(series>0 && !campos.length){
     /* v5.22 (3 oct, Salvador): con mancuernas, la suma de las dos. Justine
@@ -4476,11 +4476,11 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
         ${['kg','lb'].map(x=>`<button class="${x===uni?'on':''}" aria-pressed="${x===uni}"
           onclick="cambiaUnidad('${esc(bl)}','${esc(dia)}','${esc(nombre)}','${x}')">${x}</button>`).join('')}</div>` : ''}
       ${(function(){
-        const fila = (nom, i, etq) => {
+        const fila = (nom, i, etq, sinDesc) => {
           const id = idSerie(bl,dia,nom,i);
           recordarNombre(id, nom);
           const v = LOG[id] || {};
-          return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${descansoSeg(f)}" data-ultima="${i+1>=series?1:0}">
+          return `<div class="set ${v.ok?'ok':''} ${v.sent?'sent':''}" id="fila_${id}" data-desc="${sinDesc ? 0 : descansoCrono(f)}" data-ultima="${i+1>=series?1:0}">
         <span class="i">${etq}${v.c && hayLibras() && (v.u||'kg') !== uni ? `<small>${v.u||'kg'}</small>` : ''}</span>
         <input inputmode="numeric" placeholder="reps" value="${esc(v.r||'')}" id="r_${id}"
           oninput="anota('${id}')" aria-label="Repeticiones serie ${i+1} de ${esc(nom)}">
@@ -4500,7 +4500,7 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
         return `${bc}<div class="bi-leyenda">${partes.map((p,j)=>`<div><b>${letra(j)}</b> ${esc(p)}${(()=>{ const u = ultimaVez(bl,dia,p);
             return u ? ` <span class="sm">· ${tr('La última vez')}: ${u.carga ? esc(textoCarga(u.carga,u.u,uni))+' × ' : ''}${esc(u.reps)}</span>` : ''; })()}</div>`).join('')}</div>
           <div class="sets">${Array.from({length:series},(_,i)=>`<div class="bi-serie"><div class="bi-n">${tr('Serie')} ${i+1}</div>${
-            partes.map((p,j)=>fila(p, i, letra(j))).join('')}</div>`).join('')}</div>`;
+            partes.map((p,j)=>fila(p, i, letra(j), j < partes.length - 1)).join('')}</div>`).join('')}</div>`;
       })()}`;
   }
 
@@ -4855,7 +4855,11 @@ function anota(id){
    deja). No manda nada a la hoja.
    v5.37 (20 oct, Salvador): NO arranca solo. Es un boton opcional en cada
    ejercicio que lleva descanso, ya con su tiempo puesto; solo vibra, sin sonido.
-   Para todos. No sale en carrera, cardio ni estaciones de HYROX. */
+   Para todos. No sale en carrera, cardio ni estaciones de HYROX.
+   v5.69 (17 nov, Salva): «cuando presione serie hecha el temporizador empiece a contar
+   automaticamente». Arranca solo al marcar una serie (panel «Guardar serie» y «Anotar»),
+   tambien la ultima: se descansa igual antes del siguiente ejercicio. En una biserie, solo
+   tras la ultima letra de la vuelta. Mismas exclusiones que el boton, que se queda. */
 const CRONO_ON = true;
 function descansoSeg(f){
   const t = norm(f && f.DESCANSO); if(!t || /^(no\b|none|sin\b|-|—)/.test(t)) return 0;
@@ -4866,14 +4870,22 @@ function descansoSeg(f){
   return Math.round(/^(min|m|')$/.test(m[2]) ? n*60 : n);
 }
 let CRONO = null, CRONO_T = null, AUDIO = null, WAKE = null;
-function cronoTrasSerie(fila){ /* v5.37: ya no arranca solo */ }
+function cronoTrasSerie(fila){   // v5.69: vuelve a arrancar solo, tambien tras la ultima serie
+  if(!CRONO_ON || !fila) return;
+  const s = parseInt(fila.dataset.desc)||0;
+  if(s > 0) arrancaCrono(s);
+}
 const fmtCrono = x => Math.floor(x/60) + ':' + String(x%60).padStart(2,'0');
 /* el boton del ejercicio: solo si la fila tiene descanso y no es carrera ni cardio.
    v5.41 (23 oct, Salvador, wall balls de Stephanie): tambien en HYROX y en las sesiones
    hibridas; lo que se corre (carrera, tramos por tiempo) sigue sin el. */
-function botonCrono(f){
+function descansoCrono(f){   // los segundos del boton y del arranque solo; 0 = sin cronometro
   const sg = descansoSeg(f);
-  if(!sg || ['running','cardio','descanso','info'].indexOf(norm(f && f.TIPO)) > -1 || esCarrera(f) || tramoPorTiempo(f)) return '';
+  return !sg || ['running','cardio','descanso','info'].indexOf(norm(f && f.TIPO)) > -1 || esCarrera(f) || tramoPorTiempo(f) ? 0 : sg;
+}
+function botonCrono(f){
+  const sg = descansoCrono(f);
+  if(!sg) return '';
   return `<button type="button" class="crono-b" onclick="arrancaCrono(${sg})" aria-label="${tr('Descanso')} ${fmtCrono(sg)}">⏱ ${tr('Descanso')} ${fmtCrono(sg)}</button>`;
 }
 function arrancaCrono(seg){
