@@ -318,7 +318,8 @@ button.cronom-b{background:none!important;border:1px solid var(--linea2)!importa
 .diarow > .mas{position:absolute;right:0;top:9px;width:40px;height:36px;border:1px solid var(--linea2);border-radius:10px;
   background:none;color:var(--txt2);font-size:18px;font-weight:700;line-height:1;cursor:pointer}
 .nomhueco{display:block;width:calc(100vw - 72px);max-width:520px;margin:8px 0 2px;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#2b332e);background:transparent;color:inherit;font:inherit;font-size:16px}
-.ajej{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ajej{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;padding:0 14px}
+.ej>.ajej:last-child{padding-bottom:12px}   /* v5.71: sin «No he hecho» debajo (añadidos y sesión libre) no toca el borde */
 .ajej button{background:none;border:1px solid var(--line,#2b332e);color:var(--mut,#9aa59f);border-radius:10px;padding:7px 10px;font:inherit;font-size:13px}
 .ajej .ajs{display:flex;gap:6px}
 .cambiado{font-size:12.5px;color:var(--verde,#2BD47D);margin-top:4px}
@@ -510,11 +511,12 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .flecha svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .flecha:disabled{opacity:.3;cursor:default}
-.ej .alt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
-.ej .alt button{font:inherit;font-size:13px;padding:6px 10px;border-radius:99px;border:1px solid var(--linea);
+.ej .alt,.alt.libre{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
+.ej .alt button,.alt.libre button{font:inherit;font-size:13px;padding:6px 10px;border-radius:99px;border:1px solid var(--linea);
   background:var(--sup);color:var(--txt2);cursor:pointer;min-height:32px}
+.alt.libre button{font-size:14px;padding:8px 13px;min-height:38px}
 .ej .alt button.cambiaej{border-style:dashed;color:var(--tinta)}
-.ej .alt button.on{border-color:var(--verde);background:var(--verde-s);color:var(--tinta);font-weight:600}
+.ej .alt button.on,.alt.libre button.on{border-color:var(--verde);background:var(--verde-s);color:var(--tinta);font-weight:600}
 .msjs{display:flex;flex-direction:column;gap:10px;margin:0 0 14px}
 .msj{max-width:88%;padding:11px 13px;border-radius:14px;border:1px solid var(--linea);background:var(--sup)}
 .msj.salva{align-self:flex-start;border-color:var(--verde-s)}
@@ -543,7 +545,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .cue .pasos{margin:6px 0 10px;padding-left:22px}
 .cue .pasos li{margin:0 0 6px;line-height:1.45}
 .cue .pasos li::marker{color:var(--verde);font-weight:700}
-.pista.manc{margin:8px 0 2px;font-size:12.5px;color:var(--txt2)}
+.pista.manc{margin:8px 14px 2px;font-size:12.5px;color:var(--txt2)}
 .aviso.corrige{border-color:var(--ambar, #c9962b)}
 .novedades li{margin:0 0 8px 0;line-height:1.45}
 .novedades ul{margin:10px 0 0 18px;padding:0;color:var(--txt2);font-size:14.5px}
@@ -648,7 +650,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.69';   // v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.71';   // v5.71 «Sesión libre» siempre a mano junto a las del plan: running, fuerza con sus series, pádel, tenis y lo que sea, fuera del plan (Salva, 18 nov); «− serie / + serie» y el aviso de mancuernas ya no van pegados al borde de la tarjeta; presentación de dos pantallas al abrir (Salva, 18 nov); lo que Salva anula en la hoja no revive al tocarlo, la libre no manda el seguimiento a medias y quitar un añadido vacía su nota · v5.70 no propone subir si la última vez dejó 2 o más repeticiones menos en la recámara de las que pide hoy (Alexia, 17 nov) · v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1141,6 +1143,7 @@ const EN = {
   "Músculos que trabajas hoy": "Muscles you work today",
   "Cuerpo entero": "Full body", "Hoy trabajas": "Today you work", "Ayudan": "Helping", "Hoy intenta": "Today try", "mantén": "keep", "mismas repeticiones": "same reps",
   "La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.": "Last time you went to failure: before going up, leave a rep or two in the tank.",
+  "Hoy tocan más repeticiones en la recámara que la última vez: antes de subir, que sobre lo que pide.": "Today asks for more reps in reserve than last time: before going up, leave what it asks for.",
   "Techo conseguido": "Top of the range reached", "cuando te resulte fácil, añade lastre": "when it feels easy, add weight",
   "la siguiente kettlebell": "the next kettlebell up", "o hasta": "or up to", "si te ves fuerte": "if you feel strong",
   "Intenta las mismas repeticiones con el peso nuevo; si no salen, quédate en el rango y ve subiendo.": "Try the same reps with the new weight; if they don't come, stay in the range and build back up.",
@@ -1265,6 +1268,40 @@ const EN = {
   "Escribe y elige, o pon el nombre que sepas": "Type and pick, or write the name you know",
   "Añadir y registrar": "Add and log",
   "¿Hiciste un ejercicio que no estaba? Añádelo y anota sus series.": "Did an exercise that wasn't in the plan? Add it and log its sets.",
+  "Sesión libre": "Free session",
+  "Running, pádel, tenis, fuerza… lo que hagas fuera de tu plan": "Running, padel, tennis, strength… anything you do outside your plan",
+  "hoy": "today",
+  "Lo que hiciste por tu cuenta": "What you did on your own",
+  "Un partido, una carrera, una clase, pesas: lo que entrenes fuera de tu plan. No cuenta como sesión del plan, pero así lo sé todo.": "A match, a run, a class, weights: whatever you train outside your plan. It doesn't count as a plan session, but this way I know everything.",
+  "Cuándo": "When",
+  "Ayer": "Yesterday",
+  "Anteayer": "Two days ago",
+  "¿Qué hiciste?": "What did you do?",
+  "Toca lo que hiciste. Puedes apuntar varias cosas el mismo día.": "Tap what you did. You can log several things on the same day.",
+  "Pádel": "Padel",
+  "Tenis": "Tennis",
+  "Natación": "Swimming",
+  "Clase": "Class",
+  "Otro deporte": "Other sport",
+  "Quitar esta carrera": "Remove this run",
+  "Carrera quitada.": "Run removed.",
+  "Deportes y clases": "Sports and classes",
+  "Añade cada ejercicio que hiciste y anota sus series.": "Add each exercise you did and log its sets.",
+  "¿Algo más que contarme?": "Anything else to tell me?",
+  "Cómo te has sentido, molestias, lo que quieras": "How you felt, any discomfort, anything you like",
+  "Apuntado. Al terminar, «Guardar y enviar» abajo.": "Logged. When you finish, «Save and send» below.",
+  "Uno por ejercicio: el nombre y sus series.": "One per exercise: its name and its sets.",
+  "Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, apúntalo en «Sesión libre», aquí abajo.": "Everything you've done is still in My plan and Progress. If you train in the meantime, log it in «Free session», just below.",
+  "Nuevo: Sesión libre": "New: Free session",
+  "¿Entrenas por tu cuenta? Una carrera, un partido de pádel o tenis, pesas… Ahora lo puedes apuntar en la app.": "Training on your own? A run, a padel or tennis match, weights… Now you can log it in the app.",
+  "La tienes en Hoy, al final de la lista de tus sesiones.": "It's on Today, at the end of your list of sessions.",
+  "Aquí": "Here",
+  "Cómo se apunta": "How to log it",
+  "Toca «Sesión libre».": "Tap «Free session».",
+  "Elige el día y lo que hiciste.": "Choose the day and what you did.",
+  "Rellena lo que te pida y toca «Guardar y enviar».": "Fill in what it asks for and tap «Save and send».",
+  "No cuenta como sesión de tu plan, pero así me entero de todo lo que haces.": "It doesn't count as a session of your plan, but this way I know everything you do.",
+  "Sesión libre: si entrenas por tu cuenta (una carrera, pádel, tenis, pesas…), apúntalo en Hoy, al final de tus sesiones.": "Free session: if you train on your own (a run, padel, tennis, weights…), log it on Today, at the end of your sessions.",
   "guardada": "saved",
   "Guardar serie": "Save set",
   "Toca el número para escribir el peso exacto de tu máquina.": "Tap the number to type the exact weight of your machine.",
@@ -1424,7 +1461,7 @@ function vHoyCola(){
     <div class="bar"><i style="width:${c.length?Math.round(hechas/c.length*100):0}%"></i></div>
   </div>
   <div class="card">${ver.length ? ver.map(tarjeta).join('')
-    : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}</div>
+    : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}${filaLibre()}</div>
   ${(function(){   /* v5.62 (Salvador 9 nov): las ya hechas se pueden abrir, para verlas o corregirlas */
     const ya = c.filter(s=>HECHA_COLA.includes(s.est)).slice(-3).reverse(); if(!ya.length) return '';
     return `<div class="card"><div class="lbl">${tr('Ya hechas')}</div>
@@ -1512,7 +1549,8 @@ const semForma = s => { const v=semColor(s); return v==='rojo'?'■':v==='ambar'
    v3.14: empieza por la semana. Un bloque dura varias semanas, asi que
    sin este prefijo el lunes de la semana 3 era el mismo lunes que el de
    la 2: se pisaban el registro y se perdia la progresion. */
-const SEM = () => 's' + slug(String(((corrigiendo() ? S.mirando : S.semana) || {}).SEMANA || '0'));
+const SEM = () => (S.vista === 'libre' && S.semLibre) ? S.semLibre   // v5.71: la sesion libre cuelga de la semana del dia elegido
+  : 's' + slug(String(((corrigiendo() ? S.mirando : S.semana) || {}).SEMANA || '0'));
 const idSerie = (b,d,ej,i) => `${SEM()}~${slug(b)}~${slug(d)}~${slug(ej)}~s${i+1}`;
 const idOmit  = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~omitida`;
 const idObs   = (b,d) => `${SEM()}~${slug(b)}~${slug(d)}~obs`;
@@ -1588,6 +1626,7 @@ function ultimaVez(bl, dia, nombre){
   Object.keys(LOG).forEach(k=>{
     const p = k.split('~');
     if(p.length !== 5 || p[3] !== ej || !/^s\d+$/.test(p[4])) return;
+    if(p[1] === 'sesion-libre' && slug(bl) !== 'sesion-libre') return;   // v5.71: lo libre no marca el peso del plan
     const v = LOG[k];
     if(!v || !v.ok || v.borrada || (!v.r && !v.c)) return;
     if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;          // la sesion de hoy no es "la ultima vez"
@@ -1607,6 +1646,7 @@ function ultimaVezReg(bl, dia, nombre){
   Object.keys(LOG).forEach(k=>{
     const p = k.split('~');
     if(p.length !== 5 || p[3] !== ej || p[4] !== 'reg') return;
+    if(p[1] === 'sesion-libre' && slug(bl) !== 'sesion-libre') return;   // v5.71
     const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.d) return;
     if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;
     cand.push({sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'', d:v.d});
@@ -1632,6 +1672,7 @@ function ultimaSesionSeries(bl, dia, nombre){
   Object.keys(LOG).forEach(k=>{
     const p = k.split('~');
     if(p.length !== 5 || p[3] !== ej || !/^s\d+$/.test(p[4])) return;
+    if(p[1] === 'sesion-libre' && slug(bl) !== 'sesion-libre') return;   // v5.71: ni la sesion libre
     const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.r || esRef(k)) return;   // v5.68: la rutina anterior no empuja a subir
     const key = p[0]+'~'+p[1]+'~'+p[2]; if(key === hoy) return;
     const x = ses[key] = ses[key] || {sem: parseInt(p[0].replace(/^s/,''))||0, ts:'', sets:[]};
@@ -1658,6 +1699,10 @@ function sugerencia(bl, dia, f){
   const rirs = mismas.map(x=>parseFloat(String(x.rir||'').replace(',','.'))).filter(x=>!isNaN(x) && x>=0 && x<=4);
   const objetivo = parseFloat(String(rirObjetivo(f)||'').replace(',','.'));
   const fallo = rirs.length && !isNaN(objetivo) && objetivo >= 1 && rirs.some(x=>x===0);
+  /* v5.70 (17 nov, Alexia): con 2 o mas repeticiones menos en la recamara de las que pide hoy
+     (objetivo 3 y anoto 1), tampoco se sube: doble progresion = completar el rango CON el margen
+     previsto (fuerza.md §6). Antes solo frenaba el RIR 0. */
+  const corto = !fallo && rirs.length && !isNaN(objetivo) && rirs.some(x=>x <= objetivo - 2);
   const al = alternativasDe(f);                       // "A (o B)": cuenta solo el elegido
   const n = norm((al ? al[0].txt : nombre) + ' ' + dosis);
   const MANC = /mancuerna|dumbbell|\bdb\b/, BARRA = /barra|barbell|smith|trap bar|hexagonal/,
@@ -1666,9 +1711,10 @@ function sugerencia(bl, dia, f){
         INF = /sentadilla|squat|peso muerto|deadlift|hip thrust|zancada|lunge|bulgar|rdl|rumano|romanian|buenos dias|good morning|step|prensa/;
   const ult = `${tr('La última vez')}: ${carga ? fmtKg(carga)+' '+uni+' × ' : ''}${reps.map(x=>fmtKg(x)).join(' / ')}`;
   let hoy = '', por = '', ejemplo = 0;
-  if(fallo){
+  if(fallo || corto){
     hoy = carga ? `${tr('mantén')} ${fmtKg(carga)} ${uni}` : tr('mismas repeticiones');
-    por = tr('La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.');
+    por = fallo ? tr('La última vez llegaste al fallo: antes de subir, que sobre alguna repetición.')
+                : tr('Hoy tocan más repeticiones en la recámara que la última vez: antes de subir, que sobre lo que pide.');
   } else if(minR >= hi){
     /* v5.66 (14 nov, Salva): la subida sale del RANGO, no de un salto fijo. Se sube lo que
        hace falta para volver a la parte baja (fuerza.md §6: 100 × 12 -> 105 × 10), calculado
@@ -2143,6 +2189,28 @@ function extrasDe(b,d){
   return Object.keys(LOG).filter(k=>k.indexOf(pre)===0 && k.endsWith('~extra') && LOG[k] && !LOG[k].borrada)
     .sort().map(k=>({id:k, v:LOG[k].extra || {}}));
 }
+/* v5.71 (18 nov, Salva: «Juan Pablo hoy vino a correr... que lo pudieran agregar como
+   sesión libre, que esté siempre ahí»): la SESION LIBRE. Lo que se hace por cuenta propia
+   se apunta en un dia «Libre AAAA-MM-DD» de un bloque que no esta en la hoja («Sesión
+   libre»), con los registros de siempre: la carrera es un ~reg (suma en Tus kilometros),
+   la fuerza son ejercicios anadidos con sus series (salen en «La última vez» y en
+   Progreso) y los deportes son ~extra (minutos e intensidad). No es una sesion del plan:
+   no cuenta para la adherencia ni deja nada a medias. A la hoja va con SESIÓN «Sesión
+   libre» y la FECHA del dia elegido. */
+const BL_LIBRE = 'Sesión libre';
+const diaLibre = f => 'Libre ' + f;
+const esLibreId = k => String(k||'').split('~')[1] === 'sesion-libre';
+const fechaLibre = p => { const m = /^libre-(\d{4}-\d{2}-\d{2})$/.exec(p[2]||''); return m ? m[1] : ''; };
+/* La semana de un dia de la sesion libre: la que ya tenga algo apuntado ese dia (para no
+   partirlo en dos) o, si no, la del plan que contiene esa fecha (como semanaActual). */
+function semLibreDe(f){
+  const pre = '~sesion-libre~libre-' + f + '~', k = Object.keys(LOG).find(x=>x.indexOf(pre) > 0);
+  if(k) return k.split('~')[0];
+  const ss = (S.d && S.d.SEMANAS) || [], d = new Date(f + 'T12:00:00'); d.setHours(0,0,0,0);
+  let e = null; for(const w of ss){ const i = fechaIni(w.FECHAS); if(i && d >= i) e = w; }
+  return 's' + slug(String((e || S.semana || ss[0] || {}).SEMANA || '0'));
+}
+const FILA_RUN_LIBRE = {BLOQUE:BL_LIBRE, TIPO:'running', ORDEN:'1', 'EJERCICIO / ELEMENTO':'Running', REGISTRO:'km,tiempo,rpe', _libre:true};
 const saltado = (b,d,n) => { const v = LOG[idSalto(b,d,n)]; return !!(v && v.ok); };
 const hoyISO  = () => fLocal(new Date());   // v5.60: hora local (antes Londres: lo de medianoche caia en otro dia)
 
@@ -2441,8 +2509,11 @@ function fusionarRegistros(filas){
     if(!LOG[id]){
       if(id.endsWith('~extra')){
         const tit = String(f.EJERCICIO||'').replace(/^EXTRA\s*·\s*/,'');
-        if(tit) LOG[id] = {extra:{titulo:tit, min:String(f.TIEMPO||'').replace(/\s*min$/,''),
+        if(tit && !anulada(f) && String(f.ESTADO||'').trim()) LOG[id] = {extra:{titulo:tit, min:String(f.TIEMPO||'').replace(/\s*min$/,''),
                                   int:parseInt(f.RPE)||0, nota:f.NOTAS||''}, ok:true, sent:true};
+        // v5.71: el que no se trae no se ve ni se envia, pero ocupa su numero: el siguiente extra
+        // de ese dia no reescribe su fila en la hoja (un ESTADO cambiado a mano llega vacio)
+        else if(tit) LOG[id] = {extra:{titulo:tit}, ok:false, sent:true, borrada:true};
       } else if(id.endsWith('~anadido')){
         const nom = String(f.EJERCICIO||'').replace(/^AÑADIDO\s*·\s*/,'');
         if(nom && !anulada(f)) LOG[id] = {anadido:true, nom:nom, ok:true, sent:true, ts:f.FECHA||''};
@@ -2507,8 +2578,8 @@ function pinta(){
   try { document.documentElement.lang = enIngles() ? 'en' : 'es'; } catch(e){}
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
-  const v = {hoy:vHoy, mensajes:vMensajes, novedades:vNovedades, resumen:vResumen, plan:vPlan, semana:vSemana, sesion:vSesion, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos, comparar:vComparar}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '') + introNueva();
+  const v = {hoy:vHoy, mensajes:vMensajes, novedades:vNovedades, resumen:vResumen, plan:vPlan, semana:vSemana, sesion:vSesion, libre:vLibre, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos, comparar:vComparar}[S.vista] || vHoy;
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '') + introNueva() + presentaLibre();
   if(S.listaSem){ const L = document.querySelector('.lista-sem'), a = L && (L.querySelector('.on') || L.querySelector('.aqui'));
     if(a) L.scrollTop = Math.max(0, a.offsetTop - L.clientHeight/2 + a.offsetHeight/2); }
 }
@@ -2672,7 +2743,7 @@ function guardaExtra(bl, dia){
                             ok:true, ts:new Date().toISOString()};
   LS.set('log', LOG);
   S.extraAbre = null; S.extraTmp = null;
-  toast(tr("Apuntado. Se manda con la sesión.")); pinta();
+  toast(tr(bl === BL_LIBRE ? "Apuntado. Al terminar, «Guardar y enviar» abajo." : "Apuntado. Se manda con la sesión.")); pinta();
 }
 function borraExtra(id){
   const v = LOG[id] || {};
@@ -2680,12 +2751,13 @@ function borraExtra(id){
   else delete LOG[id];
   LS.set('log', LOG); pinta();
 }
-function bloqueExtra(bl, dia){
+function bloqueExtra(bl, dia, libre){   // v5.71: libre = en la sesion libre (sin sugerencias ni boton: los pone arriba)
   const ya = extrasDe(bl, dia), abierto = S.extraAbre === bl+'~'+dia, t = S.extraTmp || {};
   const SUG = ['Pilates','Fuerza','Running','HYROX','Bici','Natación','Clase','Pádel'];
-  return `<div class="card">
-    <h3>${tr("Otro entrenamiento")}</h3>
-    <p class="sm" style="margin-top:4px">${tr("¿Hiciste algo que no estaba en el plan? Apúntalo y me entero.")}</p>
+  if(libre && !ya.length && !abierto) return '';
+  return `<div class="card"${libre ? ' id="lib_extra"' : ''}>
+    <h3>${tr(libre ? "Deportes y clases" : "Otro entrenamiento")}</h3>
+    ${libre ? '' : `<p class="sm" style="margin-top:4px">${tr("¿Hiciste algo que no estaba en el plan? Apúntalo y me entero.")}</p>`}
     ${ya.map(x=>`<div class="extra">
         <div style="flex:1"><b>${esc(x.v.titulo||'')}</b>
           <div class="sm">${[x.v.min?esc(x.v.min)+' min':'', x.v.int?tr('intensidad')+' '+x.v.int+'/5':''].filter(Boolean).join(' · ')}</div>
@@ -2696,8 +2768,8 @@ function bloqueExtra(bl, dia){
         <div><label class="lbl" for="ex_t">${tr("Qué hiciste")}</label>
           <input id="ex_t" type="text" class="campo" value="${esc(t.titulo||'')}"
             oninput="tmpExtra('titulo',this.value)" placeholder="${tr("Pilates, fútbol, clase de spinning…")}"></div>
-        <div class="row wrap" style="gap:6px">${SUG.map(x=>
-          `<button class="tagb" onclick="document.getElementById('ex_t').value='${x}';tmpExtra('titulo','${x}')">${x}</button>`).join('')}</div>
+        ${libre ? '' : `<div class="row wrap" style="gap:6px">${SUG.map(x=>
+          `<button class="tagb" onclick="document.getElementById('ex_t').value='${x}';tmpExtra('titulo','${x}')">${x}</button>`).join('')}</div>`}
         <div><label class="lbl" for="ex_m">${tr("Cuánto duró")}</label>
           <input id="ex_m" type="number" inputmode="numeric" class="campo" value="${esc(t.min||'')}"
             oninput="tmpExtra('min',this.value)" placeholder="${tr("minutos")}"></div>
@@ -2711,7 +2783,7 @@ function bloqueExtra(bl, dia){
           <button class="btn pri" onclick="guardaExtra('${esc(bl)}','${esc(dia)}')">${tr("Guardar")}</button>
           <button class="btn sm2" onclick="abreExtra('${esc(bl)}','${esc(dia)}')">${tr("Cancelar")}</button></div>
       </div>`
-      : `<button class="btn sm2" style="margin-top:12px" onclick="abreExtra('${esc(bl)}','${esc(dia)}')">➕ ${tr("Añadir un entrenamiento")}</button>`}
+      : libre ? '' : `<button class="btn sm2" style="margin-top:12px" onclick="abreExtra('${esc(bl)}','${esc(dia)}')">➕ ${tr("Añadir un entrenamiento")}</button>`}
   </div>`;
 }
 
@@ -2729,17 +2801,18 @@ function anadidosDe(b, d){
                        'EJERCICIO / ELEMENTO':LOG[k].nom, _anadido:true}}));
 }
 async function abreAnadir(bl, dia){
-  S.anadeAbre = (S.anadeAbre === bl+'~'+dia) ? null : bl+'~'+dia; pinta();
+  S.anadeAbre = (S.anadeAbre === bl+'~'+dia) ? null : bl+'~'+dia; S.anadeTxt = '';
+  if(!S.anadeAbre && bl === BL_LIBRE && S.libreTipo === 'fuerza') S.libreTipo = null; pinta();
   if(S.anadeAbre){ await cargaBiblio(); pinta(); const i = document.getElementById('an_t'); if(i) i.focus(); }
 }
 function guardaAnadido(bl, dia){
-  const t = document.getElementById('an_t'), nom0 = (t ? t.value : '').trim();
+  const t = document.getElementById('an_t'), nom0 = (t ? t.value : '').trim().replace(/'/g, '’');   // v5.71: con ' se rompian los botones (onclick)
   if(!nom0){ toast(tr('Escribe cómo se llama el ejercicio.')); if(t) t.focus(); return; }
   const nom = nom0.charAt(0).toUpperCase() + nom0.slice(1);
   if(sesionDe(bl, dia).some(f=>slug(f['EJERCICIO / ELEMENTO']||'') === slug(nom))){ toast(tr('Ese ejercicio ya está en tu sesión.')); return; }
   const id = idAnadido(bl, dia, nom);
   LOG[id] = {anadido:true, nom:nom, ok:true, ts:new Date().toISOString()}; recordarNombre(id, nom);
-  LS.set('log', LOG); S.anadeAbre = null;
+  LS.set('log', LOG); S.anadeAbre = null; S.anadeTxt = '';
   toast(tr('Añadido') + ': ' + nom + '. ' + tr('Registra tus series abajo.')); pinta();
   setTimeout(()=>{ const c = document.getElementById('an_' + slug(nom)); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); }, 120);
 }
@@ -2751,27 +2824,137 @@ function quitaAnadido(id){
   const v = LOG[id] || {}, pre = id.replace(/~anadido$/, '~');
   Object.keys(LOG).filter(k=>k.indexOf(pre) === 0 && k !== id).forEach(k=>{   // sus series, nota, etc.
     const x = LOG[k] || {};
-    if(x.sent) LOG[k] = Object.assign({}, x, {r:'', c:'', rir:'', ok:false, corregido:true, borrada:true});
+    if(x.sent) LOG[k] = Object.assign({}, x, {r:'', c:'', rir:'', ok:false, corregido:true, borrada:true}, k.endsWith('~nota') ? {nota:''} : {});   // v5.71: su nota tambien se vacia en la hoja
     else delete LOG[k];
   });
   if(v.sent) LOG[id] = Object.assign({}, v, {ok:false, borrada:true, corregido:true});
   else delete LOG[id];
   LS.set('log', LOG); toast(tr('Ejercicio quitado.')); pinta();
 }
-function bloqueAnadidos(bl, dia){
+function bloqueAnadidos(bl, dia, libre){   // v5.71: libre = la fuerza de la sesion libre
   const ya = anadidosDe(bl, dia), ab = S.anadeAbre === bl+'~'+dia;
-  return `${ya.length ? `<div class="extra-sep"><b>${tr('Lo que añadiste tú')}</b>
+  return `${libre ? `<div class="extra-sep" id="lib_fuerza"><b>${tr('Fuerza')}</b>
+      <p>${tr('Añade cada ejercicio que hiciste y anota sus series.')}</p></div>`
+    : ya.length ? `<div class="extra-sep"><b>${tr('Lo que añadiste tú')}</b>
       <p>${tr('No cuenta para dar la sesión por hecha: es lo que hiciste de más.')}</p></div>` : ''}
     ${ya.map(x=>`<div id="an_${slug(x.f['EJERCICIO / ELEMENTO'])}">${ejercicio(bl, dia, x.f)}
       <div style="margin:-4px 0 12px;text-align:right"><button class="btn sm2" onclick="quitaAnadido('${x.id}')">${S.quitaAn === x.id ? '⚠ ' + tr('Toca otra vez para quitarlo') : '✕ ' + tr('Quitar este ejercicio')}</button></div></div>`).join('')}
     <div class="card">${ab ? `<label class="lbl" for="an_t">${tr('¿Qué ejercicio hiciste?')}</label>
-        <input id="an_t" type="text" class="campo" list="an_lista" autocomplete="off" placeholder="${tr('Escribe y elige, o pon el nombre que sepas')}">
+        <input id="an_t" type="text" class="campo" list="an_lista" autocomplete="off" value="${esc(S.anadeTxt||'')}" oninput="S.anadeTxt=this.value" placeholder="${tr('Escribe y elige, o pon el nombre que sepas')}">
         <datalist id="an_lista">${(BIBLIO||[]).map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
         <div class="stack" style="gap:8px;margin-top:10px">
           <button class="btn pri" onclick="guardaAnadido('${esc(bl)}','${esc(dia)}')">${tr('Añadir y registrar')}</button>
           <button class="btn sm2" onclick="abreAnadir('${esc(bl)}','${esc(dia)}')">${tr('Cancelar')}</button></div>`
       : `<button class="btn" style="width:100%" onclick="abreAnadir('${esc(bl)}','${esc(dia)}')">+ ${tr('Añadir ejercicio')}</button>
-        <p class="sm" style="margin-top:6px">${tr('¿Hiciste un ejercicio que no estaba? Añádelo y anota sus series.')}</p>`}</div>`;
+        <p class="sm" style="margin-top:6px">${tr(libre ? 'Uno por ejercicio: el nombre y sus series.' : '¿Hiciste un ejercicio que no estaba? Añádelo y anota sus series.')}</p>`}</div>`;
+}
+
+/* ---------- v5.71: la sesion libre por dentro ----------
+   Arriba, el dia (hoy, ayer o anteayer: muchos lo apuntan al llegar a casa o al dia
+   siguiente) y que hizo. Running abre la tarjeta de carrera de siempre (km, tiempo,
+   esfuerzo y ritmo); Fuerza, «+ Añadir ejercicio» con sus series; un deporte, el
+   formulario de minutos e intensidad con el nombre ya puesto. Se pueden juntar varias
+   cosas el mismo dia. Lo apuntado se queda a la vista; «Guardar y enviar» lo manda. */
+function actividadesLibre(f){   // lo apuntado ese dia, sea de la semana que sea
+  const pre = '~sesion-libre~libre-' + f + '~', out = [];
+  let run = false, fuerza = false;
+  Object.keys(LOG).sort().forEach(k=>{
+    if(k.indexOf(pre) < 0) return; const v = LOG[k]; if(!v || v.borrada) return;
+    if(/~running~reg$/.test(k) && tieneAlgo(v)) run = true;
+    else if(/~anadido$/.test(k) && v.ok) fuerza = true;
+    else if(/~extra$/.test(k) && v.ok) out.push((v.extra || {}).titulo || 'extra');
+  });
+  return (run ? ['running'] : []).concat(fuerza ? ['fuerza'] : [], out);
+}
+function abrirLibre(f){
+  entra();
+  S.vista = 'libre'; S.mirando = null; S.dia = null; S.video = null;
+  S.libreF = f || hoyISO(); S.semLibre = semLibreDe(S.libreF); S.libreTipo = null; S.extraAbre = null; S.anadeAbre = null; S.anadeTxt = '';
+  window.scrollTo(0,0); pinta();
+}
+function guardaDeporteAbierto(){   // un deporte con minutos, intensidad o nota y sin «Guardar»: se guarda
+  const bl = BL_LIBRE, dia = diaLibre(S.libreF || hoyISO());
+  if(S.extraAbre !== bl+'~'+dia) return;
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  if(v('ex_t') && (v('ex_m') || v('ex_n') || (S.extraTmp || {}).int)) guardaExtra(bl, dia);
+}
+function enviarLibre(){ guardaDeporteAbierto(); enviar({sinChk:true}); }   // el seguimiento a medias no sale desde aqui
+function fechaLibreSel(f){
+  guardaDeporteAbierto();
+  S.libreF = f; S.semLibre = semLibreDe(f); S.libreTipo = null; S.extraAbre = null; S.anadeAbre = null; S.anadeTxt = ''; pinta();
+}
+async function eligeLibre(tipo){
+  const bl = BL_LIBRE, dia = diaLibre(S.libreF || hoyISO()), antes = S.libreTipo;
+  if(tipo !== antes) guardaDeporteAbierto();   // el deporte a medio apuntar no se pierde al tocar otro
+  S.libreTipo = tipo;
+  const ve = id => setTimeout(()=>{ const c = document.getElementById(id); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); }, 120);
+  if(tipo === 'running'){ pinta(); ve('lib_run'); return; }   // si estaba quitada, anotaReg le quita la marca al escribir
+  if(tipo === 'fuerza'){
+    if(S.anadeAbre !== bl+'~'+dia) await abreAnadir(bl, dia); else pinta();
+    ve('lib_fuerza'); return;
+  }
+  if(S.extraAbre === bl+'~'+dia && antes === tipo){ pinta(); ve('lib_extra'); return; }   // ya abierto: no se vacia
+  S.extraAbre = bl+'~'+dia;
+  S.extraTmp = {titulo: tipo === 'otro' ? '' : tr(tipo), min:'', int:0, nota:''};
+  pinta(); ve('lib_extra');
+  if(tipo === 'otro') setTimeout(()=>{ const i = document.getElementById('ex_t'); if(i) i.focus(); }, 300);
+}
+function quitaRunLibre(){
+  const id = idReg(BL_LIBRE, diaLibre(S.libreF || hoyISO()), 'Running');
+  if(S.quitaAn !== id){ S.quitaAn = id; pinta(); setTimeout(()=>{ if(S.quitaAn === id){ S.quitaAn = null; pinta(); } }, 5000); return; }
+  S.quitaAn = null;
+  const pre = id.replace(/~reg$/, '~');
+  Object.keys(LOG).filter(k=>k.indexOf(pre) === 0).forEach(k=>{   // la carrera y su nota
+    const x = LOG[k] || {};
+    if(x.sent) LOG[k] = Object.assign({}, x, k === id ? {d:{}} : {nota:''}, {ok:false, borrada:true, corregido:true});
+    else delete LOG[k];
+  });
+  S.libreTipo = null; LS.set('log', LOG); toast(tr('Carrera quitada.')); pinta();
+}
+/* la fila de «Sesión libre» que va junto a las del plan, en todas las pantallas de Hoy */
+function filaLibre(conDia){
+  if(soloLectura() || !S.d) return '';
+  const n = actividadesLibre(hoyISO()).length;
+  return `<div class="diarow"><button class="dia" onclick="abrirLibre()">
+    ${conDia ? `<span class="d">+</span>` : ''}<span style="flex:1"><span class="n">${tr('Sesión libre')}</span>
+      <div class="sm" style="margin-top:2px">${tr('Running, pádel, tenis, fuerza… lo que hagas fuera de tu plan')}</div>
+      ${n ? `<div class="row wrap" style="gap:6px;margin-top:5px"><span class="tag">✓ ${n} ${tr('hoy')}</span></div>` : ''}</span></button></div>`;
+}
+function vLibre(){
+  const f = S.libreF || hoyISO(), bl = BL_LIBRE, dia = diaLibre(f);
+  const dias = [0,1,2].map(i=>{ const d = new Date(); d.setDate(d.getDate() - i); return fLocal(d); });
+  const nomDia = ['Hoy','Ayer','Anteayer'];
+  const largo = new Date(f + 'T12:00:00').toLocaleDateString(enIngles()?'en-GB':'es-ES', {weekday:'long', day:'numeric', month:'long'});
+  const run = LOG[idReg(bl, dia, 'Running')];
+  const hayRun = (run && !run.borrada && tieneAlgo(run)) || S.libreTipo === 'running';
+  const hayFuerza = anadidosDe(bl, dia).length || S.libreTipo === 'fuerza' || S.anadeAbre === bl+'~'+dia;
+  const ya = actividadesLibre(f);
+  const TIPOS = [['running','Running'],['fuerza','Fuerza'],['Pádel','Pádel'],['Tenis','Tenis'],['Bici','Bici'],['Natación','Natación'],['Clase','Clase'],['otro','Otro deporte']];
+  const marca = k => k === 'running' ? ya.indexOf('running') > -1 : k === 'fuerza' ? ya.indexOf('fuerza') > -1
+    : extrasDe(bl, dia).some(x=>norm(x.v.titulo) === norm(tr(k)) || norm(x.v.titulo) === norm(k));
+  const abiertoT = k => k === 'running' ? hayRun : k === 'fuerza' ? hayFuerza : (S.extraAbre === bl+'~'+dia && S.libreTipo === k);
+  const obs = LOG[idObs(bl, dia)];
+  return `${botonAtras()}
+  <div class="card"><div class="lbl">${tr('Sesión libre')}</div>
+    <h2 style="margin-top:5px;font-size:19px">${tr('Lo que hiciste por tu cuenta')}</h2>
+    <p class="mut" style="margin-top:8px">${tr('Un partido, una carrera, una clase, pesas: lo que entrenes fuera de tu plan. No cuenta como sesión del plan, pero así lo sé todo.')}</p>
+    <div class="lbl" style="margin-top:14px">${tr('Cuándo')}</div>
+    <div class="alt libre" role="group" aria-label="${tr('Cuándo')}">${dias.map((x,i)=>
+      `<button class="${x===f?'on':''}" aria-pressed="${x===f}" onclick="fechaLibreSel('${x}')">${actividadesLibre(x).length ? '✓ ' : ''}${tr(nomDia[i])}</button>`).join('')}</div>
+    <p class="sm" style="margin-top:4px">${esc(largo)}</p></div>
+  <div class="card"><h3>${tr('¿Qué hiciste?')}</h3>
+    <p class="sm" style="margin-top:4px">${tr('Toca lo que hiciste. Puedes apuntar varias cosas el mismo día.')}</p>
+    <div class="alt libre" role="group" aria-label="${tr('¿Qué hiciste?')}">${TIPOS.map(([k,t])=>
+      `<button class="${marca(k) || abiertoT(k) ? 'on' : ''}" onclick="eligeLibre('${esc(k)}')">${marca(k) ? '✓ ' : ''}${tr(t)}</button>`).join('')}</div></div>
+  ${hayRun ? `<div id="lib_run">${ejercicio(bl, dia, FILA_RUN_LIBRE)}
+    <div style="margin:-4px 0 12px;text-align:right"><button class="btn sm2" onclick="quitaRunLibre()">${S.quitaAn === idReg(bl, dia, 'Running') ? '⚠ ' + tr('Toca otra vez para quitarlo') : '✕ ' + tr('Quitar esta carrera')}</button></div></div>` : ''}
+  ${hayFuerza ? bloqueAnadidos(bl, dia, true) : ''}
+  ${bloqueExtra(bl, dia, true)}
+  <div class="card"><div class="lbl">${tr('¿Algo más que contarme?')}</div>
+    <textarea id="obs" oninput="guardaObs('${esc(bl)}','${esc(dia)}',this.value)"
+      placeholder="${tr('Cómo te has sentido, molestias, lo que quieras')}">${esc(obs ? obs.obs || '' : '')}</textarea>
+    <div class="stack" style="margin-top:14px">
+      <button class="btn pri big" onclick="enviarLibre()">${tr('Guardar y enviar')}</button></div></div>`;
 }
 
 /* ---------- mensaje de la semana (v5.11) ----------
@@ -2956,10 +3139,11 @@ function vFinBloque(){
   return `<div class="card"><div class="lbl">${tr('Bloque terminado')}</div>
     <h2 style="margin-top:6px">${tr('Has terminado tu bloque.')}</h2>
     <p class="mut" style="margin-top:8px">${tr('Salva está preparando el siguiente. En cuanto lo suba aparecerá aquí: toca ↻ arriba para buscarlo.')}</p>
-    <p class="mut" style="margin-top:8px">${tr('Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, cuéntaselo en Mensajes.')}</p>
+    <p class="mut" style="margin-top:8px">${tr('Lo que has hecho sigue en Mi plan y en Progreso. Si entrenas mientras tanto, apúntalo en «Sesión libre», aquí abajo.')}</p>
     <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="btn pri" onclick="irTab('plan')">${tr('Ver mi plan')}</button>
-      <button class="btn" onclick="irMenu('mensajes')">${tr('Escribir a Salva')}</button></div></div>`;
+      <button class="btn" onclick="irMenu('mensajes')">${tr('Escribir a Salva')}</button></div></div>
+  <div class="card">${filaLibre()}</div>`;   // v5.71: entre bloques tambien se apunta lo que haga
 }
 function vHoy(){
   if(finBloque()) return avisoMensajes() + vFinBloque();
@@ -3043,7 +3227,7 @@ function vHoy(){
             ${esDescanso(x)||!sesionDe(bl,x['DÍA']).length?'':chipEstado(es)}
             ${extrasDe(bl,x['DÍA']).length?`<span class="tag">+${extrasDe(bl,x['DÍA']).length} ${tr("extra")}</span>`:''}</div></span></button>${
         conMas ? botonMas(bl, x['DÍA']) + '</div>' : ''}`;
-    }).join('')}</div>
+    }).join('')}${filaLibre(true)}</div>
   <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
     <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
     <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
@@ -3087,6 +3271,7 @@ function vHoyLibre(bl, fase, nota){
             ${es==='parcial'?chipEstado(es):''}</div></span></button>${botonMas(bl, x['DÍA'])}</div>`;
     }).join('')
     :`<p class="mut" style="margin-top:6px">${tr("Has registrado todas las sesiones de la semana. Descansa y nos vemos en la siguiente.")}</p>`}
+    ${filaLibre()}
   </div>
   ${todas.filter(x=>!pend.includes(x)).length?`<div class="card">
     <h3 style="margin-bottom:4px">${tr("Ya hechas esta semana")}</h3>
@@ -3291,12 +3476,13 @@ function vHoyNueva(bl, fase, nota){
   const ini = fechaIni(S.semana && S.semana.FECHAS) || new Date(), lun = new Date(ini); lun.setHours(0,0,0,0);
   lun.setDate(lun.getDate() - ((lun.getDay() + 6) % 7));
   const hoy = fLocal(new Date()), ent = diasEntrenados(bl), DL = enIngles() ? ['M','T','W','T','F','S','S'] : ['L','M','X','J','V','S','D'];
+  const cal = entrenosCalendario(), lib = d => !!cal[d] && Object.values(cal[d]).some(p=>p[1] === 'sesion-libre');   // v5.71: el dia de la sesion libre, en verde (no cuenta en «quedan»)
   let quedan = 0;
   const tira = Array.from({length:7}, (_, i)=>{ const d = new Date(lun); d.setDate(lun.getDate() + i); const f = fLocal(d);
     if(f >= hoy && !(f === hoy && ent[f])) quedan++;
     const s = ent[f] ? [...ent[f]] : [];
     const comp = s.some(sd=>{ const x = ses.find(y=>slug(y['DÍA']) === sd); return x && ['hecha','sindatos'].indexOf(estadoSesion(bl, x['DÍA'])) > -1; });
-    const cls = [f === hoy ? 'hoy' : '', s.length ? (comp ? 'hecho' : 'medio') : '', f > hoy ? 'fut' : '', S.diaTira === f ? 'sel' : ''].join(' ');
+    const cls = [f === hoy ? 'hoy' : '', s.length ? (comp ? 'hecho' : 'medio') : (lib(f) ? 'hecho' : ''), f > hoy ? 'fut' : '', S.diaTira === f ? 'sel' : ''].join(' ');
     return `<button class="${cls}" onclick="S.diaTira = (S.diaTira === '${f}' ? null : '${f}'); pinta()" aria-label="${esc(d.toLocaleDateString(enIngles()?'en-GB':'es-ES',{weekday:'long', day:'numeric'}))}">
       <i>${s.length > 1 ? s.length + '<small>×</small>' : d.getDate()}</i><b>${DL[i]}</b></button>`; }).join('');
   const P = pendC.length;
@@ -3311,7 +3497,9 @@ function vHoyNueva(bl, fase, nota){
     detalle = `<div class="card"><div class="lbl">${esc(dd)}</div>${s.length ? s.map(sd=>{ const x = ses.find(y=>slug(y['DÍA']) === sd);
       return x ? `<div class="diarow"><button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
         <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(estadoSesion(bl, x['DÍA']))}</div></span></button></div>` : ''; }).join('')
-      : `<p class="mut" style="margin-top:6px">${S.diaTira > hoy ? tr('Todavía no ha llegado.') : tr('Ese día no entrenaste. Si hiciste algo y no lo apuntaste, ábrelo abajo y anótalo.')}</p>`}</div>`;
+      : lib(S.diaTira) ? '' : `<p class="mut" style="margin-top:6px">${S.diaTira > hoy ? tr('Todavía no ha llegado.') : tr('Ese día no entrenaste. Si hiciste algo y no lo apuntaste, ábrelo abajo y anótalo.')}</p>`}${
+      lib(S.diaTira) ? `<div class="diarow"><button class="dia hecha" onclick="abrirLibre('${S.diaTira}')"><span style="flex:1"><span class="n">${tr('Sesión libre')}</span>
+        <div class="sm" style="margin-top:2px">${esc(actividadesLibre(S.diaTira).map(x=>x === 'running' ? 'Running' : x === 'fuerza' ? tr('Fuerza') : x).join(' · '))}</div></span></button></div>` : ''}</div>`;
   }
   const tarjeta = (x, pri) => { const p = partir(x['SESIÓN']), es = estadoSesion(bl, x['DÍA']);
     return `<div class="diarow"><button class="dia${pri ? ' toca' : ''}" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1">
@@ -3330,6 +3518,7 @@ function vHoyNueva(bl, fase, nota){
   ${nota ? `<div class="card"><div class="lbl">${tr('Foco de esta semana')}</div><p class="mut" style="margin-top:6px">${esc(nota)}</p></div>` : ''}
   <div class="card"><h3 style="margin-bottom:6px">${orden.length ? tr('¿Qué haces hoy?') : tr('Todo hecho')}</h3>
     ${orden.length ? orden.map((x,i)=>tarjeta(x, i === 0)).join('') : `<p class="mut">${tr('Has hecho todas las sesiones de la semana. Descansa y nos vemos en la siguiente.')}</p>`}
+    ${filaLibre()}
     <p class="sm" style="margin-top:8px">${tr('Elige la que quieras: se apunta en el día que la hagas.')}</p></div>
   ${ses.filter(x=>orden.indexOf(x) < 0).length ? `<div class="card"><h3 style="margin-bottom:6px">${tr('Ya hechas esta semana')}</h3>
     ${ses.filter(x=>orden.indexOf(x) < 0).map(x=>`<div class="diarow"><button class="dia hecha" onclick="abrir('${esc(x['DÍA'])}')"><span style="flex:1"><span class="n">${esc(x['DÍA'])} · ${esc(partir(x['SESIÓN']).t)}</span>
@@ -3348,15 +3537,17 @@ function vHoyNueva(bl, fase, nota){
 function entrenosCalendario(){
   const out = {};
   Object.keys(LOG).forEach(k=>{
-    const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.ts || esRef(k)) return;
+    const v = LOG[k], fl = esLibreId(k) ? fechaLibre(k.split('~')) : '';   // v5.71: la libre, en el dia elegido
+    if(!v || !v.ok || v.borrada || !(v.ts || fl) || esRef(k)) return;
     if(/~(fecha|alt|omitida|salto|nota|obs|nser|cambio|valoracion)$/.test(k)) return;
     if(/~cierre$/.test(k) && v.tipo !== 'hecha') return;
     const p = k.split('~'); if(p.length < 4 || p[0][0] !== 's') return;
-    const f = fLocal(v.ts); (out[f] = out[f] || {})[p[0] + '~' + p[1] + '~' + p[2]] = p;
+    const f = fl || fLocal(v.ts); (out[f] = out[f] || {})[p[0] + '~' + p[1] + '~' + p[2]] = p;
   });
   return out;
 }
 function nombreDeClave(p){
+  if(p[1] === 'sesion-libre') return tr('Sesión libre');
   const r = (S.d.SEMANA||[]).find(x=>slug(x.BLOQUE) === p[1] && slug(x['DÍA']) === p[2]);
   return r ? (r['DÍA'] + ' · ' + partir(r['SESIÓN']).t) : p[2];
 }
@@ -3733,6 +3924,7 @@ function vMenu(){
    bienvenida y no esto. Para el proximo aviso, cambiar NOVEDADES y el texto. */
 const NOVEDADES = '2026-10-02';
 const TEXTO_NOVEDADES = [
+  "Sesión libre: si entrenas por tu cuenta (una carrera, pádel, tenis, pesas…), apúntalo en Hoy, al final de tus sesiones.",   // v5.71
   "Elige cómo quieres verla: clara, oscura o automática (sigue a tu móvil). Lo tienes aquí abajo y en el menú ☰ de arriba a la derecha.",
   "En cada sesión, una barra arriba te dice cuánto llevas, y un dibujo te enseña qué músculos trabajas.",
   "¿No sabes qué poner en el RIR? Toca el ¿? junto a la casilla.",
@@ -3757,6 +3949,39 @@ function novedades(){
 function vNovedades(){
   return `<div class="card flat"><button class="btn sm2" onclick="atras('hoy')">${tr("← Volver")}</button></div>
   <div class="card novedades"><h2 style="font-size:21px">${tr("Novedades")}</h2>${cuerpoNovedades()}</div>`;
+}
+
+/* ---------- v5.71 · presentacion de la «Sesion libre» (Salva, 18 nov) ----------
+   «Que sepa donde esta lo de sesion libre y mas o menos como registrarlo. No hay que
+   extenderse.» Sale una vez al abrir la app, en Hoy: donde esta y como se apunta, en dos
+   pantallas. Despues de la presentacion de la interfaz y de la bienvenida, nunca encima,
+   y solo en Hoy: no tapa una sesion a medias. */
+function presentaLibre(){
+  if(!S.d || S.vista !== 'hoy' || soloLectura() || LS.get('visto_libre', false)) return '';
+  if(enPiloto() && (S.introNueva || !LS.get('intro_d239', false))) return '';   // primero la de la interfaz
+  if(!LS.get('bienvenida_vista', false) && !Object.keys(LOG).some(k=>LOG[k] && LOG[k].ok && !esRef(k))) return '';   // la estrena: primero la bienvenida
+  const i = S.libreIntro === 1 ? 1 : 0;
+  const quieto = 'tabindex="-1" aria-hidden="true" style="pointer-events:none"';
+  const ejemplo = i === 0
+    ? `<div class="card"><div class="diarow" style="opacity:.45"><button class="dia" ${quieto}><span style="flex:1"><span class="n">${tr('Sesión')} 3 · ${tr('Pierna + trineos')}</span></span></button></div>
+        <div class="lbl" style="color:var(--verde);margin-top:12px">${tr('Aquí')} ↓</div>
+        <div class="diarow" style="border:2px solid var(--verde);border-radius:12px;padding:0 12px;margin-top:6px"><button class="dia" ${quieto}><span style="flex:1"><span class="n">${tr('Sesión libre')}</span>
+          <div class="sm" style="margin-top:2px">${tr('Running, pádel, tenis, fuerza… lo que hagas fuera de tu plan')}</div></span></button></div></div>`
+    : `<ol style="margin:0 0 14px;padding-left:22px;font-size:16px;line-height:1.5">${['Toca «Sesión libre».', 'Elige el día y lo que hiciste.', 'Rellena lo que te pida y toca «Guardar y enviar».'].map(x=>`<li style="margin-bottom:6px">${tr(x)}</li>`).join('')}</ol>
+      <div class="card"><div class="lbl">${tr('¿Qué hiciste?')}</div><div class="alt libre">${['Running','Fuerza','Pádel','Tenis','Bici','Natación','Clase','Otro deporte'].map((t,j)=>
+        `<button class="${j===0?'on':''}" ${quieto}>${tr(t)}</button>`).join('')}</div></div>`;
+  return `<div class="intro-nueva" role="dialog" aria-modal="true" aria-label="${tr('Sesión libre')}">
+    <div class="pasos"><span class="${i===0?'on':''}"></span><span class="${i===1?'on':''}"></span></div>
+    <h2 style="font-size:24px;margin:10px 0 8px">${tr(i === 0 ? 'Nuevo: Sesión libre' : 'Cómo se apunta')}</h2>
+    ${i === 0 ? `<p class="mut" style="font-size:16px;margin-bottom:8px">${tr('¿Entrenas por tu cuenta? Una carrera, un partido de pádel o tenis, pesas… Ahora lo puedes apuntar en la app.')}</p>
+      <p class="mut" style="font-size:16px;margin-bottom:14px">${tr('La tienes en Hoy, al final de la lista de tus sesiones.')}</p>` : ''}
+    ${ejemplo}
+    ${i === 1 ? `<p class="sm" style="margin-top:10px">${tr('No cuenta como sesión de tu plan, pero así me entero de todo lo que haces.')}</p>` : ''}
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+      ${i === 0 ? `<button class="btn pri big" onclick="S.libreIntro = 1; pinta()">${tr('Siguiente')}</button>`
+        : `<button class="btn pri big" onclick="LS.set('visto_libre', true); S.libreIntro = 0; pinta(); window.scrollTo(0,0)">${tr('Entendido')}</button>
+        <button class="btn big" onclick="S.libreIntro = 0; pinta()">${tr('Atrás')}</button>`}
+    </div></div>`;
 }
 
 /* ---------- de que va la sesion ----------
@@ -4058,7 +4283,8 @@ function vSesion(){
   const dia = S.dia || (diaDeHoy(bl)||{})['DÍA'];
   if(!dia) return `<div class="card"><h3>${tr("Elige un día")}</h3>
     <p class="mut" style="margin-top:8px">${tr("Vuelve a Hoy y toca la sesión que quieras registrar.")}</p>
-    <button class="btn big" style="margin-top:12px" onclick="ir('hoy')">${tr("Ir a Hoy")}</button></div>`;
+    <button class="btn big" style="margin-top:12px" onclick="ir('hoy')">${tr("Ir a Hoy")}</button></div>
+    <div class="card">${filaLibre()}</div>`;
 
   const meta = diasDeBloque(bl).find(x=>norm(x['DÍA'])===norm(dia)) || {};
   const filas = sesionDe(bl, dia);
@@ -4552,7 +4778,7 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
         : `${edit ? '' : (series>0 && !campos.length && !ops && ['fuerza','hibrido'].indexOf(norm(f.TIPO)) > -1 && !esCalentamiento(f)) ? `<div class="ajej">
              <span class="ajs"><button onclick="ajustaSeries('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}','${esc(nombre)}',${serBase},-1)" aria-label="${tr('Quitar una serie')}">− ${tr('serie')}</button>
              <button onclick="ajustaSeries('${esc(bl)}','${esc(dia)}','${esc(ejOrig)}','${esc(nombre)}',${serBase},1)" aria-label="${tr('Añadir una serie')}">+ ${tr('serie')}</button></span></div>` : ''}
-           ${f._anadido ? '' : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(ops ? origNom : nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`}`;
+           ${f._anadido || f._libre ? '' : `<div class="nohecho"><button onclick="salta('${esc(bl)}','${esc(dia)}','${esc(ops ? origNom : nombre)}')">⊘ ${tr("No he hecho este ejercicio")}</button></div>`}`;
     })()}${edit && ultHueco && !soloLectura() ? `<button class="btn" style="margin-top:12px;width:100%" onclick="anadeHueco('${esc(bl)}','${esc(dia)}')">+ ${tr('Añadir ejercicio')}</button>` : ''}</div>`;
 }
 /* v5.3 ponia "toca aqui" al final de estas lineas porque no se veia que eran
@@ -4836,6 +5062,9 @@ function anota(id){
   LOG[id] = Object.assign({}, prev, {r:r.value.trim(), c:cv, rir:i.value.trim(),
     u: prev.c && prev.c === cv ? (prev.u||'kg') : unidadDe(id.split('~')[3])});
   if(prev.sent) LOG[id].corregido = true;      // ya estaba en la hoja: al enviar se actualizará
+  // v5.71: vaciada y vuelta a escribir. Solo si estaba vacia: una serie que Salva anulo en la hoja
+  // llega con sus numeros y la marca, y tocarla no la vuelve a contar como hecha.
+  if(LOG[id].borrada && !tieneAlgo(prev) && tieneAlgo(LOG[id])) delete LOG[id].borrada;
   LS.set('log', LOG);
   const fila = document.getElementById('fila_'+id);
   if(fila && LOG[id].corregido) fila.classList.add('corr');
@@ -5046,6 +5275,7 @@ function guardaNota(id,txt){
   if(!txt.trim() && !prev.sent){ delete LOG[id]; LS.set('log',LOG); return; }
   LOG[id] = Object.assign({}, prev, {nota:txt, ok:!!txt.trim()});
   if(prev.sent) LOG[id].corregido = true;
+  if(txt.trim()) delete LOG[id].borrada;   // v5.71
   LS.set('log', LOG);
 }
 
@@ -5062,6 +5292,7 @@ function anotaReg(id, cs){
     const el=document.getElementById('g_'+id+'_'+k); if(el) d[k]=el.value.trim(); });
   LOG[id] = Object.assign({}, prev, {d:d});
   if(prev.sent) LOG[id].corregido = true;
+  if(LOG[id].borrada && !tieneAlgo(prev) && tieneAlgo(LOG[id])) delete LOG[id].borrada;   // v5.71: la carrera quitada que se vuelve a apuntar (no la anulada en la hoja)
   LS.set('log', LOG);
   const r = document.getElementById('ritmo_'+id);
   if(r){ r.textContent = textoRitmo(d); r.classList.toggle('mal', !!d.km && !!aSegundos(d.tiempo) && !ritmoCreible(d)); }
@@ -5074,6 +5305,7 @@ function anotaEscala(id, k, n){
   d[k] = (String(d[k]||'') === String(n)) ? '' : String(n);
   LOG[id] = Object.assign({}, prev, {d:d});
   if(prev.sent) LOG[id].corregido = true;
+  if(LOG[id].borrada && !tieneAlgo(prev) && tieneAlgo(LOG[id])) delete LOG[id].borrada;   // v5.71 (como en anota)
   LS.set('log', LOG);
   const C = CAMPOS[k] || {};
   for(let i=1;i<=(C.escala||5);i++){
@@ -5320,6 +5552,8 @@ async function enviar(opc){
                   semana:(p[0]||'').replace(/^s/,''), bloque:p[1]||'', dia:p[2]||'',
                   sesion:'', ejercicio:'', serie:'', reps:'', carga:'', rir:'', notas:'', estado:'',
                   km:'', tiempo:'', ritmo:'', rpe:'', piernas:'', valoracion:''};
+    const libre = esLibreId(id);   // v5.71: la sesion libre lleva su nombre y la fecha del dia elegido
+    if(libre){ base.sesion = BL_LIBRE; base.fecha = fechaLibre(p) || base.fecha; }
 
     if(id.endsWith('~omitida')){ reg.push(Object.assign(base,{estado:v.borrada?'':'omitida'})); return; }
     if(id.endsWith('~cierre')){            // v5.43 (D-218)
@@ -5331,7 +5565,7 @@ async function enviar(opc){
       const e = v.extra || {};
       reg.push(Object.assign(base,{ejercicio:'EXTRA · ' + (e.titulo||''),
         tiempo: e.min ? e.min + ' min' : '', rpe: e.int ? String(e.int) : '',
-        notas: e.nota || '', estado: v.borrada ? '' : 'realizada'}));
+        notas: v.borrada ? 'Anulada' : (e.nota || ''), estado: v.borrada ? '' : 'realizada'}));   // v5.71: quitado = Anulada
       return;
     }
     if(id.endsWith('~anadido')){          // v5.65
@@ -5365,12 +5599,12 @@ async function enviar(opc){
     }
     if(id.endsWith('~reg')){
       const d = v.d || {};
-      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||p[3]||'',
+      reg.push(Object.assign(base,{ejercicio:nombreDe(id)||(libre && p[3] === 'running' ? 'Running' : p[3])||'',
         km:d.km||'', tiempo:d.tiempo||'',
         /* v5.2: si lo escribio ella (con su unidad), manda lo suyo; si no, el
            ritmo que sale de km y tiempo. El avituallamiento va en notas: la
            hoja no tiene columna propia y asi Salvador lo lee con el resto. */
-        notas: d.fuel ? tr('Avituallamiento') + ': ' + d.fuel : '',
+        notas: libre && v.borrada ? 'Anulada' : d.fuel ? tr('Avituallamiento') + ': ' + d.fuel : '',
         ritmo: d.vam ? 'VAM' + (vamDe(d.vam) ? ' ' + paso(vamDe(d.vam)) + ' min/km' : '')
                      : (d.ritmo || (ritmoCreible(d) ? ritmoDe(d).replace('Ritmo ','') : '')),
         rpe:d.rpe||'', piernas:d.piernas||'', carga:d.carga||'', reps:d.metros||d.vam||'', serie:d.nseries||'',
@@ -5397,7 +5631,7 @@ async function enviar(opc){
   // aviso pendiente, es la actual. Tiene que ser la misma en las tres partes:
   // el identificador, el dato que va a la hoja y la marca de "ya respondida".
   const semResp = (faltaCheckin() || S.semana || {}).SEMANA || '0';
-  const chk = opc.auto ? [] : Object.keys(CHK).filter(k=>CHK[k] && (String(CHK[k].v||'').trim() || CHK[k].n)).map(k=>({
+  const chk = (opc.auto || opc.sinChk) ? [] : Object.keys(CHK).filter(k=>CHK[k] && (String(CHK[k].v||'').trim() || CHK[k].n)).map(k=>({
     id: idChk(semResp, k),
     fecha: hoy, semana: semResp, 'npregunta': k,
     categoria: CHK[k].cat||'',
@@ -5676,10 +5910,10 @@ function resumenSemana(semana){
     const v = LOG[k]; if(!v || !v.ok || v.borrada) return;
     const p = k.split('~');
     if(p.length === 5 && /^s\d+$/.test(p[4]) && (v.r || v.c || v.t || v.e)){
-      ses.add(p[1]+'~'+p[2]); series++;
+      if(p[1] !== 'sesion-libre') ses.add(p[1]+'~'+p[2]); series++;
       kilos += aKg(v.c, v.u) * (parseFloat(String(v.r).replace(',','.')) || 0);
     } else if(k.endsWith('~reg') && v.d){
-      ses.add(p[1]+'~'+p[2]);
+      if(p[1] !== 'sesion-libre') ses.add(p[1]+'~'+p[2]);
       km += parseFloat(String(v.d.km||'').replace(',','.')) || 0;
     } else if(k.endsWith('~valoracion') && v.val) ses.add(p[1]+'~'+p[2]);
   });
@@ -5726,7 +5960,7 @@ function vProgreso(){
     const p = k.split('~'); if(p.length !== 5 || !/^s\d+$/.test(p[4])) return;
     if(!v.r && !v.c && !v.t && !v.e) return;
     series++;
-    sesiones[p[0]+'~'+p[1]+'~'+p[2]] = true;
+    if(p[1] !== 'sesion-libre') sesiones[p[0]+'~'+p[1]+'~'+p[2]] = true;   // v5.71: la libre no es una sesion del plan
     if(!v.r && !v.c) return;                 // serie de carrera: cuenta, pero no es una carga
     const it = {sem:parseInt(p[0].replace(/^s/,''))||0, c:aKg(v.c, v.u),
                 carga:v.c||'', u:v.u||'kg', reps:v.r||''};
@@ -5746,6 +5980,7 @@ function vProgreso(){
   /* v5.2: quien solo corre no veia nada suyo aqui. Su progreso no son las
      cargas: son los kilometros, el tiempo en pie y el ritmo que le sale. */
   const blSlug = slug(bl||'');
+  const semsBl = (S.d.SEMANAS||[]).filter(w=>bloqueDe(w) === bl).map(w=>'s' + slug(String(w.SEMANA)));   // v5.71: la carrera libre de esas semanas, en el bloque
   let kmSem=0, kmBl=0, sgSem=0, sgBl=0, carrSem=0, carrBl=0, masLarga=0, kmTot=0, sgTot=0, sgOtro=0, sgOtroSem=0;
   Object.keys(LOG).forEach(k=>{
     const v = LOG[k];
@@ -5761,7 +5996,7 @@ function vProgreso(){
     if(esCardioNoCorrer(p[3] || '')){ sgOtro += sg; if(p[0] === SEM()) sgOtroSem += sg; return; }   // v5.27
     if(km > masLarga) masLarga = km;
     kmTot+=km; sgTot+=sg;
-    if(p[1] === blSlug){ kmBl+=km; sgBl+=sg; carrBl++; }
+    if(p[1] === blSlug || (p[1] === 'sesion-libre' && semsBl.indexOf(p[0]) > -1)){ kmBl+=km; sgBl+=sg; carrBl++; }
     if(p[0] === SEM()){ kmSem+=km; sgSem+=sg; carrSem++; }
   });
   const unKm = n => (Math.round(n*10)/10).toString().replace('.', enIngles()?'.':',');
