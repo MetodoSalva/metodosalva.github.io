@@ -533,6 +533,18 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .msj-reac .e{font-size:20px}
 .msj-reac .f{color:var(--txt3)}
 .reacs{margin:2px 0 6px}
+.chat-hueco{height:64px}
+.chat-barra{position:fixed;left:0;right:0;bottom:var(--sobre-nav,calc(60px + env(safe-area-inset-bottom)));z-index:31;
+  background:var(--papel);border-top:1px solid var(--linea);padding:8px 10px}
+.chat-barra .in{max-width:640px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+.chat-barra textarea{flex:1;min-height:44px;max-height:132px;resize:none;box-sizing:border-box;border:1px solid var(--linea2);
+  border-radius:22px;padding:11px 16px;font:inherit;font-size:16px;line-height:1.35;background:var(--sup);color:var(--tinta);overflow-y:auto}
+.chat-barra button{flex:0 0 44px;width:44px;height:44px;border-radius:50%;border:0;background:var(--verde);color:#fff;
+  display:grid;place-items:center;cursor:pointer}
+.chat-barra button svg{width:22px;height:22px}
+:root[data-estilo="deportivo"] .chat-barra button{color:#06140c}
+body.escribiendo nav{display:none}
+body.escribiendo .chat-barra{bottom:var(--teclado,0px)}
 .cmp{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:12px;padding-bottom:6px}
 .cmp figure{flex:0 0 calc(50% - 5px);margin:0;scroll-snap-align:start}
 .cmp img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block;background:var(--sup2)}
@@ -541,7 +553,6 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 .menu .op .cuenta{margin-left:auto;margin-right:6px;background:var(--verde);color:#fff;border-radius:99px;font-size:12px;padding:1px 8px}
 .menu-b{position:relative}
 .menu-b .punto{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#E5484D;border:2px solid var(--verde)}
-#msj_txt{width:100%;min-height:90px;margin-top:8px}
 .cue .pasos{margin:6px 0 10px;padding-left:22px}
 .cue .pasos li{margin:0 0 6px;line-height:1.45}
 .cue .pasos li::marker{color:var(--verde);font-weight:700}
@@ -650,7 +661,7 @@ ul.mat li.mas{color:var(--txt3);font-size:13px}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.71';   // v5.71 «Sesión libre» siempre a mano junto a las del plan: running, fuerza con sus series, pádel, tenis y lo que sea, fuera del plan (Salva, 18 nov); «− serie / + serie» y el aviso de mancuernas ya no van pegados al borde de la tarjeta; presentación de dos pantallas al abrir (Salva, 18 nov); lo que Salva anula en la hoja no revive al tocarlo, la libre no manda el seguimiento a medias y quitar un añadido vacía su nota · v5.70 no propone subir si la última vez dejó 2 o más repeticiones menos en la recámara de las que pide hoy (Alexia, 17 nov) · v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.72';   // v5.72 el ritmo o esfuerzo que ya va dentro de MAIN SET no se repite al lado (Sergio, 16 nov); «cola_desde» en la ficha: la cola empieza en esa semana y lo de antes es historia (Smi, 19 nov); los mensajes que no salieron por falta de cobertura se reenvían al cargar (21 nov); si el primer extra es una fila info, su título y su texto hacen de cabecera de «Si te sobran minutos» (Sebastian, 23 nov); un vídeo o una foto que no se envía deja aviso fijo con el motivo y el tope baja a 35 MB (Mariana, 23 nov); Mensajes como un chat: barra fija abajo para escribir, crece con el texto, sube con el teclado y se abre por lo último (Salva, 23 nov) · v5.71 «Sesión libre» siempre a mano junto a las del plan: running, fuerza con sus series, pádel, tenis y lo que sea, fuera del plan (Salva, 18 nov); «− serie / + serie» y el aviso de mancuernas ya no van pegados al borde de la tarjeta; presentación de dos pantallas al abrir (Salva, 18 nov); lo que Salva anula en la hoja no revive al tocarlo, la libre no manda el seguimiento a medias y quitar un añadido vacía su nota · v5.70 no propone subir si la última vez dejó 2 o más repeticiones menos en la recámara de las que pide hoy (Alexia, 17 nov) · v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1008,6 +1019,11 @@ const EN = {
   "No se ha podido enviar el vídeo. Inténtalo otra vez con cobertura.": "The video could not be sent. Try again where you have signal.",
   "Ese vídeo es muy largo. Recórtalo a 20 segundos o menos.": "That video is too long. Trim it to 20 seconds or less.",
   "Ese vídeo pesa demasiado. Graba uno más corto.": "That video is too heavy. Record a shorter one.",
+  "No se envió: la foto pesa demasiado.": "Not sent: the photo is too heavy.",
+  "No se envió: el vídeo pesa demasiado. Graba uno de 20 segundos o en menos calidad y vuelve a probar.": "Not sent: the video is too heavy. Record 20 seconds or use a lower quality and try again.",
+  "No se envió: dura más de 30 segundos. Recórtalo a 20 y vuelve a probar.": "Not sent: it is longer than 30 seconds. Trim it to 20 and try again.",
+  "No se envió la foto. Vuelve a probar con cobertura.": "The photo was not sent. Try again where you have signal.",
+  "No se envió el vídeo. Vuelve a probar con cobertura y espera a que salga «Vídeo enviado».": "The video was not sent. Try again where you have signal and wait until it says Video sent.",
   "Grabar otro": "Record another",
   "Lo que te dice Salva": "What Salva says",
   "Fotos de progreso": "Progress photos",
@@ -1235,7 +1251,7 @@ const EN = {
   "Arriba, la lista de ejercicios: ✓ los hechos y «ahora» el que toca. Debajo, uno cada vez: pon el peso y las repeticiones con − y + o tocando el número, ya vienen rellenos con lo sugerido, y toca «Guardar serie». Sale en verde cuando queda guardada y arranca el descanso solo.": "At the top, the exercise list: ✓ the ones done and “now” the current one. Below, one at a time: set the weight and reps with − and + or by tapping the number (they come pre-filled with the suggestion) and tap “Save set”. It turns green once saved, and the rest timer starts on its own.",
   "Elige tu estilo": "Pick your style",
   "Deportivo, Claro, Cálido o Fácil de leer (letra grande). Lo cambias cuando quieras en el menú ☰.": "Sporty, Light, Warm or Easy to read (large text). Change it whenever you like from the ☰ menu.",
-  "Probarla": "Try it",
+  "Probarla": "Try it", "Escribe a Salva…": "Write to Salva…",
   "Seguir con la de siempre": "Keep the usual one",
   "Siguiente": "Next",
   "Atrás": "Back",
@@ -1391,13 +1407,20 @@ const ajuste = k => {
    por vieja ni el aviso de sesiones sin registrar. El seguimiento sigue por semana
    de calendario. Si el perfil no es secuencia, nada cambia. */
 const enCola = () => ajuste('perfil') === 'secuencia';
+/* v5.72 (D-276, Smi 19 nov): quien pasa a la cola con semanas ya vividas en un plan de dias.
+   La cola empezaba por la primera sesion sin registrar de TODO el plan: a Smi le salia la
+   Semana 1 del maraton. «cola_desde» en la FICHA dice desde que semana cuenta la cola; las de
+   antes son historia: no entran en Hoy y en Mi plan caducan como en un plan de dias.
+   Sin el campo entran todas, como hasta ahora (Belen, Mariana, Juan Pablo, Sebastian). */
+const desdeCola = () => parseInt(ajuste('cola_desde'), 10) || 0;
+const enLaCola = w => !desdeCola() || (parseInt(String(w.SEMANA), 10) || 0) >= desdeCola();
 /* v5.62 (9 nov, Mariana): «parcial» NO es hecha. Una sesion a medias salia de la cola en
    cuanto se salia de ella (a Mensajes, por ejemplo) y no habia forma de volver a terminarla.
    Al cerrarla con «Guardar y enviar», lo no anotado se marca como saltado y pasa a «hecha». */
 const HECHA_COLA = ['hecha','sindatos','omitida','nohecha'];
 function cola(){
   const out = [];
-  semanasReales().forEach(w=>{
+  semanasReales().filter(enLaCola).forEach(w=>{
     enSemana(w, ()=>{
       const bl = bloqueDe(w); if(!bl) return;
       diasDeBloque(bl).forEach(x=>{
@@ -2328,8 +2351,8 @@ const ETQ = {sin:['gris','Sin registrar'], parcial:['ambar','Parcial'], hecha:['
    como No hecha. Solo se ve; no se manda. v5.46 (D-221, Salvador): desde la semana
    antepasada (la semana pasada aun se pregunta en Hoy). */
 function viejaSinCerrar(){
-  if(enCola()) return false;
   const w = corrigiendo() ? S.mirando : null; if(!w) return false;
+  if(enCola() && enLaCola(w)) return false;   // v5.72: lo de antes de «cola_desde» caduca como en un plan de dias
   const ini = fechaIni(w.FECHAS); if(!ini) return false;
   return (Date.now() - ini.getTime()) / 86400000 >= 14;
 }
@@ -2452,6 +2475,7 @@ async function cargar(){
     LS.set('idioma', ajuste('idioma') || 'es');   // para la pantalla de carga de la proxima vez
     LS.set('plan', {d:d, ts:Date.now()});
     fusionarRegistros(d.MIS_REGISTROS||[]);
+    reenviaMensajes();
   }catch(e){
     clearTimeout(reloj);
     const tardo = e && e.name==='AbortError';
@@ -2579,7 +2603,9 @@ function pinta(){
   if(S.err && !S.d){ app.innerHTML = vErr(); return; }
   if(!S.d){ app.innerHTML = '<div class="load"><div class="spin"></div>'+tr("Cargando tu plan…")+'</div>'; return; }
   const v = {hoy:vHoy, mensajes:vMensajes, novedades:vNovedades, resumen:vResumen, plan:vPlan, semana:vSemana, sesion:vSesion, libre:vLibre, progreso:vProgreso, seguimiento:vSeg, guias:vGuias, fotos:vFotos, comparar:vComparar}[S.vista] || vHoy;
-  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '') + introNueva() + presentaLibre();
+  app.innerHTML = cabecera() + '<main>' + v() + '</main>' + (S.vista === 'mensajes' ? barraChat() : '') + nav() + (S.menu ? vMenu() : '') + (S.listaSem ? vListaSem() : '') + introNueva() + presentaLibre();
+  if(S.vista === 'mensajes'){ creceChat(document.getElementById('msj_txt'));       // v5.72: la barra, justo encima de las pestañas
+    const b = document.querySelector('.chat-barra'), n = document.querySelector('nav'); if(b && n) b.style.setProperty('--sobre-nav', n.offsetHeight + 'px'); }
   if(S.listaSem){ const L = document.querySelector('.lista-sem'), a = L && (L.querySelector('.on') || L.querySelector('.aqui'));
     if(a) L.scrollTop = Math.max(0, a.offsetTop - L.clientHeight/2 + a.offsetHeight/2); }
 }
@@ -2693,6 +2719,7 @@ function ir(v){
   if(v!=='semana') S.mirando = null;
   S.listaSem = false;
   S.vista=v; if(v!=='sesion') S.dia=null; S.video=null; window.scrollTo(0,0); pinta();
+  if(v === 'mensajes') alFinal();      // v5.72: como un chat, se abre por lo último
 }
 /* Abre una semana para verla. Si es la de hoy, no hay modo lectura: se va a Hoy. */
 function verSemana(num){
@@ -3864,11 +3891,31 @@ function vMensajes(){
       ${m.DE!=='salva' ? '' : S.respA === m.ID ? cajaRespuesta(m.ID, 'msj')
         : `<button class="resp-btn" onclick="abreRespuesta('${esc(m.ID)}')">↩ ${tr('Responder')}</button>`}</div>`).join('')}</div>`
     : `<div class="card"><p class="mut">${tr('Todavía no hay mensajes.')}</p></div>`}
-  <div class="card"><div class="lbl">${tr('Escribir a Salva')}</div>
-    <textarea id="msj_txt" placeholder="${tr('Una duda, cómo te ha ido, lo que quieras')}">${esc(LS.get('msj_borrador',''))}</textarea>
-    <button class="btn pri big" style="margin-top:10px" onclick="enviaMensaje()">${tr('Enviar')}</button></div>`;
+  <div class="chat-hueco"></div>`;
 }
-document.addEventListener('input', e=>{ if(e.target && e.target.id === 'msj_txt') LS.set('msj_borrador', e.target.value);
+/* v5.72 (Salva, 23 nov): «la barra fija para escribir abajo, como en WhatsApp». Va fuera de <main>
+   (main se anima con transform y un fixed dentro se moveria con el). Con el teclado abierto se
+   esconden las pestanas y la barra se pega encima del teclado (visualViewport). */
+function barraChat(){
+  return `<div class="chat-barra"><div class="in">
+    <textarea id="msj_txt" rows="1" aria-label="${tr('Escribir a Salva')}" placeholder="${tr('Escribe a Salva…')}">${esc(LS.get('msj_borrador',''))}</textarea>
+    <button onclick="enviaMensaje()" aria-label="${tr('Enviar')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button></div></div>`;
+}
+function creceChat(t){ if(!t) return; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 132) + 'px';
+  t.style.overflowY = t.scrollHeight + 2 > 132 ? 'auto' : 'hidden'; }
+const alFinal = () => requestAnimationFrame(()=>window.scrollTo(0, document.documentElement.scrollHeight));
+(function(){
+  const vv = window.visualViewport; if(!vv) return;
+  const ajusta = () => { const b = document.querySelector('.chat-barra'); if(!b) return;
+    const tapa = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    document.body.classList.toggle('escribiendo', tapa > 80 && document.activeElement && document.activeElement.id === 'msj_txt');
+    b.style.setProperty('--teclado', (tapa > 80 ? tapa : 0) + 'px'); };
+  vv.addEventListener('resize', ajusta); vv.addEventListener('scroll', ajusta);
+  document.addEventListener('focusin', e=>{ if(e.target && e.target.id === 'msj_txt') setTimeout(ajusta, 300); });
+  document.addEventListener('focusout', e=>{ if(e.target && e.target.id === 'msj_txt') setTimeout(()=>{ document.body.classList.remove('escribiendo'); ajusta(); }, 100); });
+})();
+document.addEventListener('input', e=>{ if(e.target && e.target.id === 'msj_txt'){ LS.set('msj_borrador', e.target.value); creceChat(e.target); }
   if(e.target && e.target.id === 'resp_txt') LS.set('resp_borrador~' + e.target.dataset.id, e.target.value); });
 async function marcaLeidos(solo){
   const nl = noLeidos().filter(m=>!solo || m.ID === solo); if(!nl.length) return;
@@ -3884,6 +3931,7 @@ async function enviaMensaje(txR, para, cita){
   const m = {ID:'mc~' + d.getTime(), FECHA: d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),
              DE:'cliente', TEXTO: tx, PARA: para || '', CITA: cita || '', pendiente: true};
   const mios = LS.get('msj_mios', []); mios.push(m); LS.set('msj_mios', mios); if(!txR) LS.set('msj_borrador', ''); pinta();
+  if(!txR) alFinal();
   try{
     const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({cliente:CID, token:KEY, mensajes:[{id:m.ID, fecha:m.FECHA, de:'cliente', para:m.PARA, cita:m.CITA, texto:tx}]})});
@@ -3892,6 +3940,24 @@ async function enviaMensaje(txR, para, cita){
     toast(tr(para ? 'Enviado. Salva lo verá en sus mensajes.' : 'Enviado. Salva lo verá.'));
   }catch(e){ toast(tr('No se ha podido enviar. Se queda guardado: vuelve a intentarlo luego.')); }
   pinta();
+}
+/* v5.72 (21 nov): un mensaje escrito sin cobertura se quedaba «enviando…» para siempre: nada lo
+   volvia a mandar. Al cargar el plan se reenvian los que siguen pendientes y no estan en la hoja.
+   El puente los guarda por ID, asi que reenviar uno que ya llego no lo duplica. */
+async function reenviaMensajes(){
+  const srv = (S.d && S.d.MIS_MENSAJES) || [], ls = LS.get('msj_mios', []);
+  let cambia = false;
+  ls.forEach(x=>{ if(x.pendiente && srv.some(s=>s.ID===x.ID)){ delete x.pendiente; cambia = true; } });   // llego, pero no la respuesta
+  if(cambia) LS.set('msj_mios', ls);
+  const pend = ls.filter(x=>x.pendiente);
+  if(!pend.length) return;
+  try{
+    const r = await fetch(API, {method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({cliente:CID, token:KEY, mensajes: pend.map(m=>({id:m.ID, fecha:m.FECHA, de:'cliente', para:m.PARA||'', cita:m.CITA||'', texto:m.TEXTO}))})});
+    const j = await r.json(); if(j.error) return;
+    const ids = pend.map(m=>m.ID), ya = LS.get('msj_mios', []);
+    ya.forEach(x=>{ if(ids.includes(x.ID)) delete x.pendiente; }); LS.set('msj_mios', ya); pinta();
+  }catch(e){}
 }
 
 /* ---------- menu de la esquina (v5.13) ----------
@@ -4320,9 +4386,7 @@ function vSesion(){
     </div>
     ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
     ${ejerciciosConCambios(bl, dia, ejs)}
-    ${extras.length?`<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
-      <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.</p></div>
-      ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
+    ${bloqueExtras(bl, dia, extras, false)}
     <div class="card flat"><button class="btn big" onclick="atras('semana')">${tr("← Volver a la semana")}</button></div>`;
   }
 
@@ -4353,11 +4417,7 @@ function vSesion(){
   ${cal?`<div class="calent"><b>${tr("Calentamiento.")}</b> ${esc(cal.CUES||cal['REPS / DOSIS']||cal['MAIN SET']||'')}</div>`:''}
   ${interfazNueva() && !S.verTodos ? sesionFoco(bl, dia, ejs) : (interfazNueva() ? `<div class="card flat"><button class="btn sm2" onclick="S.verTodos=false; pinta()">${tr('Ver de uno en uno')}</button></div>` : '') + ejerciciosConCambios(bl, dia, ejs)}
   ${bloqueAnadidos(bl, dia)}
-  ${extras.length?`<div class="extra-sep">
-    <b>${tr("Si te sobran minutos")}</b>
-    <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.
-       No pasa nada si lo dejas: no cuenta como sesión a medias.</p></div>
-  ${extras.map(f=>ejercicio(bl,dia,f)).join('')}`:''}
+  ${bloqueExtras(bl, dia, extras, true)}
   <div class="card"><div class="lbl">${tr("Observaciones")}</div>
     <textarea id="obs" oninput="guardaObs('${esc(bl)}','${esc(dia)}',this.value)"
       placeholder="${tr("Cómo te has sentido, molestias, lo que quieras contarme")}">${esc(obs?obs.obs||'':'')}</textarea>
@@ -4376,6 +4436,20 @@ function vSesion(){
     </div>
   </div>
   ${bloqueExtra(bl, dia)}`;
+}
+
+/* v5.72: el bloque «Si te sobran minutos». Si el primer extra es una fila info, su titulo y su
+   texto hacen de cabecera en vez de la generica, que dice «hasta una hora» y no cuadra con un
+   «¿Tienes 10 minutos más?», y esa fila no se repite debajo (Sebastian, 23 nov). */
+function bloqueExtras(bl, dia, extras, larga){
+  if(!extras.length) return '';
+  const f = extras[0], info = norm(f.TIPO) === 'info' && f['EJERCICIO / ELEMENTO'];
+  const cab = info
+    ? `<div class="extra-sep"><b>${esc(f['EJERCICIO / ELEMENTO'])}</b>${f.CUES ? pintaCue(f.CUES) : ''}</div>`
+    : `<div class="extra-sep"><b>${tr("Si te sobran minutos")}</b>
+    <p>La sesión ya está completa arriba. Esto es lo que añadiría si tienes hasta una hora.${larga ? `
+       No pasa nada si lo dejas: no cuenta como sesión a medias.` : ''}</p></div>`;
+  return cab + (info ? extras.slice(1) : extras).map(x=>ejercicio(bl,dia,x)).join('');
 }
 
 /* v4.6: las hojas traen las indicaciones en trozos con nombre, separados por
@@ -4629,8 +4703,14 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
     return et+' '+t; };
   const dosis = f['REPS / DOSIS']||'', main = f['MAIN SET']||'';
   const mismo = norm(main) === norm(dosis);
-  const extra = [f.KM?'KM '+f.KM:'', mismo?'':main,
-    etiqueta(f['PACE / RPE'], esRitmo(f['PACE / RPE'])?tr('Ritmo'):''),
+  /* v5.72 (Sergio, 16 nov: «las instrucciones estan repetidas»): «40 min (esfuerzo 3–4, puedes
+     hablar)» en MAIN SET y «esfuerzo 3–4, puedes hablar» en PACE / RPE salian dos veces. Si el
+     ritmo ya va dentro de lo que se ensena, no se repite. Con 4 letras o mas: una «E» suelta no. */
+  const dosisVista = esCalentamiento(f) ? dosis.replace(/\s*·?\s*(esfuerzo|effort)\s+[\d\-–]+\s*(de|of)\s*10\b/gi, '') : dosis;   // lo que se ve arriba (cabDosis)
+  const yaDicho = t => { const x = norm(t); return x.length >= 4 && [dosisVista, mismo ? '' : main].some(y=>norm(y).indexOf(x) > -1); };
+  const pace = String(f['PACE / RPE']||'').split(/\s*·\s*/).filter(p=>!yaDicho(p)).join(' · ');   // «4:35–4:45/km · esfuerzo 8»: solo lo que falta
+  const extra = [f.KM && String(f.KM).trim() !== '0' ? 'KM '+f.KM : '', mismo?'':main,
+    etiqueta(pace, esRitmo(pace)?tr('Ritmo'):''),
     f.FUEL?'Fuel: '+f.FUEL:''].filter(Boolean).join(' · ');
   /* v5.12: numeros grandes. En fuerza, "3 × 8-10" va en grande y el resto
      (RIR, tempo, descanso) en pequeno debajo. */
@@ -4920,6 +5000,7 @@ function bloqueFoto(bl, dia, nombre, f){
       : `<button class="abrir" onclick="document.getElementById('vf_${id}').click()">📸 ${
           hecha ? tr("Mandar otra foto") : tr("Hazle una foto a tu reloj al terminar y mándamela")}</button>`}
     ${hecha && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Foto enviada")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
+    ${hecha ? '' : avisoFallo(v, true)}
     ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}`;
 }
 
@@ -4950,6 +5031,7 @@ function bloqueVideo(bl, dia, nombre, f){
              <button class="btn sm2 pri" onclick="document.getElementById('vf_${id}').click()">${tr("Grabar o elegir vídeo")}</button>
              <button class="btn sm2" onclick="avisoVideo('${id}')">${tr("Ahora no")}</button></div>` : ''}`}
     ${enviado && v.estado !== 'enviando' ? `<p class="pista">✅ ${tr("Vídeo enviado")}${v.fecha?' · '+esc(v.fecha):''}</p>` : ''}
+    ${enviado ? '' : avisoFallo(v, false)}
     ${serv.RESPUESTA ? `<div class="calent" style="margin:6px 0"><b>${tr("Lo que te dice Salva")}.</b> ${esc(serv.RESPUESTA)}</div>` : ''}
   </div>`;
 }
@@ -4962,11 +5044,14 @@ async function subirVideo(id, bl, dia, input){
   input.value = '';
   if(!f) return;
   const esFoto = id.endsWith('~foto');
-  if(f.size > (esFoto ? 12 : 45) * 1024 * 1024){
+  /* v5.72: 35 MB y no 45. El envio va en base64 (un tercio mas) y el puente no recibe mucho mas
+     de 50 MB: un video de 40 MB pasaba este filtro y se perdia por el camino. */
+  if(f.size > (esFoto ? 12 : 35) * 1024 * 1024){
+    falloVideo(id, 'grande');
     toast(esFoto ? tr("Esa foto pesa demasiado.") : tr("Ese vídeo pesa demasiado. Graba uno más corto.")); return; }
   if(!esFoto){
     const dur = await duracion(f);
-    if(dur && dur > 30){ toast(tr("Ese vídeo es muy largo. Recórtalo a 20 segundos o menos.")); return; }
+    if(dur && dur > 30){ falloVideo(id, 'largo'); toast(tr("Ese vídeo es muy largo. Recórtalo a 20 segundos o menos.")); return; }
   }
   const nombre = nombreDe(id.replace(/~(vid|foto)$/,'')) || (id.split('~')[3]||'').replace(/-/g,' ');
   VID[id] = {estado:'enviando'}; LS.set('videos', VID); pinta();
@@ -4989,11 +5074,23 @@ async function subirVideo(id, bl, dia, input){
     if(d.error) throw new Error(d.error);
     VID[id] = {estado:'enviado', fecha: hoyISO()};
   }catch(e){
-    VID[id] = {estado:'error'};
+    VID[id] = {estado:'error', motivo:'red', fecha: hoyISO()};
     toast(esFoto ? tr("No se ha podido enviar la foto. Inténtalo otra vez con cobertura.")
                  : tr("No se ha podido enviar el vídeo. Inténtalo otra vez con cobertura."));
   }
   LS.set('videos', VID); pinta();
+}
+/* v5.72 (23 nov, Mariana): un video o una foto que no sale deja un aviso fijo debajo del boton.
+   Antes solo salia un toast de unos segundos y el boton volvia como si nada: ella creyo que habia
+   mandado el del pull-through (19 nov) y nunca llego al puente. */
+function falloVideo(id, motivo){ VID[id] = {estado:'error', motivo: motivo, fecha: hoyISO()}; LS.set('videos', VID); pinta(); }
+function avisoFallo(v, foto){
+  if(v.estado !== 'error') return '';
+  const t = v.motivo === 'grande' ? (foto ? tr("No se envió: la foto pesa demasiado.") : tr("No se envió: el vídeo pesa demasiado. Graba uno de 20 segundos o en menos calidad y vuelve a probar."))
+          : v.motivo === 'largo' ? tr("No se envió: dura más de 30 segundos. Recórtalo a 20 y vuelve a probar.")
+          : foto ? tr("No se envió la foto. Vuelve a probar con cobertura.")
+          : tr("No se envió el vídeo. Vuelve a probar con cobertura y espera a que salga «Vídeo enviado».");
+  return `<p class="pista" style="color:var(--rojo)">⚠️ ${esc(t)}</p>`;
 }
 
 function duracion(f){
