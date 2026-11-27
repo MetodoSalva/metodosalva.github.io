@@ -791,7 +791,7 @@ body.escribiendo .chat-barra{bottom:var(--teclado,0px)}
 
 const API = 'https://script.google.com/macros/s/AKfycbyfsTcjZeECd0Pj3ClrJUqGulma3RBEMcOksb_CAqGIOlGUhNoNfCKDzY35hU73ItDX/exec';
 
-const VERSION = 'v5.73';   // v5.73 celebración al «Guardar y enviar»: confeti que explota y cae, la frase del día por perfil, 100 en español y 100 en inglés (revisadas por Salva el 24 nov, sin cambios), récords de la sesión «antes → hoy», series, kilos, semana y racha (Salva, 23 nov); «Tu calendario» con suiche Semanal | Mensual, desde la tira de Hoy y desde Progreso, con racha y días del mes; las fechas que llegan de la hoja ya no se corren un día en América y corregir una serie vieja no la cambia de día; «Fácil de leer» con el celular en modo oscuro ya no deja los títulos en blanco sobre blanco; Mensajes pasa a la barra de abajo en lugar de Registro y, con una sesión empezada, botón «Volver a tu sesión»; desde el calendario «Editar» y «Ponerme al día» (Salva, 24 nov) · v5.72 el ritmo o esfuerzo que ya va dentro de MAIN SET no se repite al lado (Sergio, 16 nov); «cola_desde» en la ficha: la cola empieza en esa semana y lo de antes es historia (Smi, 19 nov); los mensajes que no salieron por falta de cobertura se reenvían al cargar (21 nov); si el primer extra es una fila info, su título y su texto hacen de cabecera de «Si te sobran minutos» (Sebastian, 23 nov); un vídeo o una foto que no se envía deja aviso fijo con el motivo y el tope baja a 35 MB (Mariana, 23 nov); Mensajes como un chat: barra fija abajo para escribir, crece con el texto, sube con el teclado y se abre por lo último (Salva, 23 nov) · v5.71 «Sesión libre» siempre a mano junto a las del plan: running, fuerza con sus series, pádel, tenis y lo que sea, fuera del plan (Salva, 18 nov); «− serie / + serie» y el aviso de mancuernas ya no van pegados al borde de la tarjeta; presentación de dos pantallas al abrir (Salva, 18 nov); lo que Salva anula en la hoja no revive al tocarlo, la libre no manda el seguimiento a medias y quitar un añadido vacía su nota · v5.70 no propone subir si la última vez dejó 2 o más repeticiones menos en la recámara de las que pide hoy (Alexia, 17 nov) · v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
+const VERSION = 'v5.73.1';   // v5.73.1 la fuerza se anota serie por serie aunque la hoja pida «series,reps» (Smi); «Push-ups · paired with the plank» son flexiones, no una plancha (Ben), y una dosis en repeticiones manda sobre el nombre; con «máximo» las reps empiezan vacías (Salva, 25 nov); lo anotado antes con un solo peso sale como «La última vez» y precarga el kg (Stephanie, 26 nov); en la vista de uno en uno salen también las filas sin series (avisos, «Hoy hay test», cabeceras de circuito), encima del ejercicio que va detrás (Isidora, 26 nov); en cola, el seguimiento no se ofrece antes de que empiece la primera semana (Lucila, 27 nov); en iPhone, las pestañas de abajo y el descanso ya no se quedan a media pantalla al guardar una serie con el teclado abierto (Isidora, 27 nov); en cola, una semana 00 que no es opcional se enseña sola, con el día en que empieza el plan, y sin la cola ni el seguimiento (Lucila, 27 nov) · v5.73 celebración al «Guardar y enviar»: confeti que explota y cae, la frase del día por perfil, 100 en español y 100 en inglés (revisadas por Salva el 24 nov, sin cambios), récords de la sesión «antes → hoy», series, kilos, semana y racha (Salva, 23 nov); «Tu calendario» con suiche Semanal | Mensual, desde la tira de Hoy y desde Progreso, con racha y días del mes; las fechas que llegan de la hoja ya no se corren un día en América y corregir una serie vieja no la cambia de día; «Fácil de leer» con el celular en modo oscuro ya no deja los títulos en blanco sobre blanco; Mensajes pasa a la barra de abajo en lugar de Registro y, con una sesión empezada, botón «Volver a tu sesión»; desde el calendario «Editar» y «Ponerme al día» (Salva, 24 nov) · v5.72 el ritmo o esfuerzo que ya va dentro de MAIN SET no se repite al lado (Sergio, 16 nov); «cola_desde» en la ficha: la cola empieza en esa semana y lo de antes es historia (Smi, 19 nov); los mensajes que no salieron por falta de cobertura se reenvían al cargar (21 nov); si el primer extra es una fila info, su título y su texto hacen de cabecera de «Si te sobran minutos» (Sebastian, 23 nov); un vídeo o una foto que no se envía deja aviso fijo con el motivo y el tope baja a 35 MB (Mariana, 23 nov); Mensajes como un chat: barra fija abajo para escribir, crece con el texto, sube con el teclado y se abre por lo último (Salva, 23 nov) · v5.71 «Sesión libre» siempre a mano junto a las del plan: running, fuerza con sus series, pádel, tenis y lo que sea, fuera del plan (Salva, 18 nov); «− serie / + serie» y el aviso de mancuernas ya no van pegados al borde de la tarjeta; presentación de dos pantallas al abrir (Salva, 18 nov); lo que Salva anula en la hoja no revive al tocarlo, la libre no manda el seguimiento a medias y quitar un añadido vacía su nota · v5.70 no propone subir si la última vez dejó 2 o más repeticiones menos en la recámara de las que pide hoy (Alexia, 17 nov) · v5.69 el descanso arranca solo al marcar la serie (Salva, 17 nov) y el mapa del cuerpo cuenta «Circuito de abdomen» como core (D-245, 17 nov) · v5.68 pesos de la rutina anterior como «La última vez», sin contar como entreno (Isidora, 17 nov) · v5.67 responder a un mensaje de Salva y al mensaje de la semana, con su cita; en Hoy el mensaje entero (15 nov); la FRASE del día también en «Te quedan» (perfil flexible, Sergio) · v5.66 subida de carga en % según el rango, con peso de ejemplo (14 nov) · v5.65 «+ Añadir ejercicio» al final de la sesión: lo añade y registra sus series; al borrar series el panel vuelve a la que queda libre (14 nov) · v5.64 «Guardar serie N» con aviso verde de guardado, series hechas a la vista, doble toque no duplica y el peso se escribe a mano (14 nov) · hueco renombrado («Movilidad 2») deja grabar vídeo y escribir el nombre no se come el toque (Mariana, 13 nov) · v5.63 en cola: «Ya hechas» en Hoy y todas las semanas se abren en Mi plan (9 nov) · v5.62 en cola, una sesión a medias no sale de la lista (Mariana, 9 nov) · v5.61 v5.61 «vas N semanas por detrás» y mover el plan (fijo y flexible), clientas nuevas con la interfaz nueva, el año de cada semana (dic -> ene) (9 nov) · v5.60 planchas sin panel kg/reps, fechas en hora local, tira y textos en inglés (6 nov) · v5.59 «Cambiar ejercicio» arriba, junto al nombre (6 nov) · D-244 huecos: series, reps y intensidad 1-10 en blanco (v5.57-58) · D-243 previas de la semana 00 en cola · v5.55 tira para todos (6 nov)
 /* v5.39 (22 oct, D-213): a una mano, unilateral o "con mancuerna" (una sola) no se anota la suma: una mancuerna, y el salto es de 1 kg. */
 const UNA_MANO = /una mano|un brazo|unilateral|\/ ?lado|por lado|single arm|one arm/;
 const UNA_MANC = x => UNA_MANO.test(x) || (/\bmancuerna\b/.test(x) && !/mancuernas/.test(x));   // "con mancuerna": una sola
@@ -1507,6 +1507,9 @@ const EN = {
   "Añadir ejercicio": "Add exercise",
   "Antes de empezar": "Before you start",
   "Si quieres entrenar antes de que empiece tu plan. No cuentan para nada.": "If you want to train before your plan starts. They don't count for anything.",
+  "Lo de esta semana, antes de que empiece tu plan.": "This week, before your plan starts.",
+  "Empieza el": "It starts on",
+  "Ese día te aparece aquí tu primera sesión.": "That day your first session shows up here.",
   "Si no sabes cómo se llama, grábalo y yo le pongo nombre": "If you don't know what it's called, film it and I'll name it",
   "Comentarios sobre este ejercicio": "Comments on this exercise",
   "repeticiones": "reps",
@@ -1601,11 +1604,18 @@ function vHoyCola(){
     return `<div class="diarow"><button class="dia${HECHA_COLA.includes(s.est) ? ' hecha' : ''}" onclick="abrirCola(${A})"><span style="flex:1">
       <span class="sm">${esc(s.dia)}</span><br><span class="n">${esc(p.t)}</span>${p.sub?`<div class="sm" style="margin-top:2px">${esc(p.sub)}</div>`:''}
       <div class="row wrap" style="gap:6px;margin-top:5px"><span class="sem ${semColor(s.x['SEMÁFORO'])}"><i>${semForma(s.x['SEMÁFORO'])}</i>${esc(s.x['SEMÁFORO']||'—')}</span>
-        ${fmtMin(s.x.MIN)?`<span class="sm">${esc(fmtMin(s.x.MIN))}</span>`:''}<span class="tag">${tr('opcional')}</span>${s.est !== 'sin' ? chipEstado(s.est) : ''}</div></span></button></div>`; };
+        ${fmtMin(s.x.MIN)?`<span class="sm">${esc(fmtMin(s.x.MIN))}</span>`:''}${esOpcional(s.x) ? `<span class="tag">${tr('opcional')}</span>` : ''}${s.est !== 'sin' ? chipEstado(s.est) : ''}</div></span></button></div>`; };
+  /* 27 nov (Lucila, D-303): una semana 00 que no es opcional es «lo de esta semana». Mientras dura,
+     la cola no se enseña: sólo esa sesión y el día en que empieza el plan. */
+  const opc = prev.length && prev.every(s=>esOpcional(s.x));
+  const ini = prev.length && !opc ? fechaIni(semanasReales()[0].FECHAS) : null;
   return `
-  ${prev.length ? `<div class="card"><div class="lbl">${esc(sinRepetir(prev[0].w['FASE / TÍTULO'] || tr('Antes de empezar')))} · ${tr('opcional')}</div>
-    <p class="mut" style="margin:6px 0 4px">${tr('Si quieres entrenar antes de que empiece tu plan. No cuentan para nada.')}</p>
+  ${prev.length ? `<div class="card"><div class="lbl">${esc(sinRepetir(prev[0].w['FASE / TÍTULO'] || tr('Antes de empezar')))}${opc ? ' · ' + tr('opcional') : ''}</div>
+    <p class="mut" style="margin:6px 0 4px">${opc ? tr('Si quieres entrenar antes de que empiece tu plan. No cuentan para nada.') : tr('Lo de esta semana, antes de que empiece tu plan.')}</p>
     ${prev.map(tPrev).join('')}</div>` : ''}
+  ${prev.length && !opc ? `<div class="card"><div class="lbl">${tr('Tu plan')}</div>
+    <h2 style="margin-top:6px;font-size:19px">${tr('Empieza el')} ${esc(ini ? ini.toLocaleDateString(enIngles()?'en-GB':'es-ES', {weekday:'long', day:'numeric', month:'long'}) : '')}</h2>
+    <p class="mut" style="margin-top:8px">${tr('Ese día te aparece aquí tu primera sesión.')}</p>${filaLibre()}</div>` : `
   <div class="card">
     <div class="lbl">${tr('Tu plan')}</div>
     <h2 style="margin-top:6px;font-size:19px">${pend.length ? tr('Tus próximas sesiones') : tr('Plan terminado')}</h2>
@@ -1615,7 +1625,7 @@ function vHoyCola(){
     <div class="bar"><i style="width:${c.length?Math.round(hechas/c.length*100):0}%"></i></div>
   </div>
   <div class="card">${ver.length ? ver.map(tarjeta).join('')
-    : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}${filaLibre()}</div>
+    : `<p class="mut">${tr('Has hecho todas las sesiones del plan.')}</p>`}${filaLibre()}</div>`}
   ${(function(){   /* v5.62 (Salvador 9 nov): las ya hechas se pueden abrir, para verlas o corregirlas */
     const ya = c.filter(s=>HECHA_COLA.includes(s.est)).slice(-3).reverse(); if(!ya.length) return '';
     return `<div class="card"><div class="lbl">${tr('Ya hechas')}</div>
@@ -1624,9 +1634,15 @@ function vHoyCola(){
         <span style="flex:1"><span class="sm">${tr('Semana')} ${esc(numSem(s.w))} · ${esc(s.dia)}</span><br><span class="n">${esc(p.t)}</span>
         <div class="row wrap" style="gap:6px;margin-top:5px">${chipEstado(s.est)}</div></span></button></div>`; }).join('')}</div>`;
   })()}
-  <div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
+  ${(function(){   /* 27 nov (Lucila, D-302): antes de la primera semana del plan no se ofrece. Lo que
+     respondiera se guardaba como semana 01 y luego la app ya no le pedía el de verdad. */
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const ini = semanasReales().map(w=>fechaIni(w.FECHAS)).filter(Boolean).sort((a,b)=>a-b)[0];   // la 00 no cuenta (D-303)
+    if(ini && hoy < ini) return '';
+    return `<div class="card"><div class="row sp"><div><h3>${tr("Seguimiento semanal")}</h3>
     <p class="sm" style="margin-top:4px">${(S.d.SEGUIMIENTO||[]).length} ${tr('preguntas')} · 2 min</p></div>
-    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>
+    <button class="btn sm2" onclick="ir('seguimiento')">${tr("Responder")}</button></div></div>`;
+  })()}
   ${sinEnviar?`<div class="card"><div class="row sp"><div><b style="font-size:14.5px">${sinEnviar} ${tr(sinEnviar>1?'series':'serie')} ${tr('sin enviar')}</b>
     <p class="sm" style="margin-top:3px">${tr("Guardadas en tu móvil.")}</p></div>
     <button class="btn sm2 pri" onclick="enviar()">${tr("Enviar")}</button></div></div>`:''}
@@ -1787,12 +1803,30 @@ function ultimaVez(bl, dia, nombre){
     cand.push({ses:p[0]+'~'+p[1]+'~'+p[2], sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'',
                c:aKg(v.c, v.u), carga:v.c||'', u:v.u||'kg', reps:v.r||'', rir:v.rir||''});
   });
-  if(!cand.length) return null;
+  if(!cand.length) return ultimaCargaUnica(ej, hoy, bl);
   cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
   const ses = cand[0].ses;
   const mismas = cand.filter(x=>x.ses===ses)
     .sort((a,b)=> b.c-a.c || (parseFloat(b.reps)||0)-(parseFloat(a.reps)||0));
   return {sem:mismas[0].sem, carga:mismas[0].carga, u:mismas[0].u, reps:mismas[0].reps, rir:mismas[0].rir};
+}
+/* v5.74 (26 nov): un ejercicio que antes se anotaba con una sola carga (Stephanie hasta S09, el remo de
+   Smi del 24 nov) y ahora va serie por serie no tiene ninguna ~sN. Sin esto empezaba de cero: sin «La
+   última vez» y con el kg vacío. Se usa el último ~reg con un peso en número; no hay reps, así que no
+   empuja a subir (la sugerencia sólo mira series con reps). */
+function ultimaCargaUnica(ej, hoy, bl){
+  const cand = [];
+  Object.keys(LOG).forEach(k=>{
+    const p = k.split('~');
+    if(p.length !== 5 || p[3] !== ej || p[4] !== 'reg') return;
+    if(p[1] === 'sesion-libre' && slug(bl) !== 'sesion-libre') return;
+    const v = LOG[k]; if(!v || !v.ok || v.borrada || !v.d || !(num(v.d.carga) > 0)) return;
+    if(p[0]+'~'+p[1]+'~'+p[2] === hoy) return;
+    cand.push({sem:parseInt(p[0].replace(/^s/,''))||0, ts:v.ts||'', carga:String(v.d.carga).trim()});
+  });
+  if(!cand.length) return null;
+  cand.sort((a,b)=> b.sem-a.sem || (b.ts||'').localeCompare(a.ts||''));
+  return {sem:cand[0].sem, carga:cand[0].carga, u:'kg', reps:'', rir:''};
 }
 /* Lo mismo para lo que no son series: carrera, remo, trineo... */
 function ultimaVezReg(bl, dia, nombre){
@@ -1908,7 +1942,7 @@ function sugerencia(bl, dia, f){
 function lineaUltima(u, uni){
   if(!u) return '';
   const txt = u.txt ? u.txt
-    : (u.carga ? textoCarga(u.carga, u.u, uni)+' × '+u.reps : u.reps+' '+tr('reps')) + (u.rir?' · RIR '+u.rir:'');
+    : (u.carga ? textoCarga(u.carga, u.u, uni)+(u.reps ? ' × '+u.reps : '') : u.reps+' '+tr('reps')) + (u.rir?' · RIR '+u.rir:'');
   return `<div class="ultima">${tr("La última vez")}${u.sem?' · '+tr('semana')+' '+u.sem:''}: <b>${esc(txt)}</b></div>`;
 }
 
@@ -1954,8 +1988,10 @@ const CAMPOS = {
    grabado). Una carta para cualquier evaluacion en video. Solo donde la
    hoja lo pone; se puede juntar con otras ("hecho, video"). */
 const pideVideo = f => String((f&&f.REGISTRO)||'').split(',').map(x=>norm(x)).indexOf('video') > -1;
-const camposHoja = f => String((f&&f.REGISTRO)||'').split(',')
-                        .map(x=>norm(x)).filter(k=>CAMPOS[k]);
+/* v5.74 (Salva, 24 nov, D-295): una hoja que pide «series» o «reps» quiere el registro serie por serie
+   (kg, reps y RIR en cada una); antes se quedaba sólo con «carga» y pedía un peso para todo el ejercicio. */
+const camposHoja = f => { const l = String((f&&f.REGISTRO)||'').split(',').map(x=>norm(x));
+  return l.some(k => k === 'series' || k === 'serie' || k === 'reps') && !tipoHyrox(f) ? [] : l.filter(k=>CAMPOS[k]); };   // 26 nov: en HYROX y carrera, no
 /* ---------- v5.15: lo que se pide, coherente con lo que se hace ----------
    Revision de las quince hojas (2 oct, peticion de Salvador): la app corrige
    aqui, sin tocar las hojas, lo que no casa con el ejercicio:
@@ -2008,8 +2044,13 @@ const esCalentamiento = f => esMovilidad(f) || ['movilidad','calentamiento'].ind
    en tiempo por serie aunque la dosis diga «maximo» o la hoja ponga REGISTRO
    «tiempo». Lo que se mueve (plancha con toques, caminando) no cuenta. */
 const ISOMETRICO = /colgar|colgado|dead hang|\bhang\b|plancha|plank|hollow|isometric|wall sit|bear hold|suitcase hold|\baguante\b/;
-const esIsometrico = f => { const n = norm(f && f['EJERCICIO / ELEMENTO']);
-  return ISOMETRICO.test(n) && !/toque|tap|caminando|walk|remo|row|jack/.test(n); };
+/* v5.74 (25 nov, revisión de series de Salva): «Push-ups · paired with the plank» son flexiones, no una
+   plancha (Ben metía 48 repeticiones en el reloj: 48:00); lo que va tras «paired with» no cuenta. Y una
+   dosis en repeticiones («10 por lado») manda sobre el nombre: «Plancha lateral con elevación de cadera». */
+const SIN_PAREJA = /\s*[·,(-]?\s*\b(paired with|superset with|junto (a|con)|en biserie con|alternando con)\b.*$/;
+const DOSIS_REPS = /^\s*\d+(\s*[-–]\s*\d+)?\s*(reps?|repeticiones|por lado|por pierna|por brazo|\/\s*(lado|side|pierna|leg))\s*$/;
+const esIsometrico = f => { const n = norm(f && f['EJERCICIO / ELEMENTO']).replace(SIN_PAREJA, '');
+  return ISOMETRICO.test(n) && !/toque|tap|caminando|walk|remo|row|jack|rodilla|knee|leg raise|toes|elevacion de piernas|clean|snatch|cargada|arrancada/.test(n) && !DOSIS_REPS.test(norm(f && f['REPS / DOSIS'])); };
 const aguantePorTiempo = f => {
   if(!((parseInt(f && f.SERIES)||0) > 0) || esCorrer(f) || esMovilidad(f)) return false;
   const c = camposHoja(f);
@@ -2544,7 +2585,7 @@ function confirmaLoEscrito(){
 function faltaCheckin(){
   const ss = S.d.SEMANAS||[]; if(!S.semana || !ss.length) return null;
   const i = ss.findIndex(w=>w.SEMANA===S.semana.SEMANA);
-  if(i<=0) return null;                                  // en la semana 1 no hay anterior
+  if(i<=0 || esPrep(ss[i-1])) return null;              // en la semana 1 no hay anterior (la 00 no lleva seguimiento, D-303)
   const ant = ss[i-1];
   if(ENVIADO.includes(String(ant.SEMANA))) return null;
   // Si ya está respondida en la hoja, tampoco avisamos: así el aviso no
@@ -4182,6 +4223,11 @@ function sesionFoco(bl, dia, ejs){
   if(typeof i !== 'number' || i >= lista.length){ i = lista.findIndex(f=>hechoEj(bl,dia,f) === 'no' || hechoEj(bl,dia,f) === 'medio'); if(i < 0) i = 0; }
   const est = lista.map(f=>hechoEj(bl, dia, f)), hechos = est.filter(x=>x === 'hecho' || x === 'salto').length;
   const f = lista[i];
+  /* 26 nov (Isidora): las filas que no se anotan (info, movilidad sin series) salen encima del
+     ejercicio que las sigue en la hoja, como en «Ver todos»; las del final, debajo del último.
+     Antes esta vista las quitaba y «Hoy sin progresivos» sólo se veía en «Ver todos». */
+  const pos = lista.map(g=>ejs.indexOf(g));
+  const sueltas = (a, b) => ejs.slice(a, b).filter(g=>lista.indexOf(g) < 0).map(g=>ejercicio(bl, dia, g)).join('');
   const fila = (g, j) => { const e = est[j], ahora = j === i;
     return `<button class="lc ${ahora ? 'ahora' : ''} ${e}" onclick="S.foco['${esc(clave)}']=${j}; pinta(); document.getElementById('foco').scrollIntoView({behavior:'smooth'})">
       <span class="pt"></span><span class="nm2">${esc(nombreVisto(bl, dia, g))}</span>
@@ -4191,7 +4237,9 @@ function sesionFoco(bl, dia, ejs){
       ${lista.map(fila).join('')}
       <button class="btn sm2" style="margin-top:8px" onclick="S.verTodos=true; pinta()">${tr('Ver todos a la vez')}</button></div>
     <div id="foco" class="foco"><div class="sm" style="margin:4px 2px 6px">${tr('Ejercicio')} ${i+1} ${deN()} ${lista.length}</div>
+      ${sueltas(i ? pos[i-1] + 1 : 0, pos[i])}
       ${ejercicio(bl, dia, f, panelSerie(bl, dia, f))}
+      ${i === lista.length-1 ? sueltas(pos[i] + 1, ejs.length) : ''}
       <div class="row sp" style="margin:10px 0 18px;gap:8px">
         <button class="btn" style="flex:1" ${i === 0 ? 'disabled' : ''} onclick="S.foco['${esc(clave)}']=${i-1}; pinta(); document.getElementById('foco').scrollIntoView()">← ${tr('Anterior')}</button>
         <button class="btn pri" style="flex:1" ${i === lista.length-1 ? 'disabled' : ''} onclick="S.foco['${esc(clave)}']=${i+1}; pinta(); document.getElementById('foco').scrollIntoView()">${tr('Siguiente')} →</button></div></div>`;
@@ -4208,7 +4256,9 @@ function panelSerie(bl, dia, f){
   const sgt = sugerencia(bl, dia, f) || '';
   const sg = sgt.match(/data-c="([\d.]+)"/) || sgt.match(/<b>[^<:]*:\s*([\d.,]+)/);   // el peso de ejemplo («sube un 10 % (unos 88 kg)») o «mantén 21 kg» manda sobre la ultima vez
   const sgR = (sugerencia(bl, dia, f) || '').match(/<b>[^<]*\(\s*\d+\s*→\s*(\d+)\s*\)/);   // «una repeticion mas (8 → 9)»
-  const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || (sgR ? sgR[1] : '') || u.reps || ((String(f['REPS / DOSIS']||'').match(/\d+/)||[''])[0]);
+  /* v5.74 (25 nov): «max, 1-2 left» no son 1 repetición; con «máximo» o «al fallo» las reps empiezan vacías */
+  const dosR = String(f['REPS / DOSIS']||''), rDosis = /^\s*(m[aá]x|amrap|al fallo|to failure)/i.test(dosR) ? '' : ((dosR.match(/\d+/)||[''])[0]);
+  const c = v.c || ant.c || (sg ? sg[1].replace(',', '.') : '') || u.carga || '', r = v.r || ant.r || (sgR ? sgR[1] : '') || u.reps || rDosis;
   const manc = /mancuerna|dumbbell|\bdb\b/i.test(nom), paso = manc ? 1 : 2.5;
   const obj = rirObjetivo(f), rir = v.rir || ant.rir || ((String(obj).match(/\d+/)||[''])[0]);
   S.pf = {id: id, c: c, r: r, rir: rir, paso: paso, k: k, nom: nom};
@@ -4216,7 +4266,7 @@ function panelSerie(bl, dia, f){
      varias veces creyendo que no hacia nada, y cada toque guardaba otra serie. */
   const ok = S.pfOk && S.pfOk.nom === nom && Date.now() - S.pfOk.t < 6000 ? S.pfOk : null;
   const hechas = []; for(let i=0;i<k;i++){ const x = LOG[idSerie(bl,dia,nom,i)] || {}; hechas.push(`<span>✓ ${i+1}: ${esc(x.c ? x.c + ' × ' : '')}${esc(x.r||'')}</span>`); }
-  return `<div class="panelf">${ok ? `<div class="pfok">✓ ${tr('Serie')} ${ok.k+1} ${tr('guardada')}${ok.txt ? ' · ' + esc(ok.txt) : ''}</div>` : ''}<div class="lbl">${tr('Serie')} ${k+1} ${deN()} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)} × ${esc(u.reps)}</span>` : ''}</div>
+  return `<div class="panelf">${ok ? `<div class="pfok">✓ ${tr('Serie')} ${ok.k+1} ${tr('guardada')}${ok.txt ? ' · ' + esc(ok.txt) : ''}</div>` : ''}<div class="lbl">${tr('Serie')} ${k+1} ${deN()} ${n}${u.carga ? ` · <span class="sm">${tr('La última vez')}: ${esc(u.carga)}${u.reps ? ' × ' + esc(u.reps) : ' ' + esc(u.u || 'kg')}</span>` : ''}</div>
     <div class="pf2">
       <div><small>${esc(unidadDe(slug(nom)))}</small><div class="pv"><button onclick="pasoF('c',-1)" aria-label="${tr('Menos peso')}">−</button><input id="pf_c" type="text" inputmode="decimal" value="${esc(c)}" placeholder="—" oninput="escribeF('c',this.value)" onfocus="this.select()" aria-label="${tr('Peso')}"><button onclick="pasoF('c',1)" aria-label="${tr('Más peso')}">+</button></div></div>
       <div><small>reps</small><div class="pv"><button onclick="pasoF('r',-1)" aria-label="${tr('Menos repeticiones')}">−</button><input id="pf_r" type="text" inputmode="numeric" value="${esc(r)}" placeholder="—" oninput="escribeF('r',this.value)" onfocus="this.select()" aria-label="reps"><button onclick="pasoF('r',1)" aria-label="${tr('Más repeticiones')}">+</button></div></div></div>
@@ -4254,6 +4304,7 @@ function serieHechaF(){
   confirmar(p.id);
   S.pfOk = {nom: p.nom, k: p.k, t: Date.now(), txt: (c && c.value.trim() ? c.value.trim() + ' × ' : '') + r.value.trim()};
   try{ navigator.vibrate && navigator.vibrate(40); }catch(e){}
+  const a = document.activeElement; if(a && /^pf_/.test(a.id || '')) a.blur();   // Isidora, 27 nov: el teclado se cierra antes de repintar
   setTimeout(pinta, 60);
 }
 /* presentacion a pantalla completa: la primera vez en el piloto, y desde el menu */
@@ -4465,6 +4516,23 @@ const alFinal = () => requestAnimationFrame(()=>window.scrollTo(0, document.docu
   vv.addEventListener('resize', ajusta); vv.addEventListener('scroll', ajusta);
   document.addEventListener('focusin', e=>{ if(e.target && e.target.id === 'msj_txt') setTimeout(ajusta, 300); });
   document.addEventListener('focusout', e=>{ if(e.target && e.target.id === 'msj_txt') setTimeout(()=>{ document.body.classList.remove('escribiendo'); ajusta(); }, 100); });
+})();
+/* Isidora, 27 nov: en iPhone, al irse el teclado las pestañas y el descanso se quedaban a media
+   pantalla (WebKit no recoloca los fixed si el campo desaparece con el teclado abierto). Un
+   scroll de 1 px los vuelve a bajar. */
+const esIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let ultScroll = 0; addEventListener('scroll', ()=>{ ultScroll = Date.now(); }, {passive: true});
+function recolocaFijos(n){
+  n = n || 0;
+  const a = document.activeElement; if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+  if(Date.now() - ultScroll < 150 && n < 10) return setTimeout(()=>recolocaFijos(n + 1), 150);   // no cortar un scroll en marcha
+  const y = window.scrollY; window.scrollTo(0, y > 0 ? y - 1 : y + 1); window.scrollTo(0, y);
+}
+if(esIOS) (function(){   /* sólo iPhone y iPad. Teclado = el visual viewport tapa más de 150 px del layout; la barra de Safari no cuenta */
+  const vv = window.visualViewport; let teclado = false;
+  if(vv) vv.addEventListener('resize', ()=>{ const t = window.innerHeight - vv.height > 150;
+    if(teclado && !t) setTimeout(recolocaFijos, 60); teclado = t; });
+  document.addEventListener('focusout', e=>{ if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) setTimeout(recolocaFijos, 350); });
 })();
 document.addEventListener('input', e=>{ if(e.target && e.target.id === 'msj_txt'){ LS.set('msj_borrador', e.target.value); creceChat(e.target); }
   if(e.target && e.target.id === 'resp_txt') LS.set('resp_borrador~' + e.target.dataset.id, e.target.value); });
@@ -5359,7 +5427,7 @@ function ejercicio(bl,dia,f,panel){   // v5.59: panel = el de «Serie hecha» de
         /* biserie: serie a serie, una linea por ejercicio con su letra (A, B...) */
         const letra = j => String.fromCharCode(65 + j);
         return `${bc}<div class="bi-leyenda">${partes.map((p,j)=>`<div><b>${letra(j)}</b> ${esc(p)}${(()=>{ const u = ultimaVez(bl,dia,p);
-            return u ? ` <span class="sm">· ${tr('La última vez')}: ${u.carga ? esc(textoCarga(u.carga,u.u,uni))+' × ' : ''}${esc(u.reps)}</span>` : ''; })()}</div>`).join('')}</div>
+            return u ? ` <span class="sm">· ${tr('La última vez')}: ${u.carga ? esc(textoCarga(u.carga,u.u,uni))+(u.reps ? ' × ' : '') : ''}${esc(u.reps)}</span>` : ''; })()}</div>`).join('')}</div>
           <div class="sets">${Array.from({length:series},(_,i)=>`<div class="bi-serie"><div class="bi-n">${tr('Serie')} ${i+1}</div>${
             partes.map((p,j)=>fila(p, i, letra(j), j < partes.length - 1)).join('')}</div>`).join('')}</div>`;
       })()}`;
